@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useRef, useState} from 'react';
 
 //import Composer from '../Composer';
 import Composer from '../ComposerSlate'
@@ -6,38 +6,32 @@ import Toolbar from '../Toolbar';
 
 import './styles.scss';
 
-class MessageComposer extends React.PureComponent {
-  constructor(props) {
-    super(props);
+const MessageComposer = (props) => {
+  const commands = useRef(null);
+  const setCommands = (c) => { commands.current = c; };
 
-    this.setCommands = (c) => { this.commands = c; };
-    this.setActive = (active) => this.setState({active});
+  const [active, setActive] = useState({});
 
-    this.proxy = {
-      toggleBold: () => this.commands.toggleBold(),
-      toggleItalic: () => this.commands.toggleItalic(),
-      toggleUnderline: () => this.commands.toggleUnderline(),
-      toggleCode: () => this.commands.toggleCode(),
-    }
-
-    this.state = {
-      active: {}
-    };
+  const proxy = {
+    toggleBold: () => commands.current.toggleBold(),
+    toggleItalic: () => commands.current.toggleItalic(),
+    toggleUnderline: () => commands.current.toggleUnderline(),
+    toggleCode: () => commands.current.toggleCode(),
   }
 
-  render() {
-    return (<div className="message-composer-container" >
-      <Toolbar toggle={this.proxy} active={this.state.active} />
+  return (
+    <div className="message-composer-container" >
+      <Toolbar toggle={proxy} active={active} />
       <hr className="message-composer"/>
       <div className="message-composer-composer">
         <Composer
-          send={this.props.send}
-          mentions={this.props.mentions}
-          commands={this.setCommands}
-          active={this.setActive} />
+          send={props.send}
+          mentions={props.mentions}
+          commands={setCommands}
+          active={setActive} />
       </div>
-    </div>)
-  }
-}
+    </div>
+  );
+};
 
 export default MessageComposer;

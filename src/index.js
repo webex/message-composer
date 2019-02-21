@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import ReactDOM from 'react-dom';
 
 import MessageComposer from './components/MessageComposer';
@@ -9,10 +9,19 @@ const mentions = {
   renderUser: (user) => null,
 }
 
-const mc = <MessageComposer
-  mentions={mentions}
-  send={(message) => console.log('Sending: ', message)} />;
+const Example = (props) => {
+  const [message, setMessage] = useState('');
+
+  return (<div>
+    <MessageComposer
+      mentions={mentions}
+      send={(message) => setMessage(message)} />
+    <br/>
+    <div>Sending: {JSON.stringify(message)}</div>
+  </div>)
+}
+
 ReactDOM.render(
-  mc,
+  <Example />,
   document.getElementById("root")
 );

@@ -1,6 +1,6 @@
 import classnames from 'classnames';
 import produce from 'immer';
-import React, {Component} from 'react';
+import React, {Component, useRef, useState, useEffect} from 'react';
 import {Editor} from 'slate-react';
 import {Value} from 'slate';
 
@@ -58,72 +58,58 @@ const plugins = [
   SerializePlugin(InitialValue),
 ];
 
-class ComposerSlate extends Component {
-  constructor(props) {
-    super(props);
-
-    this.focus = () => this.editor.focus();
-    this.setEditor = (e) => { this.editor = e; };
-    
-    this.onChange =this.onChange.bind(this);
-    this.toggleStyle = this.toggleStyle.bind(this);
-    this.toggleNode = this.toggleNode.bind(this);
-
-    this.state = {
-      value: InitialValue,
-    };
-    this.activeStates = {};
-  }
-
-  componentDidMount() {
-    if (this.props.commands) {
-      this.props.commands({
-        toggleBold: () => this.toggleStyle(STYLE.BOLD),
-        toggleItalic: () => this.toggleStyle(STYLE.ITALIC),
-        toggleUnderline: () => this.toggleStyle(STYLE.UNDERLINE),
-        toggleCode: () => this.toggleStyle(STYLE.CODE),
+const ComposerSlate = (props) => {
+  const editor = useRef(null);
+  
+  const focus = () => editor.current.focus();
+  
+  const toggleStyle = (type) => {
+    editor.current.toggleMark(type)
+  };
+  const toggleNode = (type) => {
+    const isType = editor.current.value.blocks.some(block => block.type == type);
+    editor.current.setBlocks(isType ? 'paragraph' : type);
+  };
+  useEffect(() => {
+    if (props.commands) {
+      props.commands({
+        toggleBold: () => toggleStyle(STYLE.BOLD),
+        toggleItalic: () => toggleStyle(STYLE.ITALIC),
+        toggleUnderline: () => toggleStyle(STYLE.UNDERLINE),
+        toggleCode: () => toggleStyle(STYLE.CODE),
       })
     }
-  }
-
-  toggleStyle(type) {
-    this.editor.toggleMark(type)
-  }
-
-  toggleNode(type) {
-    const isType = this.editor.value.blocks.some(block => block.type == type);
-    this.editor.setBlocks(isType ? 'paragraph' : type);
-  }
-
-  onChange({value}) {
-    if (this.props.active) {
-      this.activeStates = produce(this.activeStates, states => {
+  }, [props.commands]);
+  
+  const [value, setValue] = useState(InitialValue);
+  const activeStates = useRef({});
+  const onChange = ({value}) => {
+    if (props.active) {
+      activeStates.current = produce(activeStates.current, states => {
         states.bold = value.activeMarks.some(mark => mark.type === STYLE.BOLD);
         states.italic = value.activeMarks.some(mark => mark.type === STYLE.ITALIC);
         states.underline = value.activeMarks.some(mark => mark.type === STYLE.UNDERLINE);
         states.code = value.activeMarks.some(mark => mark.type === STYLE.CODE);
       })
-      this.props.active(this.activeStates);
+      props.active(activeStates.current);
     }
-    this.setState({value});
-  }
+    setValue(value);
+  };
 
-  render() {
-    const draftRootClass = classnames('draft-root', {'draft-hidePlaceholder': this.state.hasFocus});
+  const draftRootClass = classnames('draft-root');
 
-    return (
-      <div className={draftRootClass} onClick={this.focus} onKeyPress={this.focus} role="textbox" tabIndex={-1}>
-        <Editor
-          value={this.state.value}
-          onChange={this.onChange}
-          placeholder="Write a message here."
-          plugins={plugins}
-          ref={this.setEditor}
-          send={this.props.send}
-        />
-      </div>
-    );
-  }
+  return (
+    <div className={draftRootClass} onClick={focus} onKeyPress={focus} role="textbox" tabIndex={-1}>
+      <Editor
+        value={value}
+        onChange={onChange}
+        placeholder="Write a message here."
+        plugins={plugins}
+        ref={editor}
+        send={props.send}
+      />
+    </div>
+  );
 }
 
 export default ComposerSlate;

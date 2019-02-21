@@ -1,0 +1,11 @@
+{
+    "name": "@bit/bit.utils.validation.empty",
+    "version": "0.0.1",
+    "homepage": "https://bitsrc.io/bit/utils/validation/empty",
+    "main": "dist/src/validation/empty.js",
+    "dependencies": {},
+    "devDependencies": {},
+    "peerDependencies": {},
+    "componentRootFolder": "components/.dependencies/validation/empty/bit.utils/0.0.1",
+    "license": "SEE LICENSE IN LICENSE"
+}
