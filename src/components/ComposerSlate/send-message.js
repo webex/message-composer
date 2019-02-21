@@ -93,8 +93,9 @@ const rules = [
             displayName: Text.serialize(editor.value),
             content: html.serialize(editor.value),
           });
-          editor.setState({value});
-          return;
+          editor.props.onChange({value});
+          setTimeout(() => editor.focus());
+          return true;
         }
         return next();
       }

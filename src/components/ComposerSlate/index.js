@@ -7,7 +7,7 @@ import {Value} from 'slate';
 import {Bold, Italic, Underline, Code} from './marks';
 import ToggleMarks from './toggle-marks';
 import RenderPlugin from './render-marks';
-import SerializePlugin from './serialize-html';
+import SendMessagePlugin from './send-message';
 
 import './styles.scss';
 
@@ -55,7 +55,7 @@ const plugins = [
     nodes: {
     },
   }),
-  SerializePlugin(InitialValue),
+  SendMessagePlugin(InitialValue),
 ];
 
 const ComposerSlate = (props) => {
@@ -97,7 +97,6 @@ const ComposerSlate = (props) => {
   };
 
   const draftRootClass = classnames('draft-root');
-
   return (
     <div className={draftRootClass} onClick={focus} onKeyPress={focus} role="textbox" tabIndex={-1}>
       <Editor
