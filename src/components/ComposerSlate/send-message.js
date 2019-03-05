@@ -2,6 +2,8 @@ import Html from 'slate-html-serializer';
 import Text from 'slate-plain-serializer';
 import React from 'react';
 
+import {convertMarkdown} from '../../plugins/markdown';
+
 const BLOCK_TAGS = {
   blockquote: 'quote',
   p: 'paragraph',
@@ -39,9 +41,9 @@ const rules = [
                 <code>{children}</code>
               </pre>
             )
-            case 'paragraph':
+          case 'paragraph':
             return <p className={obj.data.get('className')}>{children}</p>
-            case 'quote':
+          case 'quote':
             return <blockquote>{children}</blockquote>
           }
         }
@@ -89,6 +91,11 @@ const rules = [
 
         if (event.key === 'Enter') {
           event.preventDefault();
+
+          for (const node of editor.value.document.nodes) {
+            convertMarkdown(editor, node);
+          }
+
           editor.props.send({
             displayName: Text.serialize(editor.value),
             content: html.serialize(editor.value),

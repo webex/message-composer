@@ -9,6 +9,8 @@ import ToggleMarks from './toggle-marks';
 import RenderPlugin from './render-marks';
 import SendMessagePlugin from './send-message';
 
+import MarkDownPlugin from '../../plugins/markdown';
+
 import './styles.scss';
 
 const STYLE = {
@@ -56,6 +58,7 @@ const plugins = [
     },
   }),
   SendMessagePlugin(InitialValue),
+  MarkDownPlugin(),
 ];
 
 const ComposerSlate = (props) => {
@@ -81,9 +84,8 @@ const ComposerSlate = (props) => {
     }
   }, [props.commands]);
   
-  const [value, setValue] = useState(InitialValue);
   const activeStates = useRef({});
-  const onChange = ({value}) => {
+  const updateActiveStates = (value) => {
     if (props.active) {
       activeStates.current = produce(activeStates.current, states => {
         states.bold = value.activeMarks.some(mark => mark.type === STYLE.BOLD);
@@ -93,6 +95,11 @@ const ComposerSlate = (props) => {
       })
       props.active(activeStates.current);
     }
+  }
+
+  const [value, setValue] = useState(InitialValue);
+  const onChange = ({value}) => {
+    updateActiveStates(value);
     setValue(value);
   };
 
