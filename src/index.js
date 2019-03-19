@@ -4,9 +4,53 @@ import ReactDOM from 'react-dom';
 import MessageComposer from './components/MessageComposer';
 import Toolbar from './components/Toolbar';
 
+import './styles.scss';
+
+let ids = 1;
+const users = [{
+  id: ids++,
+  displayName: 'Philip Fry',
+},
+{
+  id: ids++,
+  displayName: 'Turanga Leela',
+},
+{
+  id: ids++,
+  displayName: 'Hubert Farnsworth',
+},
+{
+  id: ids++,
+  displayName: 'Zapp Brannigan',
+},
+{
+  id: ids++,
+  displayName: 'John Zoidberg',
+},
+{
+  id: ids++,
+  displayName: 'Amy Wang',
+},
+{
+  id: ids++,
+  displayName: 'Bender Rodriguez',
+},
+{
+  id: ids++,
+  displayName: 'Hermes Conrad',
+},
+{
+  id: ids++,
+  displayName: 'Kif Kroker',
+},];
+
 const mentions = {
-  filter: (query) => [],
-  renderUser: (user) => null,
+  filter: (query) => {
+    return users.filter((user) => user.displayName.toLowerCase().startsWith(query));
+  },
+  renderUser: ({item: user, props}) => {
+    return (<div {...props} key={user.id}>{user.displayName}</div>);
+  },
 }
 
 const Example = (props) => {

@@ -33,7 +33,7 @@ const rules = [
       }
     },
     serialize(obj, children) {
-      if (obj.object == 'block') {
+      if (obj.object === 'block') {
         switch (obj.type) {
           case 'code':
             return (
@@ -45,68 +45,79 @@ const rules = [
             return <p className={obj.data.get('className')}>{children}</p>
           case 'quote':
             return <blockquote>{children}</blockquote>
-          }
         }
-      },
+      }
+      else if (obj.object === 'inline') {
+        if (obj.type === 'userMention') {
+          return (
+            <spark-mention data-object-type="person" data-object-id={obj.data.get('id')}>
+              {obj.data.get('displayName')}
+            </spark-mention>
+          );
+        }
+      }
     },
-    // Add a new rule that handles marks...
-    {
-      deserialize(el, next) {
-        const type = MARK_TAGS[el.tagName.toLowerCase()]
-        if (type) {
-          return {
-            object: 'mark',
-            type: type,
-            nodes: next(el.childNodes),
-          }
+  },
+  // Add a new rule that handles marks...
+  {
+    deserialize(el, next) {
+      const type = MARK_TAGS[el.tagName.toLowerCase()]
+      if (type) {
+        return {
+          object: 'mark',
+          type: type,
+          nodes: next(el.childNodes),
         }
-      },
-      serialize(obj, children) {
-        if (obj.object == 'mark') {
-          switch (obj.type) {
-            case 'bold':
-            return <strong>{children}</strong>
-            case 'italic':
-            return <em>{children}</em>
-            case 'underline':
-            return <u>{children}</u>
-            case 'code':
-            return (
-              <pre>
-                <code>{children}</code>
-              </pre>
-            )
-          }
-        }
-      },
+      }
     },
-  ];
-  
-  const html = new Html({ rules });
+    serialize(obj, children) {
+      if (obj.object === 'mark') {
+        switch (obj.type) {
+          case 'bold':
+          return <strong>{children}</strong>
+          case 'italic':
+          return <em>{children}</em>
+          case 'underline':
+          return <u>{children}</u>
+          case 'code':
+          return (
+            <pre>
+              <code>{children}</code>
+            </pre>
+          )
+        }
+      }
+    },
+  },
+];
 
-  const serializePlugin = (value) => {
-    return {
-      onKeyDown(event, editor, next) {
-        if (!event.metaKey) return next();
+const html = new Html({ rules });
 
-        if (event.key === 'Enter') {
-          event.preventDefault();
+const serializePlugin = (value) => {
+  return {
+    onKeyDown(event, editor, next) {
+      if (!event.metaKey) return next();
 
-          for (const node of editor.value.document.nodes) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+
+        for (const outerNode of editor.value.document.nodes) {
+          for (const node of outerNode.getTexts()) {
             convertMarkdown(editor, node);
           }
-
-          editor.props.send({
-            displayName: Text.serialize(editor.value),
-            content: html.serialize(editor.value),
-          });
-          editor.props.onChange({value});
-          setTimeout(() => editor.focus());
-          return true;
         }
-        return next();
+
+        editor.props.send({
+          displayName: Text.serialize(editor.value),
+          content: html.serialize(editor.value),
+        });
+        editor.props.onChange({value});
+        setTimeout(() => editor.focus());
+        return true;
       }
+      return next();
     }
   }
+}
 
-  export default serializePlugin;
+export default serializePlugin;
