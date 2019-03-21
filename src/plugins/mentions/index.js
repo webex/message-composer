@@ -232,6 +232,11 @@ export const schema = {
   },
 };
 
+const defaultMentionProps = {
+  filter: () => [],
+  renderUser: () => null,
+};
+
 let gDecorations;
 export const markMention = (editor) => {
   if (gDecorations) {
@@ -242,17 +247,24 @@ export const markMention = (editor) => {
 
 export const Plugin = () => {
   let initialQuery
-  const setInitialQuery = (query) => { initialQuery = query; };
-  const command = {
-    search: setInitialQuery,
-    open: false,
-  };
+  const command = {};
+  const resetCommand = () => {
+    command.disable = () => {};
+    command.moveUp = () => {};
+    command.moveDown = () => {};
+    command.select = () => {};
+    command.search = (query) => { initialQuery = query; };
+    command.open = false;
+  }
+  resetCommand();
   const setCommand = (c = {}) => {
-    for (const k in c) {
-      command[k] = c[k];
+    if (!c.open) {
+      resetCommand();
     }
-    if (!c.search) {
-      command.search = setInitialQuery;
+    else {
+      for (const k in c) {
+        command[k] = c[k];
+      }
     }
   };
 
@@ -337,7 +349,7 @@ export const Plugin = () => {
           <Mentions
             setCommand={setCommand}
             initialQuery={initialQuery}
-            mentions={editor.props.mentions}
+            mentions={editor.props.mentions || defaultMentionProps}
             editor={editor}
           >
             {renderMentionContext(props)}
