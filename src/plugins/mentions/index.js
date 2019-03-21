@@ -188,22 +188,25 @@ const Mentions = React.memo((props) => {
     borderStyle: 'solid',
     borderWidth: 'thin',
   };
-  const portal = (!state.disabled && state.items.length) ? (
-    <Portal>
-      <div ref={mentionsRef} style={suggestionsStyles} data-placement={placement}>
-        {
-          state.items.map((item, index) => {
-            const itemProps = {
-              onClick: () => onSelection(item),
-              className: index === state.index ? 'active' : '',
-              ref: index === state.index ? suggestionRef : null,
-            }
-            return props.mentions.renderUser({item, props: itemProps})
-          })
-        }
-      </div>
-    </Portal>
-  ) : null;
+  let portal;
+  if (!state.disabled && state.items.length) {
+    portal = (
+      <Portal>
+        <div ref={mentionsRef} style={suggestionsStyles} data-placement={placement}>
+          {
+            state.items.map((item, index) => {
+              const itemProps = {
+                onClick: () => onSelection(item),
+                className: index === state.index ? 'active' : '',
+                ref: index === state.index ? suggestionRef : null,
+              }
+              return props.mentions.renderUser({item, props: itemProps})
+            })
+          }
+        </div>
+      </Portal>
+    );
+  }
   return (
     <>
       {anchor}
