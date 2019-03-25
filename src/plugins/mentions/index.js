@@ -1,5 +1,6 @@
 import React, {useState, useEffect, useRef, useReducer} from 'react';
 import ReactDOM from 'react-dom';
+import {Portal} from 'react-portal';
 
 import usePopper from './usePopper';
 
@@ -186,22 +187,32 @@ const Mentions = React.memo((props) => {
     backgroundColor: 'white',
     borderStyle: 'solid',
     borderWidth: 'thin',
+    cursor: 'pointer',
   };
   let portal;
   if (!state.disabled && state.items.length) {
     portal = (
-      <div ref={mentionsRef} style={suggestionsStyles} data-placement={placement}>
-        {
-          state.items.map((item, index) => {
-            const itemProps = {
-              onClick: () => onSelection(item),
-              className: index === state.index ? 'active' : '',
-              ref: index === state.index ? suggestionRef : null,
-            }
-            return props.mentions.renderUser({item, props: itemProps})
-          })
-        }
-      </div>
+      <Portal>
+        <div ref={mentionsRef} style={suggestionsStyles} data-placement={placement}>
+          {
+            state.items.map((item, index) => {
+              const itemProps = {
+                onMouseDown: (e) => {
+                  e.preventDefault();
+                  onSelection(item);
+                },
+                onClick: () => {
+                  // Used by keyboard selection
+                  onSelection(item);
+                },
+                className: index === state.index ? 'active' : '',
+                ref: index === state.index ? suggestionRef : null,
+              }
+              return props.mentions.renderUser({item, props: itemProps})
+            })
+          }
+        </div>
+      </Portal>
     );
   }
   return (
@@ -331,12 +342,12 @@ export const Plugin = () => {
 
     onBlur(event, editor, next) {
       // Remove 'mentions' when losing focus
-      gDecorations = editor.value.decorations.filter((value) => value.mark.type !== CONTEXT_MARK_TYPE);
+      editor.clearSuggestionsMarker();
       next();
     },
 
     onFocus(event, editor, next) {
-      lastInputValue = '';
+      editor.clearSuggestionsLastInput();
       next();
     },
 
@@ -365,6 +376,15 @@ export const Plugin = () => {
       }
   
       return next();
+    },
+
+    commands: {
+      clearSuggestionsMarker(editor) {
+        gDecorations = editor.value.decorations.filter((value) => value.mark.type !== CONTEXT_MARK_TYPE);
+      },
+      clearSuggestionsLastInput(editor) {
+        lastInputValue = '';
+      },
     },
   };
 };
