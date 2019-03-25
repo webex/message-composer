@@ -48,8 +48,11 @@ const mentions = {
   filter: (query) => {
     return users.filter((user) => user.displayName.toLowerCase().startsWith(query));
   },
-  renderUser: ({item: user, props}) => {
-    return (<div {...props} key={user.id}>{user.displayName}</div>);
+  renderUser: (user) => {
+    return {
+      key: user.id,
+      render: (<div>{user.displayName}</div>),
+    };
   },
 }
 

@@ -10,7 +10,9 @@ import RenderPlugin from './render-marks';
 import SendMessagePlugin from './send-message';
 
 import MarkDownPlugin from '../../plugins/markdown';
-import {Plugin as MentionsPlugin, markMention, schema} from '../../plugins/mentions';
+import Mentions from '../../plugins/mentions';
+
+const {markMention, Plugin: MentionsPlugin} = Mentions();
 
 import './styles.scss';
 
@@ -119,7 +121,6 @@ const Composer = (props) => {
         plugins={plugins}
         ref={editor}
         send={props.send}
-        schema={schema}
         mentions={props.mentions}
       />
     </div>
