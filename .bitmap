@@ -57,7 +57,7 @@
         "origin": "AUTHORED",
         "exported": true
     },
-    "mwegman.message-composer/mentions@0.0.2": {
+    "mwegman.message-composer/mentions@0.0.3": {
         "files": [
             {
                 "relativePath": "src/plugins/mentions/index.js",
@@ -65,9 +65,24 @@
                 "name": "index.js"
             },
             {
+                "relativePath": "src/plugins/mentions/suggestions.js",
+                "test": false,
+                "name": "suggestions.js"
+            },
+            {
+                "relativePath": "src/plugins/mentions/types.js",
+                "test": false,
+                "name": "types.js"
+            },
+            {
                 "relativePath": "src/plugins/mentions/usePopper.js",
                 "test": false,
                 "name": "usePopper.js"
+            },
+            {
+                "relativePath": "src/plugins/mentions/utils.js",
+                "test": false,
+                "name": "utils.js"
             }
         ],
         "mainFile": "src/plugins/mentions/index.js",
@@ -75,7 +90,7 @@
         "origin": "AUTHORED",
         "exported": true
     },
-    "mwegman.message-composer/composer-slate@0.0.5": {
+    "mwegman.message-composer/composer-slate@0.0.6": {
         "files": [
             {
                 "relativePath": "src/components/ComposerSlate/composer.js",
@@ -119,7 +134,7 @@
         "mainDistFile": "dist/src/components/ComposerSlate/index.js",
         "exported": true
     },
-    "mwegman.message-composer/message-composer@0.0.5": {
+    "mwegman.message-composer/message-composer@0.0.6": {
         "files": [
             {
                 "relativePath": "src/components/MessageComposer/index.js",
