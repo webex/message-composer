@@ -15,7 +15,7 @@ const ICON_SIZE = 14;
 const FormatToolbar = (props) => {
   const toggle = (type) => (e) => {
     e.preventDefault();
-    props.toggle[type]();
+    props.emitter.emit(type);
   }
 
   const boldClass = classnames('toolbar', 'bold', {active: props.active && props.active.bold});

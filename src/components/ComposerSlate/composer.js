@@ -78,15 +78,18 @@ const Composer = (props) => {
     editor.current.setBlocks(isType ? 'paragraph' : type);
   };
   useEffect(() => {
-    if (props.commands) {
-      props.commands({
-        toggleBold: () => toggleStyle(STYLE.BOLD),
-        toggleItalic: () => toggleStyle(STYLE.ITALIC),
-        toggleUnderline: () => toggleStyle(STYLE.UNDERLINE),
-        toggleCode: () => toggleStyle(STYLE.CODE),
-      })
+    props.emitter.on('toggleBold', () => toggleStyle(STYLE.BOLD));
+    props.emitter.on('toggleItalic', () => toggleStyle(STYLE.ITALIC));
+    props.emitter.on('toggleUnderline', () => toggleStyle(STYLE.UNDERLINE));
+    props.emitter.on('toggleCode', () => toggleStyle(STYLE.CODE));
+
+    return () => {
+      props.emitter.off('toggleBold');
+      props.emitter.off('toggleItalic');
+      props.emitter.off('toggleUnderline');
+      props.emitter.off('toggleCode');
     }
-  }, [props.commands]);
+  }, [props.emitter]);
   
   const activeStates = useRef({});
   const updateActiveStates = (value) => {
