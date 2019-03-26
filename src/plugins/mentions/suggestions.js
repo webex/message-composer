@@ -104,25 +104,34 @@ export default React.memo((props) => {
   const disable = () => {
     dispatch({type: 'DISABLE'});
   }
+
+  useEffect(() => {
+    props.emitter.on('MOVE_DOWN', moveDown);
+    props.emitter.on('MOVE_UP', moveUp);
+    props.emitter.on('SELECT', select);
+    props.emitter.on('DISABLE', disable);
+    props.emitter.on('SEARCH', search);
+
+    return () => {
+      props.emitter.off('MOVE_DOWN', moveDown);
+      props.emitter.off('MOVE_UP', moveUp);
+      props.emitter.off('SELECT', select);
+      props.emitter.off('DISABLE', disable);
+      props.emitter.off('SEARCH', search);
+    }
+  }, [props.emitter]);
   
   useEffect(() => {
-    if (props.setCommand) {
-      props.setCommand({
-        disable,
-        search,
-        moveUp,
-        moveDown,
-        select,
-        open: true,
-      });
-    }
+    props.setFlags({
+      open: true,
+    });
     
     return () => {
-      props.setCommand({
+      props.setFlags({
         open: false,
       });
     }
-  }, [props.setCommand]);
+  }, [props.setFlags]);
   
   const anchor = props.children({ref: anchorRef});
   const suggestionsStyles = {

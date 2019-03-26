@@ -1,4 +1,5 @@
 import React from 'react';
+import {TinyEmitter} from 'tiny-emitter';
 
 import {CONTEXT_MARK_TYPE, USER_MENTION_NODE_TYPE} from './types';
 import {hasValidAncestors, getInput} from './utils';
@@ -36,48 +37,39 @@ export default function() {
 
   const Plugin = () => {
     let initialQuery
-    const command = {};
-    const resetCommand = () => {
-      command.disable = () => {};
-      command.moveUp = () => {};
-      command.moveDown = () => {};
-      command.select = () => {};
-      command.search = (query) => { initialQuery = query; };
-      command.open = false;
-    }
-    resetCommand();
-    const setCommand = (c = {}) => {
-      if (!c.open) {
-        resetCommand();
-      }
-      else {
-        for (const k in c) {
-          command[k] = c[k];
-        }
-      }
+    const emitter = new TinyEmitter();
+    emitter.on('SEARCH', (query) => {
+      initialQuery = query;
+    });
+    const flags = {
+      open: false,
     };
+    const setFlags = ({open}) => {
+      flags.open = open;
+    };
+    const isOpen = () => flags.open;
 
     let lastInputValue = null;
     
     return {
       onKeyDown(event, editor, next) {
-        if (command.open) {
+        if (isOpen()) {
           switch (event.key) {
             case ('ArrowDown'):
             event.preventDefault();
-            command.moveDown();
+            emitter.emit('MOVE_DOWN');
             return true;
             case ('ArrowUp'):
             event.preventDefault();
-            command.moveUp();
+            emitter.emit('MOVE_UP');
             return true;
             case ('Enter'):
             event.preventDefault();
-            command.select();
+            emitter.emit('SELECT');
             return true;
             case ('Escape'):
             event.preventDefault();
-            command.disable();
+            emitter.emit('DISABLE');
               return true;
           }
         }
@@ -91,7 +83,7 @@ export default function() {
           lastInputValue = inputValue;
           
           if (hasValidAncestors(editor.value)) {
-            command.search(inputValue);
+            emitter.emit('SEARCH', inputValue);
           }
           
           const { selection } = editor.value
@@ -136,7 +128,8 @@ export default function() {
         if (props.mark.type === CONTEXT_MARK_TYPE) {
           return (
             <Suggestions
-              setCommand={setCommand}
+              emitter={emitter}
+              setFlags={setFlags}
               initialQuery={initialQuery}
               mentions={editor.props.mentions || defaultMentionProps}
               editor={editor}

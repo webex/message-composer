@@ -24,7 +24,8 @@
     "slate": "^0.44.10",
     "slate-html-serializer": "^0.7.34",
     "slate-plain-serializer": "^0.6.34",
-    "slate-react": "^0.21.16"
+    "slate-react": "^0.21.16",
+    "tiny-emitter": "^2.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.2.2",
