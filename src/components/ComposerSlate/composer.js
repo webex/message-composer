@@ -65,7 +65,7 @@ const plugins = [
   MentionsPlugin(),
 ];
 
-const Composer = (props) => {
+const Composer = React.memo(({emitter, active, mentions, send}) => {
   const editor = useRef(null);
   
   const focus = () => editor.current.focus();
@@ -78,29 +78,29 @@ const Composer = (props) => {
     editor.current.setBlocks(isType ? 'paragraph' : type);
   };
   useEffect(() => {
-    props.emitter.on('toggleBold', () => toggleStyle(STYLE.BOLD));
-    props.emitter.on('toggleItalic', () => toggleStyle(STYLE.ITALIC));
-    props.emitter.on('toggleUnderline', () => toggleStyle(STYLE.UNDERLINE));
-    props.emitter.on('toggleCode', () => toggleStyle(STYLE.CODE));
+    emitter.on('toggleBold', () => toggleStyle(STYLE.BOLD));
+    emitter.on('toggleItalic', () => toggleStyle(STYLE.ITALIC));
+    emitter.on('toggleUnderline', () => toggleStyle(STYLE.UNDERLINE));
+    emitter.on('toggleCode', () => toggleStyle(STYLE.CODE));
 
     return () => {
-      props.emitter.off('toggleBold');
-      props.emitter.off('toggleItalic');
-      props.emitter.off('toggleUnderline');
-      props.emitter.off('toggleCode');
+      emitter.off('toggleBold');
+      emitter.off('toggleItalic');
+      emitter.off('toggleUnderline');
+      emitter.off('toggleCode');
     }
-  }, [props.emitter]);
+  }, [emitter]);
   
   const activeStates = useRef({});
   const updateActiveStates = (value) => {
-    if (props.active) {
+    if (active) {
       activeStates.current = produce(activeStates.current, states => {
         states.bold = value.activeMarks.some(mark => mark.type === STYLE.BOLD);
         states.italic = value.activeMarks.some(mark => mark.type === STYLE.ITALIC);
         states.underline = value.activeMarks.some(mark => mark.type === STYLE.UNDERLINE);
         states.code = value.activeMarks.some(mark => mark.type === STYLE.CODE);
       })
-      props.active(activeStates.current);
+      active(activeStates.current);
     }
   }
 
@@ -123,11 +123,11 @@ const Composer = (props) => {
         placeholder="Write a message here."
         plugins={plugins}
         ref={editor}
-        send={props.send}
-        mentions={props.mentions}
+        send={send}
+        mentions={mentions}
       />
     </div>
   );
-}
+});
 
 export default Composer;

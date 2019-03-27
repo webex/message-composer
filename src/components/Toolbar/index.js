@@ -12,16 +12,16 @@ import './styles.scss';
 
 const ICON_SIZE = 14;
 
-const FormatToolbar = (props) => {
+const FormatToolbar = React.memo(({active, emitter}) => {
   const toggle = (type) => (e) => {
     e.preventDefault();
-    props.emitter.emit(type);
+    emitter.emit(type);
   }
 
-  const boldClass = classnames('toolbar', 'bold', {active: props.active && props.active.bold});
-  const italicClass = classnames('toolbar', 'italic', {active: props.active && props.active.italic});
-  const ulClass = classnames('toolbar', 'underline', {active: props.active && props.active.underline});
-  const codeClass = classnames('toolbar', 'code', {active: props.active && props.active.code});
+  const boldClass = classnames('toolbar', 'bold', {active: active && active.bold});
+  const italicClass = classnames('toolbar', 'italic', {active: active && active.italic});
+  const ulClass = classnames('toolbar', 'underline', {active: active && active.underline});
+  const codeClass = classnames('toolbar', 'code', {active: active && active.code});
   return (<Toolbar>
     <button className={boldClass} onPointerDown={toggle('toggleBold')}>
       <Icon size={ICON_SIZE} icon={bold} />
@@ -36,6 +36,6 @@ const FormatToolbar = (props) => {
       <Icon size={ICON_SIZE} icon={code} />
     </button>
   </Toolbar>);
-};
+});
 
 export default FormatToolbar;

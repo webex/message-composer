@@ -7,7 +7,7 @@ import Toolbar from '../Toolbar';
 
 import './styles.scss';
 
-const MessageComposer = (props) => {
+const MessageComposer = ({send, mentions}) => {
   const emitter = useRef(new TinyEmitter());
   const [active, setActive] = useState({});
 
@@ -17,8 +17,8 @@ const MessageComposer = (props) => {
       <hr className="message-composer"/>
       <div className="message-composer-composer">
         <Composer
-          send={props.send}
-          mentions={props.mentions}
+          send={send}
+          mentions={mentions}
           emitter={emitter.current}
           active={setActive} />
       </div>
