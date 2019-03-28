@@ -148,7 +148,8 @@ export default React.memo((props) => {
         <div role="list" ref={mentionsRef} style={suggestionsStyles} data-placement={placement}>
           {
             state.items.map((item, index) => {
-              const {key, render} = props.mentions.renderUser(item);
+              const active = index === state.index;
+              const {key, render} = props.mentions.renderUser(item, {active});
               const itemProps = {
                 onMouseDown: (e) => {
                   e.preventDefault();
@@ -158,7 +159,7 @@ export default React.memo((props) => {
                   // Used by keyboard selection
                   onSelection(item);
                 },
-                className: index === state.index ? 'active' : '',
+                className: active ? 'active' : '',
                 ref: index === state.index ? suggestionRef : null,
                 role: 'listitem',
                 key,
