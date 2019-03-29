@@ -1,8 +1,12 @@
-button.toolbar {
-  border: 0;
-  background: transparent;
+.format-toolbar {
+  display: flex;
+  padding-top: 5px;
 }
 
-button.toolbar.active {
-  color: #5890ff;
+button.toolbar-button {
+  border: 0;
+  background: transparent;
+  &.active {
+    color: #5890ff;
+  }
 }

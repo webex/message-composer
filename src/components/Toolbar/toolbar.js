@@ -1,7 +1,7 @@
 import React from 'react';
 
-const Toolbar = (props) => {
-  return <div className='format-toolbar'>{props.children}</div>;
+const Toolbar = ({children}) => {
+  return <div className='format-toolbar'>{children}</div>;
 };
 
 export default Toolbar;

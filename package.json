@@ -17,6 +17,7 @@
     "lodash.isequal": "^4.5.0",
     "popper.js": "^1.14.7",
     "prismjs": "^1.15.0",
+    "prop-types": "^15.7.2",
     "react": "^16.8.2",
     "react-dom": "^16.8.2",
     "react-icons-kit": "^1.2.1",
