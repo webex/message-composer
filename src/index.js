@@ -8,40 +8,45 @@ import './styles.scss';
 
 let ids = 1;
 const users = [{
+  id: 'all',
+  displayName: 'All',
+  objectType: 'groupMention',
+},{
   id: ids++,
   displayName: 'Philip Fry',
-},
-{
+  objectType: 'person',
+},{
   id: ids++,
   displayName: 'Turanga Leela',
-},
-{
+  objectType: 'person',
+},{
   id: ids++,
   displayName: 'Hubert Farnsworth',
-},
-{
+  objectType: 'person',
+},{
   id: ids++,
   displayName: 'Zapp Brannigan',
-},
-{
+  objectType: 'person',
+},{
   id: ids++,
   displayName: 'John Zoidberg',
-},
-{
+  objectType: 'person',
+},{
   id: ids++,
   displayName: 'Amy Wang',
-},
-{
+  objectType: 'person',
+},{
   id: ids++,
   displayName: 'Bender Rodriguez',
-},
-{
+  objectType: 'person',
+},{
   id: ids++,
   displayName: 'Hermes Conrad',
-},
-{
+  objectType: 'person',
+},{
   id: ids++,
   displayName: 'Kif Kroker',
+  objectType: 'person',
 },];
 
 const mentions = {

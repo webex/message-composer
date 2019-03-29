@@ -17,6 +17,9 @@ const MARK_TAGS = {
   u: 'underline',
 }
 
+let mentions = [];
+let groupMentions = [];
+
 const rules = [
   {
     deserialize(el, next) {
@@ -49,11 +52,32 @@ const rules = [
       }
       else if (obj.object === 'inline') {
         if (obj.type === 'userMention') {
-          return (
-            <spark-mention data-object-type="person" data-object-id={obj.data.get('id')}>
-              {obj.data.get('displayName')}
-            </spark-mention>
-          );
+          const id = obj.data.get('id');
+          const objectType = obj.data.get('objectType');
+          if (objectType === 'groupMention') {
+            groupMentions.push({
+              groupType: id,
+              objectType,
+            });
+
+            return (
+              <spark-mention data-object-type={objectType} data-group-type={id}>
+                {obj.data.get('displayName')}
+              </spark-mention>
+            );
+          }
+          else {
+            mentions.push({
+              id,
+              objectType,
+            });
+
+            return (
+              <spark-mention data-object-type={objectType} data-object-id={id}>
+                {obj.data.get('displayName')}
+              </spark-mention>
+            );
+          }
         }
       }
     },
@@ -107,10 +131,20 @@ const serializePlugin = (value) => {
           }
         }
 
-        editor.props.send({
+        const message = {
           displayName: Text.serialize(editor.value),
           content: html.serialize(editor.value),
-        });
+        };
+        if (mentions.length) {
+          message.mentions = mentions;
+          mentions = [];
+        }
+        if (groupMentions.length) {
+          message.groupMentions = groupMentions;
+          groupMentions = [];
+        }
+        editor.props.send(message);
+
         editor.props.onChange({value});
         setTimeout(() => editor.focus());
         return true;
