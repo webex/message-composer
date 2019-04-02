@@ -120,7 +120,7 @@ const html = new Html({ rules });
 const serializePlugin = (value) => {
   return {
     onKeyDown(event, editor, next) {
-      if (!event.metaKey) return next();
+      if (event.shiftKey) return next();
 
       if (event.key === 'Enter') {
         event.preventDefault();
