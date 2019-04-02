@@ -60,9 +60,9 @@ const plugins = [
     nodes: {
     },
   }),
-  SendMessagePlugin(InitialValue),
   MarkDownPlugin(),
   MentionsPlugin(),
+  SendMessagePlugin(InitialValue),
 ];
 
 const Composer = React.memo(({emitter, active, mentions, send}) => {
