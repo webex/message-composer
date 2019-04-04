@@ -12,42 +12,37 @@ const users = [{
   displayName: 'All',
   objectType: 'groupMention',
 },{
-  id: ids++,
   displayName: 'Philip Fry',
-  objectType: 'person',
 },{
-  id: ids++,
   displayName: 'Turanga Leela',
-  objectType: 'person',
 },{
-  id: ids++,
   displayName: 'Hubert Farnsworth',
-  objectType: 'person',
 },{
-  id: ids++,
   displayName: 'Zapp Brannigan',
-  objectType: 'person',
 },{
-  id: ids++,
   displayName: 'John Zoidberg',
-  objectType: 'person',
 },{
-  id: ids++,
   displayName: 'Amy Wang',
-  objectType: 'person',
 },{
-  id: ids++,
   displayName: 'Bender Rodriguez',
-  objectType: 'person',
 },{
-  id: ids++,
   displayName: 'Hermes Conrad',
-  objectType: 'person',
 },{
-  id: ids++,
   displayName: 'Kif Kroker',
-  objectType: 'person',
+},{
+  displayName: 'Barbados Slim',
+},{
+  displayName: 'Bill McNeal',
 },];
+
+for (const user of users) {
+  if (!user.id) {
+    user.id = ids++;
+  }
+  if (!user.objectType) {
+    user.objectType = 'person';
+  }
+}
 
 const mentions = {
   filter: (query) => {
@@ -62,16 +57,39 @@ const mentions = {
   },
 }
 
+const spaces = [];
+const setValue = (v, num) => {
+  spaces[num] = v;
+};
+
 const Example = (props) => {
   const [message, setMessage] = useState('');
+  const [number, setNumber] = useState(1);
 
-  return (<div>
-    <MessageComposer
-      mentions={mentions}
-      send={(message) => setMessage(message)} />
-    <br/>
-    <div>Sending: {JSON.stringify(message)}</div>
-  </div>)
+  const show = (num) => {
+    setMessage('');
+    setNumber(num);
+  };
+
+  const other = (number === 1) ? 2 : 1;
+
+  const draft = {
+    id: number,
+    value: spaces[number],
+    save: setValue,
+  };
+
+  return (
+    <div>
+      <MessageComposer
+        draft={draft}
+        mentions={mentions}
+        send={(message) => setMessage(message)} />
+      <br/>
+      <div>Sending: {JSON.stringify(message)}</div>
+      <button onClick={() => show(other)}>Show Space {other}</button>
+    </div>
+  );
 }
 
 ReactDOM.render(

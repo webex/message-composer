@@ -12,7 +12,7 @@ const renderToolbar = ({emitter, active}) => (
   <Toolbar emitter={emitter} active={active} />
 );
 
-const MessageComposer = ({send, mentions, toolbar, children}) => {
+const MessageComposer = ({send, mentions, toolbar, children, draft}) => {
   const emitter = useRef(new TinyEmitter());
   const [active, setActive] = useState({});
 
@@ -26,6 +26,7 @@ const MessageComposer = ({send, mentions, toolbar, children}) => {
         <Composer
           send={send}
           mentions={mentions}
+          draft={draft}
           emitter={emitter.current}
           active={setActive} />
       </div>
@@ -37,6 +38,11 @@ const MessageComposer = ({send, mentions, toolbar, children}) => {
 };
 
 MessageComposer.propTypes = {
+  draft: PropTypes.shape({
+    id: PropTypes.any,
+    value: PropTypes.object,
+    save: PropTypes.func,
+  }),
   toolbar: PropTypes.func,
 };
 

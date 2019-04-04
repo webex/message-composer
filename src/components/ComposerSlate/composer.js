@@ -1,5 +1,6 @@
 import classnames from 'classnames';
 import produce from 'immer';
+import PropTypes from 'prop-types';
 import React, {Component, useRef, useState, useEffect} from 'react';
 import {Editor} from 'slate-react';
 import {Value} from 'slate';
@@ -65,7 +66,7 @@ const plugins = [
   SendMessagePlugin(InitialValue),
 ];
 
-const Composer = React.memo(({emitter, active, mentions, send}) => {
+const Composer = React.memo(({emitter, active, mentions, send, draft}) => {
   const editor = useRef(null);
   
   const focus = () => editor.current.focus();
@@ -109,6 +110,19 @@ const Composer = React.memo(({emitter, active, mentions, send}) => {
     updateActiveStates(value);
     setValue(value);
   };
+  useEffect(() => {
+    if (draft.value) {
+      onChange({value: draft.value});
+    }
+    else {
+      onChange({value: InitialValue});
+    }
+  }, [draft.id]);
+  useEffect(() => {
+    if (draft.save) {
+      draft.save(value, draft.id);
+    }
+  }, [value]);
 
   useEffect(() => {
     markMention(editor.current);
@@ -129,5 +143,17 @@ const Composer = React.memo(({emitter, active, mentions, send}) => {
     </div>
   );
 });
+
+Composer.propTypes = {
+  draft: PropTypes.shape({
+    id: PropTypes.any,
+    value: PropTypes.object,
+    save: PropTypes.func,
+  }),
+};
+
+Composer.defaultProps = {
+  draft: {},
+}
 
 export default Composer;
