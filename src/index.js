@@ -49,7 +49,7 @@ const mentions = {
     return users.filter((user) => user.displayName.toLowerCase().startsWith(query));
   },
   renderUser: (user, {active}) => {
-    const style = active ? {color: 'darkblue'} : null;
+    const style = active ? {backgroundColor: 'lightblue'} : null;
     return {
       key: user.id,
       render: (<div style={style}>{user.displayName}</div>),
