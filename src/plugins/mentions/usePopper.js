@@ -89,7 +89,9 @@ export default ({
           applyStyle: { enabled: false },
           preventOverflow: {
             boundariesElement: 'viewport',
-            escapeWithReference: true,
+          },
+          offset: {
+            offset: '100%',
           },
           updateStateModifier: {
             enabled: true,

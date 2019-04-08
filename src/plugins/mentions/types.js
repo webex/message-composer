@@ -11,4 +11,4 @@ export const USER_MENTION_NODE_TYPE = 'userMention';
  *
  * @type {RegExp}
  */
-export const CAPTURE_REGEX = /@([^@\s]*[ ]?[^@\s]*)$/;
+export const CAPTURE_REGEX = /(@)([^@\s]*[ ]?[^@\s]*)$/;

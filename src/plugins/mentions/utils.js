@@ -32,12 +32,12 @@ export const getInput = (value) => {
   // In some cases, like if the node that was selected gets deleted,
   // `startText` can be null.
   if (!value.startText) {
-    return null;
+    return [null, null];
   }
 
   const startOffset = value.selection.start.offset;
   const textBefore = value.startText.text.slice(0, startOffset);
   const result = CAPTURE_REGEX.exec(textBefore);
 
-  return result && result[1];
+  return (result) ? [result[1], result[2]] : [null, null];
 };

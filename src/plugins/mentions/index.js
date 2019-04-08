@@ -77,7 +77,7 @@ export default function() {
       },
 
       onChange(editor, next) {
-        const inputValue = getInput(editor.value)
+        const [triggerSymbol, inputValue] = getInput(editor.value)
         
         if (inputValue !== lastInputValue) {
           lastInputValue = inputValue;
@@ -90,17 +90,18 @@ export default function() {
           
           let decorations = editor.value.decorations.filter(
             value => value.mark.type !== CONTEXT_MARK_TYPE
-            )
+          );
             
-            if (inputValue && hasValidAncestors(editor.value)) {
-              decorations = decorations.push({
-                anchor: {
-                  key: selection.start.key,
-                  offset: selection.start.offset - inputValue.length,
-                },
+          if (inputValue !== null && hasValidAncestors(editor.value)) {
+            const endOfTrigger = selection.start.offset - inputValue.length;
+            decorations = decorations.push({
+              anchor: {
+                key: selection.start.key,
+                offset: endOfTrigger - triggerSymbol.length,
+              },
               focus: {
                 key: selection.start.key,
-                offset: selection.start.offset,
+                offset: endOfTrigger,
               },
               mark: {
                 type: CONTEXT_MARK_TYPE,
@@ -157,7 +158,7 @@ export default function() {
           gDecorations = editor.value.decorations.filter((value) => value.mark.type !== CONTEXT_MARK_TYPE);
         },
         clearSuggestionsLastInput(editor) {
-          lastInputValue = '';
+          lastInputValue = null;
         },
       },
 

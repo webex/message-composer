@@ -46,6 +46,9 @@ for (const user of users) {
 
 const mentions = {
   filter: (query) => {
+    if (query === '') {
+      return users;
+    }
     return users.filter((user) => user.displayName.toLowerCase().startsWith(query));
   },
   renderUser: (user, {active}) => {
@@ -80,14 +83,17 @@ const Example = (props) => {
   };
 
   return (
-    <div>
-      <MessageComposer
-        draft={draft}
-        mentions={mentions}
-        send={(message) => setMessage(message)} />
-      <br/>
-      <div>Sending: {JSON.stringify(message)}</div>
-      <button onClick={() => show(other)}>Show Space {other}</button>
+    <div className='container'>
+      <div className='content' />
+      <div className='mc'>
+        <MessageComposer
+          draft={draft}
+          mentions={mentions}
+          send={(message) => setMessage(message)} />
+        <br/>
+        <div>Sending: {JSON.stringify(message)}</div>
+        <button onClick={() => show(other)}>Show Space {other}</button>
+      </div>
     </div>
   );
 }

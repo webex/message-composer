@@ -13,13 +13,13 @@ export default React.memo((props) => {
   const {styles, placement} = usePopper({
     referrenceRef: anchorRef,
     popperRef: mentionsRef,
-    placement: 'bottom-start',
+    placement: 'top-start',
   });
   
   const onSelection = (item) => {
     const editor = props.editor;
     const value = editor.value;
-    const inputValue = getInput(value);
+    const [triggerSymbol, inputValue] = getInput(value);
     
     // Delete the captured value, including the `@` symbol
     editor.deleteBackward(inputValue.length + 1)
