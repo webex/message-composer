@@ -51,7 +51,7 @@ const mentions = {
     }
     return users.filter((user) => user.displayName.toLowerCase().startsWith(query));
   },
-  renderUser: (user, {active}) => {
+  renderSuggestion: (user, {active}) => {
     const activeStyle = active ? {backgroundColor: 'lightblue'} : null;
     const style = {
       ...activeStyle,
@@ -63,6 +63,10 @@ const mentions = {
       render: (<div style={style}>{user.displayName}</div>),
     };
   },
+  renderInsert: (user) => {
+    const text = (user.objectType === 'person') ? user.displayName.split(' ')[0] : user.displayName;
+    return <b>{text}</b>;
+  }
 }
 
 const spaces = [];

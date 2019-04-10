@@ -153,7 +153,7 @@ export default React.memo((props) => {
   if (!state.disabled && state.items.length) {
     const items = state.items.map((item, index) => {
       const active = index === state.index;
-      const {key, render} = props.mentions.renderUser(item, {active});
+      const {key, render} = props.mentions.renderSuggestion(item, {active});
       const itemProps = {
         onMouseDown: (e) => {
           e.preventDefault();

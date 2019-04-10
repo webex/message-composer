@@ -23,7 +23,8 @@ const schema = {
 
 const defaultMentionProps = {
   filter: () => [],
-  renderUser: () => null,
+  renderSuggestion: () => null,
+  renderInsert: () => null,
 };
 
 export default function() {
@@ -147,7 +148,11 @@ export default function() {
         const { attributes, node } = props
     
         if (node.type === USER_MENTION_NODE_TYPE) {
-          return <b {...attributes}>{props.node.text}</b>;
+          return (
+            <span {...attributes}>
+              {editor.props.mentions.renderInsert(node.data.toJS())}
+            </span>
+          );
         }
     
         return next();
