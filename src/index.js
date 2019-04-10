@@ -64,8 +64,9 @@ const mentions = {
     };
   },
   renderInsert: (user) => {
+    const style = {background: 'lightblue'};
     const text = (user.objectType === 'person') ? user.displayName.split(' ')[0] : user.displayName;
-    return <b>{text}</b>;
+    return <b style={style}>{text}</b>;
   }
 }
 
