@@ -130,14 +130,6 @@
   {
     "id": {
       "scope": "mwegman.message-composer",
-      "name": "mentions"
-    },
-    "isSymlink": false,
-    "hash": "453e775779b6bb51e33dd71c50ac640a7f393a81"
-  },
-  {
-    "id": {
-      "scope": "mwegman.message-composer",
       "name": "toolbar"
     },
     "isSymlink": false,
@@ -150,6 +142,14 @@
     },
     "isSymlink": false,
     "hash": "eab7af1b4dfe3b5864286312ca5d0d4a137e7a41"
+  },
+  {
+    "id": {
+      "scope": "mwegman.message-composer",
+      "name": "mentions"
+    },
+    "isSymlink": false,
+    "hash": "453e775779b6bb51e33dd71c50ac640a7f393a81"
   },
   {
     "id": {
