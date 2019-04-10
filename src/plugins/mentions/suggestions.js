@@ -50,12 +50,12 @@ export default React.memo((props) => {
       case 'INCREMENT':
       return {
         ...state,
-        index: (state.index !== (state.items.length - 1)) ? state.index + 1 : 0
+        index: (state.index !== (state.items.length - 1)) ? state.index + 1 : 0,
       };
       case 'DECREMENT':
       return {
         ...state,
-        index: (state.index !== 0) ? state.index - 1 : state.items.length - 1
+        index: (state.index !== 0) ? state.index - 1 : state.items.length - 1,
       };
       case 'SET_ITEMS':
       return {
@@ -132,6 +132,12 @@ export default React.memo((props) => {
       });
     }
   }, [props.setFlags]);
+
+  useEffect(() => {
+    if (suggestionRef.current) {
+      suggestionRef.current.scrollIntoView(false);
+    }
+  });
   
   const anchor = props.children({ref: anchorRef});
   const suggestionsStyles = {
@@ -140,37 +146,38 @@ export default React.memo((props) => {
     borderStyle: 'solid',
     borderWidth: 'thin',
     cursor: 'pointer',
+    maxHeight: '15em',
+    overflow: 'scroll',
   };
   let portal;
   if (!state.disabled && state.items.length) {
+    const items = state.items.map((item, index) => {
+      const active = index === state.index;
+      const {key, render} = props.mentions.renderUser(item, {active});
+      const itemProps = {
+        onMouseDown: (e) => {
+          e.preventDefault();
+          onSelection(item);
+        },
+        onClick: () => {
+          // Used by keyboard selection
+          onSelection(item);
+        },
+        className: active ? 'active' : '',
+        ref: index === state.index ? suggestionRef : null,
+        role: 'listitem',
+        key,
+      };
+      return (
+        <div {...itemProps}>
+          {render}
+        </div>
+      ) 
+    });
     portal = (
       <Portal>
         <div role="list" ref={mentionsRef} style={suggestionsStyles} data-placement={placement}>
-          {
-            state.items.map((item, index) => {
-              const active = index === state.index;
-              const {key, render} = props.mentions.renderUser(item, {active});
-              const itemProps = {
-                onMouseDown: (e) => {
-                  e.preventDefault();
-                  onSelection(item);
-                },
-                onClick: () => {
-                  // Used by keyboard selection
-                  onSelection(item);
-                },
-                className: active ? 'active' : '',
-                ref: index === state.index ? suggestionRef : null,
-                role: 'listitem',
-                key,
-              };
-              return (
-                <div {...itemProps}>
-                  {render}
-                </div>
-              ) 
-            })
-          }
+          {items}
         </div>
       </Portal>
     );
