@@ -164,6 +164,7 @@ export default React.memo((props) => {
           onSelection(item);
         },
         className: active ? 'active' : '',
+        'aria-current': active,
         ref: index === state.index ? suggestionRef : null,
         role: 'listitem',
         key,
