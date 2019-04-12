@@ -1,11 +1,12 @@
 import React, {useState, useEffect, useRef, useReducer} from 'react';
 import {Portal} from 'react-portal';
+import PropTypes from 'prop-types'
 
 import usePopper from './usePopper';
 import {getInput} from './utils';
 import {USER_MENTION_NODE_TYPE} from './types';
 
-export default React.memo((props) => {
+const Suggestions = (props) => {
   const mentionsRef = useRef(null);
   const anchorRef = useRef(null);
   const suggestionRef = useRef(null);
@@ -81,12 +82,11 @@ export default React.memo((props) => {
   const [state, dispatch] = useReducer(indexReducer, {disabled: false, items: [], index: 0});
   
   const search = (q) => {
-    dispatch({
-      type: 'SET_ITEMS',
-      payload: {
-        items: props.mentions.filter(q),
-      },
-    });
+    props.mentions.filter((q === null) ? '' : q)
+      .then((items) => props.emitter.emit('DISPATCH_SEARCH', items));
+  }
+  const dispatchSearch = (items) => {
+    dispatch({type: 'SET_ITEMS', payload: {items}});
   }
   useEffect(() => {
     search(props.initialQuery)
@@ -111,6 +111,7 @@ export default React.memo((props) => {
     props.emitter.on('SELECT', select);
     props.emitter.on('DISABLE', disable);
     props.emitter.on('SEARCH', search);
+    props.emitter.on('DISPATCH_SEARCH', dispatchSearch);
 
     return () => {
       props.emitter.off('MOVE_DOWN', moveDown);
@@ -118,6 +119,7 @@ export default React.memo((props) => {
       props.emitter.off('SELECT', select);
       props.emitter.off('DISABLE', disable);
       props.emitter.off('SEARCH', search);
+      props.emitter.off('DISPATCH_SEARCH', dispatchSearch);
     }
   }, [props.emitter]);
   
@@ -139,19 +141,10 @@ export default React.memo((props) => {
     }
   });
   
-  const anchor = props.children({ref: anchorRef});
-  const suggestionsStyles = {
-    ...styles,
-    backgroundColor: 'white',
-    borderStyle: 'solid',
-    borderWidth: 'thin',
-    cursor: 'pointer',
-    maxHeight: '15em',
-    overflow: 'scroll',
-  };
-  let portal;
+  let items;
   if (!state.disabled && state.items.length) {
-    const items = state.items.map((item, index) => {
+    props.setFlags({open: true});
+    items = state.items.map((item, index) => {
       const active = index === state.index;
       const {key, render} = props.mentions.renderSuggestion(item, {active});
       const itemProps = {
@@ -175,18 +168,42 @@ export default React.memo((props) => {
         </div>
       ) 
     });
-    portal = (
+  }
+  else {
+    props.setFlags({open: false});
+  }
+
+  const suggestionsStyles = {
+    ...styles,
+    backgroundColor: 'white',
+    borderStyle: 'solid',
+    borderWidth: 'thin',
+    cursor: 'pointer',
+    maxHeight: '15em',
+    overflow: 'scroll',
+  };
+  return (
+    <>
+      {props.children({ref: anchorRef})}
       <Portal>
         <div role="list" ref={mentionsRef} style={suggestionsStyles} data-placement={placement}>
           {items}
         </div>
       </Portal>
-    );
-  }
-  return (
-    <>
-      {anchor}
-      {portal}
     </>
   );
-});
+};
+
+Suggestions.propTypes = {
+  children: PropTypes.func.isRequired,
+  editor: PropTypes.object,
+  emitter: PropTypes.object,
+  initialQuery: PropTypes.string,
+  mentions: PropTypes.shape({
+    filter: PropTypes.func,
+    renderSuggestion: PropTypes.func,
+  }),
+  setFlags: PropTypes.func,
+};
+
+export default React.memo(Suggestions);

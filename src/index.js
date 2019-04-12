@@ -45,12 +45,10 @@ for (const user of users) {
 }
 
 const mentions = {
-  filter: (query) => {
-    if (query === '') {
-      return users;
-    }
-    return users.filter((user) => user.displayName.toLowerCase().startsWith(query));
-  },
+  filter: (query) =>
+    Promise.resolve(
+      (query === '') ? users : users.filter((user) => user.displayName.toLowerCase().startsWith(query.toLowerCase()))
+    ),
   renderSuggestion: (user, {active}) => {
     const activeStyle = active ? {backgroundColor: 'lightblue'} : null;
     const style = {
