@@ -57,7 +57,7 @@
         "mainDistFile": "dist/src/components/Composer/index.js",
         "exported": true
     },
-    "mwegman.message-composer/mentions@0.0.6": {
+    "mwegman.message-composer/mentions@0.0.8": {
         "files": [
             {
                 "relativePath": "src/plugins/mentions/index.js",
@@ -90,7 +90,7 @@
         "origin": "AUTHORED",
         "exported": true
     },
-    "mwegman.message-composer/composer-slate@0.0.11": {
+    "mwegman.message-composer/composer-slate@0.0.13": {
         "files": [
             {
                 "relativePath": "src/components/ComposerSlate/composer.js",
@@ -134,7 +134,7 @@
         "mainDistFile": "dist/src/components/ComposerSlate/index.js",
         "exported": true
     },
-    "mwegman.message-composer/message-composer@0.0.11": {
+    "mwegman.message-composer/message-composer@0.0.13": {
         "files": [
             {
                 "relativePath": "src/components/MessageComposer/index.js",
@@ -153,5 +153,5 @@
         "mainDistFile": "dist/src/components/MessageComposer/index.js",
         "exported": true
     },
-    "version": "14.0.4"
+    "version": "14.0.5"
 }
