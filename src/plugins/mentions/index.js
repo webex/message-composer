@@ -22,7 +22,7 @@ const schema = {
 };
 
 const defaultMentionProps = {
-  filter: () => [],
+  filter: () => Promise.resolve([]),
   renderSuggestion: () => null,
   renderInsert: () => null,
 };
