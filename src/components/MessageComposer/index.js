@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React, {useRef, useState, useEffect} from 'react';
 import {TinyEmitter} from 'tiny-emitter';
 import PropTypes from 'prop-types';
 
@@ -12,9 +12,13 @@ const renderToolbar = ({emitter, active}) => (
   <Toolbar emitter={emitter} active={active} />
 );
 
-const MessageComposer = ({send, mentions, toolbar, children, draft}) => {
+const MessageComposer = ({send, mentions, toolbar, children, draft, setEmitter}) => {
   const emitter = useRef(new TinyEmitter());
   const [active, setActive] = useState({});
+  
+  useEffect(() => {
+    setEmitter(emitter.current);
+  }, [emitter]);
 
   const toolbarDom = toolbar({emitter: emitter.current, active});
 
@@ -44,10 +48,12 @@ MessageComposer.propTypes = {
     save: PropTypes.func,
   }),
   toolbar: PropTypes.func,
+  setEmitter: PropTypes.func,
 };
 
 MessageComposer.defaultProps = {
   toolbar: renderToolbar,
+  setEmitter: () => {},
 };
 
 export default MessageComposer;

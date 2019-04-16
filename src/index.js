@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useRef} from 'react';
 import ReactDOM from 'react-dom';
 
 import MessageComposer from './components/MessageComposer';
@@ -89,15 +89,26 @@ const Example = (props) => {
     value: spaces[number],
     save: setValue,
   };
+  
+  const emitter = useRef();
+  const setEmitter = (e) => {
+    emitter.current = e;
+  };
+
+  const focus = (e) => {
+    e.preventDefault();
+    emitter.current.emit('FOCUS');
+  };
 
   return (
-    <div className='container'>
+    <div className='container' onClick={focus}>
       <div className='content' />
       <div className='mc'>
         <MessageComposer
           draft={draft}
           mentions={mentions}
-          send={(message) => setMessage(message)} />
+          send={(message) => setMessage(message)}
+          setEmitter={setEmitter} />
         <br/>
         <div>Sending: {JSON.stringify(message)}</div>
         <button onClick={() => show(other)}>Show Space {other}</button>

@@ -18,11 +18,13 @@ const FormatToolbar = React.memo(({active, emitter}) => {
     emitter.emit(type);
   }
 
+  const focus = toggle('FOCUS');
+
   const boldClass = classnames('toolbar-button','bold', {active: active && active.bold});
   const italicClass = classnames('toolbar-button','italic', {active: active && active.italic});
   const ulClass = classnames('toolbar-button','underline', {active: active && active.underline});
   const codeClass = classnames('toolbar-button','code', {active: active && active.code});
-  return (<Toolbar>
+  return (<Toolbar focus={focus} >
     <button className={boldClass} onPointerDown={toggle('toggleBold')}>
       <Icon size={ICON_SIZE} icon={bold} />
     </button>

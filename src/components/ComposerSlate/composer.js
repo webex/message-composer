@@ -84,11 +84,15 @@ const Composer = React.memo(({emitter, active, mentions, send, draft}) => {
     emitter.on('toggleUnderline', () => toggleStyle(STYLE.UNDERLINE));
     emitter.on('toggleCode', () => toggleStyle(STYLE.CODE));
 
+    emitter.on('FOCUS', focus);
+
     return () => {
       emitter.off('toggleBold');
       emitter.off('toggleItalic');
       emitter.off('toggleUnderline');
       emitter.off('toggleCode');
+
+      emitter.off('FOCUS', focus);
     }
   }, [emitter]);
   
