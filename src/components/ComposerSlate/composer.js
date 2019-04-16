@@ -70,6 +70,8 @@ const Composer = React.memo(({emitter, active, mentions, send, draft}) => {
   const editor = useRef(null);
   
   const focus = () => editor.current.focus();
+
+  const insert = (s) => editor.current.insertText(s);
   
   const toggleStyle = (type) => {
     editor.current.toggleMark(type)
@@ -85,6 +87,7 @@ const Composer = React.memo(({emitter, active, mentions, send, draft}) => {
     emitter.on('toggleCode', () => toggleStyle(STYLE.CODE));
 
     emitter.on('FOCUS', focus);
+    emitter.on('INSERT_TEXT', insert);
 
     return () => {
       emitter.off('toggleBold');
@@ -93,6 +96,7 @@ const Composer = React.memo(({emitter, active, mentions, send, draft}) => {
       emitter.off('toggleCode');
 
       emitter.off('FOCUS', focus);
+      emitter.off('INSERT_TEXT', insert);
     }
   }, [emitter]);
   

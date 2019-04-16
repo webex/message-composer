@@ -100,6 +100,11 @@ const Example = (props) => {
     emitter.current.emit('FOCUS');
   };
 
+  const insertText = (t) => (e) => {
+    e.preventDefault();
+    emitter.current.emit('INSERT_TEXT', t);
+  }
+
   return (
     <div className='container' onClick={focus}>
       <div className='content' />
@@ -112,6 +117,8 @@ const Example = (props) => {
         <br/>
         <div>Sending: {JSON.stringify(message)}</div>
         <button onClick={() => show(other)}>Show Space {other}</button>
+        <button onClick={insertText('🎉')}>Insert Emoji</button>
+        <button onClick={insertText('@')}>@Mention</button>
       </div>
     </div>
   );
