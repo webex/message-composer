@@ -182,11 +182,14 @@ const Suggestions = (props) => {
     maxHeight: '15em',
     overflow: 'scroll',
   };
+  if (!items) {
+    suggestionsStyles.display = 'none';
+  }
   return (
     <>
       {props.children({ref: anchorRef})}
       <Portal>
-        <div role="list" ref={mentionsRef} style={suggestionsStyles} data-placement={placement}>
+        <div className="suggestion-list" role="list" ref={mentionsRef} style={suggestionsStyles} data-placement={placement}>
           {items}
         </div>
       </Portal>
