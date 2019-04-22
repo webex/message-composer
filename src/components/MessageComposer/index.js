@@ -12,7 +12,7 @@ const renderToolbar = ({emitter, active}) => (
   <Toolbar emitter={emitter} active={active} />
 );
 
-const MessageComposer = ({send, mentions, toolbar, children, draft, setEmitter}) => {
+const MessageComposer = ({send, mentions, toolbar, children, draft, setEmitter, notifyKeyDown}) => {
   const emitter = useRef(new TinyEmitter());
   const [active, setActive] = useState({});
   
@@ -25,14 +25,14 @@ const MessageComposer = ({send, mentions, toolbar, children, draft, setEmitter})
   return (
     <div className="message-composer-container" >
       <div className="toolbar">{toolbarDom}</div>
-      <hr className="message-composer"/>
       <div className="composer">
         <Composer
           send={send}
           mentions={mentions}
           draft={draft}
           emitter={emitter.current}
-          active={setActive} />
+          active={setActive}
+          notifyKeyDown={notifyKeyDown} />
       </div>
       <div className="children">
         {children}
@@ -49,11 +49,13 @@ MessageComposer.propTypes = {
   }),
   toolbar: PropTypes.func,
   setEmitter: PropTypes.func,
+  notifyKeyDown: PropTypes.func,
 };
 
 MessageComposer.defaultProps = {
   toolbar: renderToolbar,
   setEmitter: () => {},
+  notifyKeyDown: null,
 };
 
 export default MessageComposer;

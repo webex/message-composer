@@ -118,9 +118,18 @@ const rules = [
 const html = new Html({ rules });
 
 const serializePlugin = (value) => {
+  const notifyKeyDown = (editor) => {
+    if (editor.props.notifyKeyDown) {
+      editor.props.notifyKeyDown();
+    }
+  }
+  
   return {
     onKeyDown(event, editor, next) {
-      if (event.shiftKey) return next();
+      if (event.shiftKey) {
+        notifyKeyDown(editor);
+        return next();
+      };
 
       if (event.key === 'Enter') {
         event.preventDefault();
@@ -149,6 +158,8 @@ const serializePlugin = (value) => {
         setTimeout(() => editor.focus());
         return true;
       }
+
+      notifyKeyDown(editor);
       return next();
     }
   }

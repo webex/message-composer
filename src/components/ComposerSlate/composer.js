@@ -66,7 +66,7 @@ const plugins = [
   SendMessagePlugin(InitialValue),
 ];
 
-const Composer = React.memo(({emitter, active, mentions, send, draft}) => {
+const Composer = React.memo(({emitter, active, mentions, send, draft, notifyKeyDown}) => {
   const editor = useRef(null);
   
   const focus = () => editor.current.focus();
@@ -141,6 +141,7 @@ const Composer = React.memo(({emitter, active, mentions, send, draft}) => {
     <div className={draftRootClass} onClick={focus} onKeyPress={focus} role="textbox" tabIndex={-1}>
       <Editor
         value={value}
+        notifyKeyDown={notifyKeyDown}
         onChange={onChange}
         placeholder="Write a message here."
         plugins={plugins}
@@ -158,10 +159,12 @@ Composer.propTypes = {
     value: PropTypes.object,
     save: PropTypes.func,
   }),
+  notifyKeyDown: PropTypes.func,
 };
 
 Composer.defaultProps = {
   draft: {},
+  notifyKeyDown: null,
 }
 
 export default Composer;

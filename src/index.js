@@ -105,6 +105,10 @@ const Example = (props) => {
     emitter.current.emit('INSERT_TEXT', t);
   }
 
+  const notifyKeyDown = () => {
+    console.log('Key pressed');
+  }
+  
   return (
     <div className='container' onClick={focus}>
       <div className='content' />
@@ -113,6 +117,7 @@ const Example = (props) => {
           draft={draft}
           mentions={mentions}
           send={(message) => setMessage(message)}
+          notifyKeyDown={notifyKeyDown}
           setEmitter={setEmitter} />
         <br/>
         <div>Sending: {JSON.stringify(message)}</div>
