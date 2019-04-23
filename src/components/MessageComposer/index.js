@@ -1,6 +1,7 @@
 import React, {useRef, useState, useEffect} from 'react';
-import {TinyEmitter} from 'tiny-emitter';
+import classnames from 'classnames';
 import PropTypes from 'prop-types';
+import {TinyEmitter} from 'tiny-emitter';
 
 //import Composer from '../Composer';
 import Composer from '../ComposerSlate'
@@ -8,11 +9,11 @@ import Toolbar from '../Toolbar';
 
 import './styles.scss';
 
-const renderToolbar = ({emitter, active}) => (
-  <Toolbar emitter={emitter} active={active} />
+const renderToolbar = ({emitter, active, disabled}) => (
+  <Toolbar emitter={emitter} active={active} disabled={disabled} />
 );
 
-const MessageComposer = ({send, mentions, toolbar, children, draft, setEmitter, notifyKeyDown, placeholder}) => {
+const MessageComposer = ({send, mentions, toolbar, children, disabled, draft, setEmitter, notifyKeyDown, placeholder}) => {
   const emitter = useRef(new TinyEmitter());
   const [active, setActive] = useState({});
   
@@ -20,15 +21,17 @@ const MessageComposer = ({send, mentions, toolbar, children, draft, setEmitter, 
     setEmitter(emitter.current);
   }, [emitter]);
 
-  const toolbarDom = toolbar({emitter: emitter.current, active});
+  const toolbarDom = toolbar({emitter: emitter.current, active, disabled});
 
+  const containerClasses = classnames('message-composer-container', {disabled});
   return (
-    <div className="message-composer-container" >
+    <div className={containerClasses} >
       <div className="toolbar">{toolbarDom}</div>
       <div className="composer">
         <Composer
           send={send}
           mentions={mentions}
+          disabled={disabled}
           draft={draft}
           emitter={emitter.current}
           active={setActive}
@@ -44,6 +47,7 @@ const MessageComposer = ({send, mentions, toolbar, children, draft, setEmitter, 
 };
 
 MessageComposer.propTypes = {
+  disabled: PropTypes.bool,
   draft: PropTypes.shape({
     id: PropTypes.any,
     value: PropTypes.object,
@@ -56,6 +60,7 @@ MessageComposer.propTypes = {
 };
 
 MessageComposer.defaultProps = {
+  disabled: false,
   toolbar: renderToolbar,
   setEmitter: () => {},
   notifyKeyDown: null,

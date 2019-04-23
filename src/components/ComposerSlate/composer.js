@@ -66,7 +66,7 @@ const plugins = [
   SendMessagePlugin(InitialValue),
 ];
 
-const Composer = React.memo(({emitter, active, mentions, send, draft, notifyKeyDown, placeholder}) => {
+const Composer = React.memo(({emitter, active, mentions, send, disabled, draft, notifyKeyDown, placeholder}) => {
   const editor = useRef(null);
   
   const focus = () => editor.current.focus();
@@ -136,7 +136,7 @@ const Composer = React.memo(({emitter, active, mentions, send, draft, notifyKeyD
     markMention(editor.current);
   });
 
-  const draftRootClass = classnames('draft-root');
+  const draftRootClass = classnames('draft-root', {disabled});
   return (
     <div className={draftRootClass} onClick={focus} onKeyPress={focus} role="textbox" tabIndex={-1}>
       <Editor
@@ -145,6 +145,7 @@ const Composer = React.memo(({emitter, active, mentions, send, draft, notifyKeyD
         onChange={onChange}
         placeholder={placeholder}
         plugins={plugins}
+        readOnly={disabled}
         ref={editor}
         send={send}
         mentions={mentions}
@@ -154,6 +155,7 @@ const Composer = React.memo(({emitter, active, mentions, send, draft, notifyKeyD
 });
 
 Composer.propTypes = {
+  disabled: PropTypes.bool,
   draft: PropTypes.shape({
     id: PropTypes.any,
     value: PropTypes.object,
@@ -164,6 +166,7 @@ Composer.propTypes = {
 };
 
 Composer.defaultProps = {
+  disabled: false,
   draft: {},
   notifyKeyDown: null,
   placeholder: '',

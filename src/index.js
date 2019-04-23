@@ -110,12 +110,18 @@ const Example = (props) => {
   const notifyKeyDown = () => {
     console.log('Key pressed');
   }
-  
+
+  const [disabled, setDisabled] = useState(false);
+  const toggleDisabled = () => {
+    setDisabled(!disabled);
+  }
+   
   return (
     <div className='container' onClick={focus}>
       <div className='content' />
       <div className='mc'>
         <MessageComposer
+          disabled={disabled}
           draft={draft}
           mentions={mentions}
           send={(message) => setMessage(message)}
@@ -127,6 +133,7 @@ const Example = (props) => {
         <button onClick={() => show(other)}>Show Space {other}</button>
         <button onClick={insertText('🎉')}>Insert Emoji</button>
         <button onClick={insertText('@')}>@Mention</button>
+        <button onClick={toggleDisabled}>{(disabled) ? 'enable' : 'disable'}</button>
       </div>
     </div>
   );

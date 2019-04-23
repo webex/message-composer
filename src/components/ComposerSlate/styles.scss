@@ -4,4 +4,8 @@
   min-height: 5em;
   max-height: 10em;
   overflow: auto;
+
+  &.disabled {
+    pointer-events: none;
+  }
 }

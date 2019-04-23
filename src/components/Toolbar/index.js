@@ -12,7 +12,7 @@ import './styles.scss';
 
 const ICON_SIZE = 14;
 
-const FormatToolbar = React.memo(({active, emitter}) => {
+const FormatToolbar = React.memo(({active, disabled, emitter}) => {
   const toggle = (type) => (e) => {
     e.preventDefault();
     emitter.emit(type);
@@ -25,16 +25,16 @@ const FormatToolbar = React.memo(({active, emitter}) => {
   const ulClass = classnames('toolbar-button','underline', {active: active && active.underline});
   const codeClass = classnames('toolbar-button','code', {active: active && active.code});
   return (<Toolbar focus={focus} >
-    <button className={boldClass} onPointerDown={toggle('toggleBold')}>
+    <button className={boldClass} disabled={disabled} onClick={toggle('toggleBold')}>
       <Icon size={ICON_SIZE} icon={bold} />
     </button>
-    <button className={italicClass} onPointerDown={toggle('toggleItalic')}>
+    <button className={italicClass} disabled={disabled} onClick={toggle('toggleItalic')}>
       <Icon size={ICON_SIZE} icon={italic} />
     </button>
-    <button className={ulClass} onPointerDown={toggle('toggleUnderline')}>
+    <button className={ulClass} disabled={disabled} onClick={toggle('toggleUnderline')}>
       <Icon size={ICON_SIZE} icon={underline} />
     </button>
-    <button className={codeClass} onPointerDown={toggle('toggleCode')}>
+    <button className={codeClass} disabled={disabled} onClick={toggle('toggleCode')}>
       <Icon size={ICON_SIZE} icon={code} />
     </button>
   </Toolbar>);
