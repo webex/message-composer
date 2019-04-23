@@ -130,18 +130,18 @@
   {
     "id": {
       "scope": "mwegman.message-composer",
-      "name": "toolbar"
-    },
-    "isSymlink": false,
-    "hash": "85c16f694bfecf955c9a0ae762b8300ddda60e6a"
-  },
-  {
-    "id": {
-      "scope": "mwegman.message-composer",
       "name": "composer"
     },
     "isSymlink": false,
     "hash": "eab7af1b4dfe3b5864286312ca5d0d4a137e7a41"
+  },
+  {
+    "id": {
+      "scope": "mwegman.message-composer",
+      "name": "toolbar"
+    },
+    "isSymlink": false,
+    "hash": "85c16f694bfecf955c9a0ae762b8300ddda60e6a"
   },
   {
     "id": {

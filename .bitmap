@@ -14,7 +14,26 @@
         "origin": "AUTHORED",
         "exported": true
     },
-    "mwegman.message-composer/toolbar@0.0.5": {
+    "mwegman.message-composer/composer@0.0.6": {
+        "files": [
+            {
+                "relativePath": "src/components/Composer/index.js",
+                "test": false,
+                "name": "index.js"
+            },
+            {
+                "relativePath": "src/components/Composer/styles.scss",
+                "test": false,
+                "name": "styles.scss"
+            }
+        ],
+        "mainFile": "src/components/Composer/index.js",
+        "trackDir": "src/components/Composer",
+        "origin": "AUTHORED",
+        "mainDistFile": "dist/src/components/Composer/index.js",
+        "exported": true
+    },
+    "mwegman.message-composer/toolbar@0.0.7": {
         "files": [
             {
                 "relativePath": "src/components/Toolbar/index.js",
@@ -38,26 +57,7 @@
         "mainDistFile": "dist/src/components/Toolbar/index.js",
         "exported": true
     },
-    "mwegman.message-composer/composer@0.0.6": {
-        "files": [
-            {
-                "relativePath": "src/components/Composer/index.js",
-                "test": false,
-                "name": "index.js"
-            },
-            {
-                "relativePath": "src/components/Composer/styles.scss",
-                "test": false,
-                "name": "styles.scss"
-            }
-        ],
-        "mainFile": "src/components/Composer/index.js",
-        "trackDir": "src/components/Composer",
-        "origin": "AUTHORED",
-        "mainDistFile": "dist/src/components/Composer/index.js",
-        "exported": true
-    },
-    "mwegman.message-composer/mentions@0.0.9": {
+    "mwegman.message-composer/mentions@0.0.11": {
         "files": [
             {
                 "relativePath": "src/plugins/mentions/index.js",
@@ -90,7 +90,7 @@
         "origin": "AUTHORED",
         "exported": true
     },
-    "mwegman.message-composer/composer-slate@0.0.15": {
+    "mwegman.message-composer/composer-slate@0.0.19": {
         "files": [
             {
                 "relativePath": "src/components/ComposerSlate/composer.js",
@@ -134,7 +134,7 @@
         "mainDistFile": "dist/src/components/ComposerSlate/index.js",
         "exported": true
     },
-    "mwegman.message-composer/message-composer@0.0.15": {
+    "mwegman.message-composer/message-composer@0.0.21": {
         "files": [
             {
                 "relativePath": "src/components/MessageComposer/index.js",
@@ -153,5 +153,5 @@
         "mainDistFile": "dist/src/components/MessageComposer/index.js",
         "exported": true
     },
-    "version": "14.0.5"
+    "version": "14.0.6"
 }
