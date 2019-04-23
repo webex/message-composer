@@ -73,6 +73,8 @@ const setValue = (v, num) => {
   spaces[num] = v;
 };
 
+const placeholder = 'Write your message in this space.'
+
 const Example = (props) => {
   const [message, setMessage] = useState('');
   const [number, setNumber] = useState(1);
@@ -118,6 +120,7 @@ const Example = (props) => {
           mentions={mentions}
           send={(message) => setMessage(message)}
           notifyKeyDown={notifyKeyDown}
+          placeholder={placeholder}
           setEmitter={setEmitter} />
         <br/>
         <div>Sending: {JSON.stringify(message)}</div>
