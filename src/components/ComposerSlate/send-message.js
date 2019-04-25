@@ -1,6 +1,8 @@
 import Html from 'slate-html-serializer';
 import Text from 'slate-plain-serializer';
-import React from 'react';
+import React, {cloneElement} from 'react';
+import commonmark from 'commonmark';
+import ReactHtmlParser from 'react-html-parser';
 
 import {convertMarkdown} from '../../plugins/markdown';
 
@@ -20,6 +22,27 @@ const MARK_TAGS = {
 let mentions = [];
 let groupMentions = [];
 
+const convertMarkdownToHTML = (md) => {
+  const reader = new commonmark.Parser();
+  const parsed = reader.parse(md);
+  
+  const writer = new commonmark.HtmlRenderer({safe: true});
+  let value = writer.render(parsed);
+  value = value.replace(/^<p>([\s\S]*)<\/p>\s$/, '$1');
+  return (<>{ReactHtmlParser(value)}</>);
+}
+
+const blocks = {
+  blockquote: <blockquote/>,
+  list: <ul/>,
+  'list-item': <li/>,
+  h1: <h1/>,
+  h2: <h2/>,
+  h3: <h3/>,
+  h4: <h4/>,
+  h5: <h5/>,
+};
+
 const rules = [
   {
     deserialize(el, next) {
@@ -38,24 +61,17 @@ const rules = [
     serialize(obj, children) {
       if (obj.object === 'block') {
         switch (obj.type) {
-          case 'code':
-            return (
-              <pre>
-                <code>{children}</code>
-              </pre>
-            )
           case 'paragraph':
-            return <p className={obj.data.get('className')}>{children}</p>
+            return <div className={obj.data.get('className')}>{children}</div>;
           case 'blockquote':
-            return <blockquote>{children}</blockquote>;
           case 'list-item':
-            return (
-              <li>{children}</li>
-            );
           case 'list':
-              return (
-                <ul>{children}</ul>
-              );
+          case 'h1':
+          case 'h2':
+          case 'h3':
+          case 'h4':
+          case 'h5':
+            return cloneElement(blocks[obj.type], {}, children);
         }
       }
       else if (obj.object === 'inline') {
@@ -106,17 +122,17 @@ const rules = [
       if (obj.object === 'mark') {
         switch (obj.type) {
           case 'bold':
-          return <strong>{children}</strong>
+            return <strong>{children}</strong>
           case 'italic':
-          return <em>{children}</em>
+            return <em>{children}</em>
           case 'underline':
-          return <u>{children}</u>
+            return <u>{children}</u>
           case 'code':
-          return (
-            <pre>
-              <code>{children}</code>
-            </pre>
-          );
+            return (
+              <code className="language-none">{children}</code>
+            );
+          case 'url':
+            return convertMarkdownToHTML(children[0]);
         }
       }
     },

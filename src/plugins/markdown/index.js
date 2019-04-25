@@ -2,17 +2,36 @@ import Prism from 'prismjs'
 import 'prismjs/components/prism-markup';
 import 'prismjs/components/prism-markdown';
 
-const isLineMarkdown = ({type}) => {
-  if (type === 'blockquote'
-    || type === 'list'
-  ) return true;
-  return false;
+const lineMarkdowns = {
+  blockquote: true,
+  list: true,
+  title: true,
 };
+const isLineMarkdown = ({type}) => !!lineMarkdowns[type];
 
-const canPreview = ({type}) => (type === 'bold' || type === 'italic');
+const previewMarkdowns = {
+  bold: true,
+  code: true,
+  italic: true,
+};
+const canPreview = ({type}) => !!previewMarkdowns[type];
 
 let listStartNode;
 let listEndNode;
+
+const lineContentLength = (token) => {
+  if (Array.isArray(token.content)) {
+    return token.content[0].length;
+  }
+  else {
+    return token.length;
+  }
+}
+
+const getTitleType = (length) => {
+  const type = (length > 5) ? 5 : length;
+  return `h${type}`;
+}
 
 export const convertMarkdown = ({editor, node, done}) => {
   let foundListItem = false;
@@ -30,7 +49,8 @@ export const convertMarkdown = ({editor, node, done}) => {
       }
       else {
         if (isLineMarkdown(token)) {
-          editor.moveFocusForward(token.length);
+          const length = lineContentLength(token);
+          editor.moveFocusForward(length);
           editor.delete();
 
           if (token.type === 'list') {
@@ -42,7 +62,9 @@ export const convertMarkdown = ({editor, node, done}) => {
             listEndNode = node;
           }
           else {
-            editor.setBlocks(token.type);
+
+            const type = (token.type === 'title') ? getTitleType(length) : token.type;
+            editor.setBlocks(type);
           }
         }
         else {
@@ -137,7 +159,7 @@ const MarkDown = () => {
           endOffset = remaining
         }
   
-        if (typeof token !== 'string' && !isLineMarkdown(token)) {
+        if (typeof token !== 'string' && canPreview(token)) {
           const dec = {
             anchor: {
               key: startText.key,
