@@ -66,7 +66,7 @@ const plugins = [
   SendMessagePlugin(InitialValue),
 ];
 
-const Composer = React.memo(({emitter, active, mentions, send, disabled, draft, notifyKeyDown, placeholder}) => {
+const Composer = ({emitter, active, mentions, send, disabled, draft, notifyKeyDown, placeholder}) => {
   const editor = useRef(null);
   
   const focus = () => editor.current.focus();
@@ -152,7 +152,7 @@ const Composer = React.memo(({emitter, active, mentions, send, disabled, draft, 
       />
     </div>
   );
-});
+};
 
 Composer.propTypes = {
   disabled: PropTypes.bool,
@@ -172,4 +172,4 @@ Composer.defaultProps = {
   placeholder: '',
 }
 
-export default Composer;
+export default React.memo(Composer);
