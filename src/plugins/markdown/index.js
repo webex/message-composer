@@ -1,33 +1,74 @@
 import Prism from 'prismjs'
+import 'prismjs/components/prism-markup';
+import 'prismjs/components/prism-markdown';
 
-// eslint-disable-next-line
-;Prism.languages.markdown=Prism.languages.extend("markup",{}),Prism.languages.insertBefore("markdown","prolog",{blockquote:{pattern:/^>(?:[\t ]*>)*/m,alias:"punctuation"},code:[{pattern:/^(?: {4}|\t).+/m,alias:"keyword"},{pattern:/``.+?``|`[^`\n]+`/,alias:"keyword"}],title:[{pattern:/\w+.*(?:\r?\n|\r)(?:==+|--+)/,alias:"important",inside:{punctuation:/==+$|--+$/}},{pattern:/(^\s*)#+.+/m,lookbehind:!0,alias:"important",inside:{punctuation:/^#+|#+$/}}],hr:{pattern:/(^\s*)([*-])([\t ]*\2){2,}(?=\s*$)/m,lookbehind:!0,alias:"punctuation"},list:{pattern:/(^\s*)(?:[*+-]|\d+\.)(?=[\t ].)/m,lookbehind:!0,alias:"punctuation"},"url-reference":{pattern:/!?\[[^\]]+\]:[\t ]+(?:\S+|<(?:\\.|[^>\\])+>)(?:[\t ]+(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\((?:\\.|[^)\\])*\)))?/,inside:{variable:{pattern:/^(!?\[)[^\]]+/,lookbehind:!0},string:/(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\((?:\\.|[^)\\])*\))$/,punctuation:/^[\[\]!:]|[<>]/},alias:"url"},bold:{pattern:/(^|[^\\])(\*\*|__)(?:(?:\r?\n|\r)(?!\r?\n|\r)|.)+?\2/,lookbehind:!0,inside:{punctuation:/^\*\*|^__|\*\*$|__$/}},italic:{pattern:/(^|[^\\])([*_])(?:(?:\r?\n|\r)(?!\r?\n|\r)|.)+?\2/,lookbehind:!0,inside:{punctuation:/^[*_]|[*_]$/}},url:{pattern:/!?\[[^\]]+\](?:\([^\s)]+(?:[\t ]+"(?:\\.|[^"\\])*")?\)| ?\[[^\]\n]*\])/,inside:{variable:{pattern:/(!?\[)[^\]]+(?=\]$)/,lookbehind:!0},string:{pattern:/"(?:\\.|[^"\\])*"(?=\)$)/}}}}),Prism.languages.markdown.bold.inside.url=Prism.util.clone(Prism.languages.markdown.url),Prism.languages.markdown.italic.inside.url=Prism.util.clone(Prism.languages.markdown.url),Prism.languages.markdown.bold.inside.italic=Prism.util.clone(Prism.languages.markdown.italic),Prism.languages.markdown.italic.inside.bold=Prism.util.clone(Prism.languages.markdown.bold); // prettier-ignore
+const isLineMarkdown = ({type}) => {
+  if (type === 'blockquote'
+    || type === 'list'
+  ) return true;
+  return false;
+};
 
-export const convertMarkdown = (editor, node) => {
-  if (node.object != 'text') return;
+const canPreview = ({type}) => (type === 'bold' || type === 'italic');
 
-  const string = node.text;
-  const grammar = Prism.languages.markdown;
-  const tokens = Prism.tokenize(string, grammar);
+let listStartNode;
+let listEndNode;
 
-  editor.moveToStartOfNode(node);
-  for (const token of tokens) {
-    if (typeof token === 'string') {
-      editor.moveForward(token.length);
-    }
-    else {
-      for (const i of token.content) {
-        if (typeof i === 'string') {
-          editor.moveFocusForward(i.length);
-          editor.addMark(token.type);
-          editor.moveAnchorForward(i.length);
+export const convertMarkdown = ({editor, node, done}) => {
+  let foundListItem = false;
+  if (!done) {
+    if (node.object != 'text') return;
+
+    const string = node.text;
+    const grammar = Prism.languages.markdown;
+    const tokens = Prism.tokenize(string, grammar);
+
+    editor.moveToStartOfNode(node);
+    for (const token of tokens) {
+      if (typeof token === 'string') {
+        editor.moveForward(token.length);
+      }
+      else {
+        if (isLineMarkdown(token)) {
+          editor.moveFocusForward(token.length);
+          editor.delete();
+
+          if (token.type === 'list') {
+            foundListItem = true;
+            editor.setBlocks('list-item');
+            if (!listStartNode) {
+              listStartNode = node;
+            }
+            listEndNode = node;
+          }
+          else {
+            editor.setBlocks(token.type);
+          }
         }
         else {
-          editor.moveFocusForward(i.length);
-          editor.delete();
+          for (const i of token.content) {
+            if (typeof i === 'string') {
+              editor.moveFocusForward(i.length);
+              editor.addMark(token.type);
+              editor.moveAnchorForward(i.length);
+            }
+            else {
+              editor.moveFocusForward(i.length);
+              editor.delete();
+            }
+          }
         }
       }
     }
+  }
+
+  if (listStartNode && !foundListItem) {
+    // This is the end of the list. Wrap it in a list element
+    editor.moveAnchorToStartOfNode(listStartNode);
+    editor.moveFocusToEndOfNode(listEndNode);
+    editor.wrapBlock('list');
+    listStartNode = null;
+    listEndNode = null;
   }
 };
 
@@ -42,14 +83,28 @@ const MarkDown = () => {
       const decorations = [];
 
       const string = node.text
-      const texts = node.getTexts().toArray()
-      const grammar = Prism.languages.markdown
-      const tokens = Prism.tokenize(string, grammar)
-      let startText = texts.shift()
-      let endText = startText
-      let startOffset = 0
-      let endOffset = 0
-      let start = 0
+      const grammar = Prism.languages.markdown;
+      const tokens = Prism.tokenize(string, grammar);
+
+      const resetVars = (node) => {
+        const texts = node.getTexts().toArray();
+        const startText = texts.shift();
+        const endText = startText;
+        const startOffset = 0;
+        const endOffset = 0;
+        const start = 0;
+        return {
+          texts,
+          startText,
+          endText,
+          startOffset,
+          endOffset,
+          start,
+        };
+      }
+      
+
+      let {texts, startText, endText, startOffset, endOffset, start} = resetVars(node);
   
       function getLength(token) {
         if (typeof token == 'string') {
@@ -65,7 +120,9 @@ const MarkDown = () => {
         startText = endText
         startOffset = endOffset
   
-        const length = getLength(token)
+        const length = (canPreview(token))
+          ? getLength(token)
+          : token.length;
         const end = start + length
   
         let available = startText.text.length - startOffset
@@ -80,7 +137,7 @@ const MarkDown = () => {
           endOffset = remaining
         }
   
-        if (typeof token != 'string') {
+        if (typeof token !== 'string' && !isLineMarkdown(token)) {
           const dec = {
             anchor: {
               key: startText.key,
@@ -98,7 +155,7 @@ const MarkDown = () => {
           decorations.push(dec)
         }
   
-        start = end
+        start = end;
       }
   
       return [...others, ...decorations]

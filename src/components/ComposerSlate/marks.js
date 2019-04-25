@@ -15,3 +15,7 @@ export const Underline = (props) => (
 export const Code = (props) => (
   <code {...props.attributes}>{props.children}</code>
 );
+
+export const Blockquote = ({attributes, children})  => (
+  <blockquote {...attributes}>{children}</blockquote> 
+);

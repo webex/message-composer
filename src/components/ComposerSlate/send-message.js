@@ -46,8 +46,16 @@ const rules = [
             )
           case 'paragraph':
             return <p className={obj.data.get('className')}>{children}</p>
-          case 'quote':
-            return <blockquote>{children}</blockquote>
+          case 'blockquote':
+            return <blockquote>{children}</blockquote>;
+          case 'list-item':
+            return (
+              <li>{children}</li>
+            );
+          case 'list':
+              return (
+                <ul>{children}</ul>
+              );
         }
       }
       else if (obj.object === 'inline') {
@@ -108,7 +116,7 @@ const rules = [
             <pre>
               <code>{children}</code>
             </pre>
-          )
+          );
         }
       }
     },
@@ -136,9 +144,10 @@ const serializePlugin = (value) => {
 
         for (const outerNode of editor.value.document.nodes) {
           for (const node of outerNode.getTexts()) {
-            convertMarkdown(editor, node);
+            convertMarkdown({editor, node});
           }
         }
+        convertMarkdown({editor, done: true});
 
         const message = {
           displayName: Text.serialize(editor.value),
