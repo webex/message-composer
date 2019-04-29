@@ -74,7 +74,10 @@ const plugins = [
   SendMessagePlugin(InitialValue),
 ];
 
-const Composer = ({emitter, active, mentions, send, disabled, draft, notifyKeyDown, placeholder}) => {
+const Composer = ({
+  emitter, active, markdown, mentions, send,
+  disabled, draft, notifyKeyDown, placeholder,
+}) => {
   const editor = useRef(null);
   
   const focus = () => editor.current.focus();
@@ -171,6 +174,7 @@ const Composer = ({emitter, active, mentions, send, disabled, draft, notifyKeyDo
         readOnly={disabled}
         ref={editor}
         send={send}
+        markdown={markdown}
         mentions={mentions}
       />
     </div>
@@ -184,6 +188,9 @@ Composer.propTypes = {
     value: PropTypes.object,
     save: PropTypes.func,
   }),
+  markdown: PropTypes.shape({
+    disabled: PropTypes.bool,
+  }),
   notifyKeyDown: PropTypes.func,
   placeholder: PropTypes.string,
 };
@@ -191,6 +198,9 @@ Composer.propTypes = {
 Composer.defaultProps = {
   disabled: false,
   draft: {},
+  markdown: {
+    disabled: false,
+  },
   notifyKeyDown: null,
   placeholder: '',
 }

@@ -1,4 +1,4 @@
-import React, {useState, useRef} from 'react';
+import React, {useMemo, useState, useRef} from 'react';
 import ReactDOM from 'react-dom';
 
 import MessageComposer from './components/MessageComposer';
@@ -115,6 +115,15 @@ const Example = (props) => {
   const toggleDisabled = () => {
     setDisabled(!disabled);
   }
+
+  const [isMarkdownDisabled, setMarkdownDisabled] = useState(false);
+  const toggleMarkdownDisabled = () => {
+    setMarkdownDisabled(!isMarkdownDisabled);
+  };
+
+  const markdown = useMemo(() => ({
+    disabled: isMarkdownDisabled,
+  }), [isMarkdownDisabled]);
    
   return (
     <div className='container'>
@@ -123,6 +132,7 @@ const Example = (props) => {
         <MessageComposer
           disabled={disabled}
           draft={draft}
+          markdown={markdown}
           mentions={mentions}
           send={(message) => setMessage(message)}
           notifyKeyDown={notifyKeyDown}
@@ -134,6 +144,7 @@ const Example = (props) => {
         <button onClick={insertText('🎉')}>Insert Emoji</button>
         <button onClick={insertText('@')}>@Mention</button>
         <button onClick={toggleDisabled}>{(disabled) ? 'enable' : 'disable'}</button>
+        <button onClick={toggleMarkdownDisabled}>{(isMarkdownDisabled) ? 'enable markdown' : 'disable markdown'}</button>
       </div>
     </div>
   );

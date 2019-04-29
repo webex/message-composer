@@ -13,7 +13,10 @@ const renderToolbar = ({emitter, active, disabled}) => (
   <Toolbar emitter={emitter} active={active} disabled={disabled} />
 );
 
-const MessageComposer = ({send, mentions, toolbar, children, disabled, draft, setEmitter, notifyKeyDown, placeholder}) => {
+const MessageComposer = ({
+  send, markdown, mentions, toolbar, children, disabled,
+  draft, setEmitter, notifyKeyDown, placeholder
+}) => {
   const emitter = useRef(new TinyEmitter());
   const [active, setActive] = useState({});
   
@@ -30,6 +33,7 @@ const MessageComposer = ({send, mentions, toolbar, children, disabled, draft, se
       <div className="composer">
         <Composer
           send={send}
+          markdown={markdown}
           mentions={mentions}
           disabled={disabled}
           draft={draft}

@@ -75,6 +75,8 @@ const markCode = ({editor, blockNode}) => {
 };
 
 export const convertMarkdown = ({editor, node: blockNode, done}) => {
+  if (editor.props.markdown.disabled) return;
+
   let foundListItem = false;
   if (!done) {
     if (blockNode.object !== 'block') return;
@@ -145,7 +147,7 @@ const MarkDown = () => {
   return {
     decorateNode(node, editor, next) {
       const others = next() || [];
-      if (node.object != 'block') {
+      if (node.object !== 'block' || editor.props.markdown.disabled) {
         return others;
       }
   
