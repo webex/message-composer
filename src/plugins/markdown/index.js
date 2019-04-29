@@ -38,12 +38,6 @@ const codeEnd = /^```$/m;
 
 let codeBeginPointer;
 
-const deleteNode = ({editor, node}) => {
-  editor.moveAnchorToStartOfNode(node);
-  editor.moveFocusToEndOfNode(node);
-  editor.delete();
-};
-
 const markCode = ({editor, blockNode}) => {
   if (blockNode.getTexts().size === 1) {
     const textNode = blockNode.getFirstText();
@@ -60,14 +54,13 @@ const markCode = ({editor, blockNode}) => {
         node: textNode,
       };
 
-      editor.moveAnchorToStartOfNode(codeBeginPointer.node);
-      editor.moveFocusToEndOfNode(codeEndPointer.node);
-      editor.setBlocks('plain');
-      editor.toggleMark('plain');
-      editor.wrapBlock({type: 'code', data: {language: codeBeginPointer.language}});
-
-      deleteNode({editor, node: codeBeginPointer.node});
-      deleteNode({editor, node: codeEndPointer.node});
+      editor.moveAnchorToStartOfNode(codeBeginPointer.node)
+        .moveFocusToEndOfNode(codeEndPointer.node)
+        .setBlocks('plain')
+        .setMark('plain')
+        .wrapBlock({type: 'code', data: {language: codeBeginPointer.language}})
+        .deleteNode(codeBeginPointer.node)
+        .deleteNode(codeEndPointer.node);
 
       codeBeginPointer = null;
     }
@@ -229,9 +222,22 @@ const MarkDown = () => {
         start = end;
       }
   
-      return [...others, ...decorations]
-    }
-  }
-}
+      return [...others, ...decorations];
+    },
+    commands: {
+      setMark(editor, mark) {
+        editor.value.document.getMarksAtRange(editor.value.selection).forEach((mark) => {
+          editor.removeMark(mark.type);
+        });
+        editor.toggleMark(mark);
+      },
+      deleteNode(editor, node) {
+        editor.moveAnchorToStartOfNode(node);
+        editor.moveFocusToEndOfNode(node);
+        editor.delete();
+      },
+    },
+  };
+};
 
 export default MarkDown;
