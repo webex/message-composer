@@ -117,8 +117,8 @@ const Example = (props) => {
   }
    
   return (
-    <div className='container' onClick={focus}>
-      <div className='content' />
+    <div className='container'>
+      <div className='content' onClick={focus} />
       <div className='mc'>
         <MessageComposer
           disabled={disabled}

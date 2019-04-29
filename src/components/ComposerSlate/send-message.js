@@ -22,14 +22,33 @@ const MARK_TAGS = {
 let mentions = [];
 let groupMentions = [];
 
+const addNewLine = (children) => {
+  if (children.length) {
+    const last = children[children.length-1];
+    if (last) {
+      children[children.length-1] = `${last}\n`;
+    }
+  }
+  return children;
+};
+
 const convertMarkdownToHTML = (md) => {
   const reader = new commonmark.Parser();
   const parsed = reader.parse(md);
-  
-  const writer = new commonmark.HtmlRenderer({safe: true});
   let value = writer.render(parsed);
   value = value.replace(/^<p>([\s\S]*)<\/p>\s$/, '$1');
   return (<>{ReactHtmlParser(value)}</>);
+}
+
+const cleanUpContent = (content) => {
+  let newContent = content;
+
+  // Remove the last unwanted \n in a code block
+  newContent = newContent.replace(/\n<\/code>/, '</code>');
+  // There should always be a language class
+  newContent = newContent.replace(/<code>/g, '<code class="language-none">');
+
+  return newContent;
 }
 
 const blocks = {
@@ -63,6 +82,16 @@ const rules = [
         switch (obj.type) {
           case 'paragraph':
             return <div className={obj.data.get('className')}>{children}</div>;
+          case 'code': {
+            const lang = obj.data.get('language') || 'none';
+            return (
+              <pre>
+                <code className={`language-${lang}`}>{children}</code>
+              </pre>
+            );
+          }
+          case 'plain':
+              return <>{children}</>;
           case 'blockquote':
           case 'list-item':
           case 'list':
@@ -133,6 +162,8 @@ const rules = [
             );
           case 'url':
             return convertMarkdownToHTML(children[0]);
+          case 'plain':
+            return <>{addNewLine(children)}</>;
         }
       }
     },
@@ -158,16 +189,17 @@ const serializePlugin = (value) => {
       if (event.key === 'Enter') {
         event.preventDefault();
 
-        for (const outerNode of editor.value.document.nodes) {
-          for (const node of outerNode.getTexts()) {
-            convertMarkdown({editor, node});
-          }
+        const displayName = Text.serialize(editor.value);
+
+        for (const node of editor.value.document.nodes) {
+          convertMarkdown({editor, node});
         }
         convertMarkdown({editor, done: true});
+        const content = cleanUpContent(html.serialize(editor.value));
 
         const message = {
-          displayName: Text.serialize(editor.value),
-          content: html.serialize(editor.value),
+          displayName,
+          content,
         };
         if (mentions.length) {
           message.mentions = mentions;

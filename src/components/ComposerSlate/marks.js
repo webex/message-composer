@@ -1,21 +1,33 @@
 import React from 'react';
 
-export const Bold = (props) => (
-  <strong>{props.children}</strong>
+export const Bold = ({attributes, children}) => (
+  <strong {...attributes}>{children}</strong>
 );
 
-export const Italic = (props) => (
-  <em>{props.children}</em>
+export const Italic = ({attributes, children}) => (
+  <em {...attributes}>{children}</em>
 );
 
-export const Underline = (props) => (
-  <u>{props.children}</u>
+export const Underline = ({attributes, children}) => (
+  <u {...attributes}>{children}</u>
 );
 
-export const Code = (props) => (
-  <code {...props.attributes}>{props.children}</code>
+export const Code = ({attributes, children}) => (
+  <code {...attributes}>{children}</code>
 );
 
 export const Blockquote = ({attributes, children})  => (
   <blockquote {...attributes}>{children}</blockquote> 
+);
+
+export const H1 = ({attributes, children})  => (
+  <h1 {...attributes}>{children}</h1> 
+);
+
+export const H2 = ({attributes, children})  => (
+  <h2 {...attributes}>{children}</h2> 
+);
+
+export const H3 = ({attributes, children})  => (
+  <h3 {...attributes}>{children}</h3> 
 );

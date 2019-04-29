@@ -33,55 +33,102 @@ const getTitleType = (length) => {
   return `h${type}`;
 }
 
-export const convertMarkdown = ({editor, node, done}) => {
+const codeBegin = /^```[\s]?([\S]*)$/m;
+const codeEnd = /^```$/m;
+
+let codeBeginPointer;
+
+const deleteNode = ({editor, node}) => {
+  editor.moveAnchorToStartOfNode(node);
+  editor.moveFocusToEndOfNode(node);
+  editor.delete();
+};
+
+const markCode = ({editor, blockNode}) => {
+  if (blockNode.getTexts().size === 1) {
+    const textNode = blockNode.getFirstText();
+    if (!codeBeginPointer && codeBegin.test(textNode.text)) {
+      const match = codeBegin.exec(textNode.text);
+      codeBeginPointer = {
+        node: textNode,
+        language: match[1],
+      };
+    }
+    else if (codeBeginPointer && codeEnd.test(textNode.text)) {
+      const match = codeEnd.exec(textNode.text);
+      const codeEndPointer = {
+        node: textNode,
+      };
+
+      editor.moveAnchorToStartOfNode(codeBeginPointer.node);
+      editor.moveFocusToEndOfNode(codeEndPointer.node);
+      editor.setBlocks('plain');
+      editor.toggleMark('plain');
+      editor.wrapBlock({type: 'code', data: {language: codeBeginPointer.language}});
+
+      deleteNode({editor, node: codeBeginPointer.node});
+      deleteNode({editor, node: codeEndPointer.node});
+
+      codeBeginPointer = null;
+    }
+  }
+};
+
+export const convertMarkdown = ({editor, node: blockNode, done}) => {
   let foundListItem = false;
   if (!done) {
-    if (node.object != 'text') return;
+    if (blockNode.object !== 'block') return;
 
-    const string = node.text;
-    const grammar = Prism.languages.markdown;
-    const tokens = Prism.tokenize(string, grammar);
+    markCode({editor, blockNode});
+    
+    for (let node of blockNode.getTexts()) {
+      const string = node.text;
+      const grammar = Prism.languages.markdown;
+      const tokens = Prism.tokenize(string, grammar);
 
-    editor.moveToStartOfNode(node);
-    for (const token of tokens) {
-      if (typeof token === 'string') {
-        editor.moveForward(token.length);
-      }
-      else {
-        if (isLineMarkdown(token)) {
-          const length = lineContentLength(token);
-          editor.moveFocusForward(length);
-          editor.delete();
-
-          if (token.type === 'list') {
-            foundListItem = true;
-            editor.setBlocks('list-item');
-            if (!listStartNode) {
-              listStartNode = node;
-            }
-            listEndNode = node;
-          }
-          else {
-
-            const type = (token.type === 'title') ? getTitleType(length) : token.type;
-            editor.setBlocks(type);
-          }
+      editor.moveToStartOfNode(node);
+      for (const token of tokens) {
+        if (typeof token === 'string') {
+          editor.moveForward(token.length);
         }
         else {
-          for (const i of token.content) {
-            if (typeof i === 'string') {
-              editor.moveFocusForward(i.length);
-              editor.addMark(token.type);
-              editor.moveAnchorForward(i.length);
+          if (isLineMarkdown(token)) {
+            const length = lineContentLength(token);
+            editor.moveFocusForward(length);
+            editor.delete();
+
+            if (token.type === 'list') {
+              foundListItem = true;
+              editor.setBlocks('list-item');
+              if (!listStartNode) {
+                listStartNode = node;
+              }
+              listEndNode = node;
             }
             else {
-              editor.moveFocusForward(i.length);
-              editor.delete();
+              const type = (token.type === 'title') ? getTitleType(length) : token.type;
+              editor.setBlocks({type, data: {test: 'Can I find this'}});
+            }
+          }
+          else {
+            for (const i of token.content) {
+              if (typeof i === 'string') {
+                editor.moveFocusForward(i.length);
+                editor.addMark(token.type);
+                editor.moveAnchorForward(i.length);
+              }
+              else {
+                editor.moveFocusForward(i.length);
+                editor.delete();
+              }
             }
           }
         }
       }
     }
+  }
+  else {
+    codeBeginPointer = null;
   }
 
   if (listStartNode && !foundListItem) {

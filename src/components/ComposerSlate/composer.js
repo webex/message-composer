@@ -5,7 +5,7 @@ import React, {Component, useRef, useState, useEffect} from 'react';
 import {Editor} from 'slate-react';
 import {Value} from 'slate';
 
-import {Bold, Italic, Underline, Code} from './marks';
+import {Bold, Italic, Underline, Code, H1, H2, H3} from './marks';
 import ToggleMarks from './toggle-marks';
 import RenderPlugin from './render-marks';
 import SendMessagePlugin from './send-message';
@@ -22,6 +22,11 @@ const STYLE = {
   ITALIC: 'italic',
   UNDERLINE: 'underline',
   CODE: 'code',
+
+  H1: 'h1',
+  H2: 'h2',
+  H3: 'h3',
+  NORMAL: 'paragraph',
 };
 
 const InitialValue = Value.fromJSON({
@@ -59,6 +64,9 @@ const plugins = [
       [STYLE.CODE]: Code,
     },
     nodes: {
+      [STYLE.H1]: H1,
+      [STYLE.H2]: H2,
+      [STYLE.H3]: H3,
     },
   }),
   MarkDownPlugin(),
@@ -86,6 +94,11 @@ const Composer = ({emitter, active, mentions, send, disabled, draft, notifyKeyDo
     emitter.on('toggleUnderline', () => toggleStyle(STYLE.UNDERLINE));
     emitter.on('toggleCode', () => toggleStyle(STYLE.CODE));
 
+    emitter.on('toggleNormal', () => toggleNode(STYLE.NORMAL));
+    emitter.on('toggleH1', () => toggleNode(STYLE.H1));
+    emitter.on('toggleH2', () => toggleNode(STYLE.H2));
+    emitter.on('toggleH3', () => toggleNode(STYLE.H3));
+
     emitter.on('FOCUS', focus);
     emitter.on('INSERT_TEXT', insert);
 
@@ -94,6 +107,11 @@ const Composer = ({emitter, active, mentions, send, disabled, draft, notifyKeyDo
       emitter.off('toggleItalic');
       emitter.off('toggleUnderline');
       emitter.off('toggleCode');
+
+      emitter.off('toggleNormal');
+      emitter.off('toggleH1');
+      emitter.off('toggleH2');
+      emitter.off('toggleH3');
 
       emitter.off('FOCUS', focus);
       emitter.off('INSERT_TEXT', insert);
@@ -108,6 +126,11 @@ const Composer = ({emitter, active, mentions, send, disabled, draft, notifyKeyDo
         states.italic = value.activeMarks.some(mark => mark.type === STYLE.ITALIC);
         states.underline = value.activeMarks.some(mark => mark.type === STYLE.UNDERLINE);
         states.code = value.activeMarks.some(mark => mark.type === STYLE.CODE);
+
+        states.normal = value.blocks.some(block => block.type === 'paragraph');
+        states.h1 = value.blocks.some(block => block.type === 'h1');
+        states.h2 = value.blocks.some(block => block.type === 'h2');
+        states.h3 = value.blocks.some(block => block.type === 'h3');
       })
       active(activeStates.current);
     }

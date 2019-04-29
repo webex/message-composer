@@ -12,6 +12,20 @@ import './styles.scss';
 
 const ICON_SIZE = 14;
 
+const options = {
+  normal: 'Normal',
+  h1: 'H1',
+  h2: 'H2',
+  h3: 'H3',
+};
+
+const setCurrentHeader = (active) => {
+  if (active.normal) return options.normal;
+  if (active.h1) return options.h1;
+  if (active.h2) return options.h2;
+  if (active.h3) return options.h3;
+};
+
 const FormatToolbar = React.memo(({active, disabled, emitter}) => {
   const toggle = (type) => (e) => {
     e.preventDefault();
@@ -20,11 +34,17 @@ const FormatToolbar = React.memo(({active, disabled, emitter}) => {
 
   const focus = toggle('FOCUS');
 
+  const currentHeader = setCurrentHeader(active);
+  const toggleHeader = (e) => {
+    emitter.emit(`toggle${e.target.value}`);
+    focus(e);
+  }
+  
   const boldClass = classnames('toolbar-button','bold', {active: active && active.bold});
   const italicClass = classnames('toolbar-button','italic', {active: active && active.italic});
   const ulClass = classnames('toolbar-button','underline', {active: active && active.underline});
   const codeClass = classnames('toolbar-button','code', {active: active && active.code});
-  return (<Toolbar focus={focus} >
+  return (<Toolbar >
     <button className={boldClass} disabled={disabled} onClick={toggle('toggleBold')}>
       <Icon size={ICON_SIZE} icon={bold} />
     </button>
@@ -37,6 +57,9 @@ const FormatToolbar = React.memo(({active, disabled, emitter}) => {
     <button className={codeClass} disabled={disabled} onClick={toggle('toggleCode')}>
       <Icon size={ICON_SIZE} icon={code} />
     </button>
+    <select value={currentHeader} disabled={disabled} onChange={toggleHeader}>
+      {Object.values(options).map((option) => (<option key={option} value={option}>{option}</option>))}
+    </select> 
   </Toolbar>);
 });
 
