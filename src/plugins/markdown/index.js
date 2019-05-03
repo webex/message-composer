@@ -75,7 +75,7 @@ export const convertMarkdown = ({editor, node: blockNode, done}) => {
     if (blockNode.object !== 'block') return;
 
     markCode({editor, blockNode});
-    
+
     for (let node of blockNode.getTexts()) {
       const string = node.text;
       const grammar = Prism.languages.markdown;
@@ -106,15 +106,17 @@ export const convertMarkdown = ({editor, node: blockNode, done}) => {
             }
           }
           else {
-            for (const i of token.content) {
-              if (typeof i === 'string') {
-                editor.moveFocusForward(i.length);
-                editor.addMark(token.type);
-                editor.moveAnchorForward(i.length);
-              }
-              else {
-                editor.moveFocusForward(i.length);
-                editor.delete();
+            if (token.type !== 'tag') {
+              for (const i of token.content) {
+                if (typeof i === 'string') {
+                  editor.moveFocusForward(i.length);
+                  editor.addMark(token.type);
+                  editor.moveAnchorForward(i.length);
+                }
+                else {
+                  editor.moveFocusForward(i.length);
+                  editor.delete();
+                }
               }
             }
           }
