@@ -14,7 +14,8 @@
         "babel-plugin-transform-react-jsx": "^6.24.1",
         "babel-plugin-transform-regenerator": "^6.26.0",
         "babel-preset-latest": "^6.24.1",
-        "babel-preset-react": "^6.24.1"
+        "babel-preset-react": "^6.24.1",
+        "slate": "^0.46.1"
     },
     "devDependencies": {},
     "peerDependencies": {},
