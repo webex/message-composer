@@ -47,6 +47,8 @@ const cleanUpContent = (content) => {
   newContent = newContent.replace(/\n<\/code>/, '</code>');
   // There should always be a language class
   newContent = newContent.replace(/<code>/g, '<code class="language-none">');
+  // Make empty divs into breaks
+  newContent = newContent.replace(/<div><\/div>/g, '<br>');
 
   return newContent;
 }
