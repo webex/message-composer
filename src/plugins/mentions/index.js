@@ -31,9 +31,13 @@ export default function() {
   let gDecorations;
   const markMention = (editor) => {
     if (gDecorations) {
-      editor.setDecorations(gDecorations);
-      gDecorations = null;
+      try {
+        return editor.setDecorations(gDecorations).value;
+      } finally {
+        gDecorations = null;
+      }
     }
+    return null;
   }
 
   const Plugin = () => {

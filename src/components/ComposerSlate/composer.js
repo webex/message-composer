@@ -159,7 +159,10 @@ const Composer = ({
   }, [value]);
 
   useEffect(() => {
-    markMention(editor.current);
+    const value = markMention(editor.current);
+    if (value) {
+      onChange({value});
+    }
   });
 
   const draftRootClass = classnames('draft-root', {disabled});
