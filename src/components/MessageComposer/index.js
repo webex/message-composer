@@ -24,13 +24,15 @@ const MessageComposer = ({
     setEmitter(emitter.current);
   }, [emitter]);
 
+  const focus = () => emitter.current.emit('FOCUS');
+
   const toolbarDom = toolbar({emitter: emitter.current, active, disabled});
 
   const containerClasses = classnames('message-composer-container', {disabled});
   return (
     <div className={containerClasses} >
       <div className="toolbar">{toolbarDom}</div>
-      <div className="composer">
+      <div className="composer" onClick={focus}>
         <Composer
           send={send}
           markdown={markdown}
