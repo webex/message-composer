@@ -107,8 +107,8 @@ const Example = (props) => {
     emitter.current.emit('INSERT_TEXT', t);
   }
 
-  const notifyKeyDown = () => {
-    console.log('Key pressed');
+  const notifyKeyDown = (event) => {
+    console.log('Key pressed', event);
   }
 
   const [disabled, setDisabled] = useState(false);

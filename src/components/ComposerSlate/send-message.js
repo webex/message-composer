@@ -34,6 +34,7 @@ const addNewLine = (children) => {
 
 const convertMarkdownToHTML = (md) => {
   const reader = new commonmark.Parser();
+  const writer = new commonmark.HtmlRenderer();
   const parsed = reader.parse(md);
   let value = writer.render(parsed);
   value = value.replace(/^<p>([\s\S]*)<\/p>\s$/, '$1');
@@ -175,18 +176,18 @@ const rules = [
 const html = new Html({ rules });
 
 const serializePlugin = (value) => {
-  const notifyKeyDown = (editor) => {
+  const notifyKeyDown = (editor, event) => {
     if (editor.props.notifyKeyDown) {
-      editor.props.notifyKeyDown();
+      editor.props.notifyKeyDown(event);
     }
   }
   
   return {
     onKeyDown(event, editor, next) {
       if (event.shiftKey) {
-        notifyKeyDown(editor);
+        notifyKeyDown(editor, event);
         return next();
-      };
+      }
 
       if (event.key === 'Enter') {
         event.preventDefault();
@@ -218,7 +219,7 @@ const serializePlugin = (value) => {
         return true;
       }
 
-      notifyKeyDown(editor);
+      notifyKeyDown(editor, event);
       return next();
     }
   }
