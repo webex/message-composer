@@ -105,18 +105,27 @@ export const convertMarkdown = ({editor, node: blockNode, done}) => {
               editor.setBlocks({type, data: {test: 'Can I find this'}});
             }
           }
-          else {
-            if (token.type !== 'tag') {
-              for (const i of token.content) {
-                if (typeof i === 'string') {
-                  editor.moveFocusForward(i.length);
-                  editor.addMark(token.type);
-                  editor.moveAnchorForward(i.length);
-                }
-                else {
-                  editor.moveFocusForward(i.length);
-                  editor.delete();
-                }
+          else if (token.type === 'code') {
+            // Remove the first and last characters which are backticks
+            const length = token.content.length - 2;
+            editor.moveFocusForward(1)
+              .delete()
+              .moveFocusForward(length)
+              .addMark(token.type)
+              .moveAnchorForward(length)
+              .moveFocusForward(1)
+              .delete();
+          }
+          else if (token.type !== 'tag') {
+            for (const i of token.content) {
+              if (typeof i === 'string') {
+                editor.moveFocusForward(i.length);
+                editor.addMark(token.type);
+                editor.moveAnchorForward(i.length);
+              }
+              else {
+                editor.moveFocusForward(i.length);
+                editor.delete();
               }
             }
           }
