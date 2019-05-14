@@ -191,7 +191,15 @@ const serializePlugin = (value) => {
 
       if (event.key === 'Enter') {
         event.preventDefault();
+        editor.sendMessage();
+        return true;
+      }
 
+      notifyKeyDown(editor, event);
+      return next();
+    },
+    commands: {
+      sendMessage(editor) {
         const displayName = Text.serialize(editor.value);
 
         for (const node of editor.value.document.nodes) {
@@ -216,12 +224,8 @@ const serializePlugin = (value) => {
 
         editor.props.onChange({value});
         setTimeout(() => editor.focus());
-        return true;
-      }
-
-      notifyKeyDown(editor, event);
-      return next();
-    }
+      },
+    },
   }
 }
 

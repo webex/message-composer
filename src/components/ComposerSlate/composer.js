@@ -105,6 +105,8 @@ const Composer = ({
     emitter.on('FOCUS', focus);
     emitter.on('INSERT_TEXT', insert);
 
+    emitter.on('SEND', () => editor.current.sendMessage());
+
     return () => {
       emitter.off('toggleBold');
       emitter.off('toggleItalic');
@@ -118,6 +120,8 @@ const Composer = ({
 
       emitter.off('FOCUS', focus);
       emitter.off('INSERT_TEXT', insert);
+
+      emitter.off('SEND');
     }
   }, [emitter]);
   

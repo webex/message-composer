@@ -107,6 +107,11 @@ const Example = (props) => {
     emitter.current.emit('INSERT_TEXT', t);
   }
 
+  const send = (e) => {
+    e.preventDefault();
+    emitter.current.emit('SEND');
+  }
+
   const notifyKeyDown = (event) => {
     console.log('Key pressed', event);
   }
@@ -145,6 +150,7 @@ const Example = (props) => {
         <button onClick={insertText('@')}>@Mention</button>
         <button onClick={toggleDisabled}>{(disabled) ? 'enable' : 'disable'}</button>
         <button onClick={toggleMarkdownDisabled}>{(isMarkdownDisabled) ? 'enable markdown' : 'disable markdown'}</button>
+        <button onClick={send}>SEND</button>
       </div>
     </div>
   );
