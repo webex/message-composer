@@ -173,6 +173,7 @@ const Composer = ({
   return (
     <div className={draftRootClass} onClick={focus} onKeyPress={focus} role="textbox" tabIndex={-1}>
       <Editor
+        className="composer-editable"
         value={value}
         notifyKeyDown={notifyKeyDown}
         onChange={onChange}
