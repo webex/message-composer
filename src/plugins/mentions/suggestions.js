@@ -1,6 +1,7 @@
 import React, {useState, useEffect, useRef, useReducer} from 'react';
 import {Portal} from 'react-portal';
 import PropTypes from 'prop-types'
+import classnames from 'classnames';
 
 import usePopper from './usePopper';
 import {getInput} from './utils';
@@ -156,7 +157,7 @@ const Suggestions = (props) => {
           // Used by keyboard selection
           onSelection(item);
         },
-        className: active ? 'active' : '',
+        className: classnames('suggestion-list-item', {active}),
         'aria-current': active,
         ref: index === state.index ? suggestionRef : null,
         role: 'listitem',
