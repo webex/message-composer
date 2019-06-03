@@ -5,16 +5,16 @@ import {TinyEmitter} from 'tiny-emitter';
 
 //import Composer from '../Composer';
 import Composer from '../ComposerSlate'
-import Toolbar from '../Toolbar';
+import ToolbarDefault from '../Toolbar';
 
 import './styles.scss';
 
-const renderToolbar = ({emitter, active, disabled}) => (
-  <Toolbar emitter={emitter} active={active} disabled={disabled} />
+const CreateToolbar = ({emitter, active, disabled}) => (
+  <ToolbarDefault emitter={emitter} active={active} disabled={disabled} />
 );
 
 const MessageComposer = ({
-  send, markdown, mentions, toolbar, children, disabled,
+  send, markdown, mentions, Toolbar, children, disabled,
   draft, setEmitter, notifyKeyDown, placeholder
 }) => {
   const emitter = useRef(new TinyEmitter());
@@ -26,7 +26,7 @@ const MessageComposer = ({
 
   const focus = () => emitter.current.emit('FOCUS');
 
-  const toolbarDom = toolbar({emitter: emitter.current, active, disabled});
+  const toolbarDom = <Toolbar emitter={emitter.current} active={active} disabled={disabled} />;
 
   const containerClasses = classnames('message-composer-container', {disabled});
   return (
@@ -59,7 +59,7 @@ MessageComposer.propTypes = {
     value: PropTypes.object,
     save: PropTypes.func,
   }),
-  toolbar: PropTypes.func,
+  Toolbar: PropTypes.func,
   setEmitter: PropTypes.func,
   notifyKeyDown: PropTypes.func,
   placeholder: PropTypes.string,
@@ -67,7 +67,7 @@ MessageComposer.propTypes = {
 
 MessageComposer.defaultProps = {
   disabled: false,
-  toolbar: renderToolbar,
+  Toolbar: CreateToolbar,
   setEmitter: () => {},
   notifyKeyDown: null,
   placeholder: '',
