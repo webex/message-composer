@@ -34,27 +34,32 @@ const FormatToolbar = React.memo(({active, disabled, emitter}) => {
 
   const focus = toggle('FOCUS');
 
+  const toggleStyle = (type) => (e) => {
+    emitter.emit(type);
+    focus(e);
+  }
+
   const currentHeader = setCurrentHeader(active);
   const toggleHeader = (e) => {
     emitter.emit(`toggle${e.target.value}`);
     focus(e);
-  }
+  };
   
   const boldClass = classnames('toolbar-button','bold', {active: active && active.bold});
   const italicClass = classnames('toolbar-button','italic', {active: active && active.italic});
   const ulClass = classnames('toolbar-button','underline', {active: active && active.underline});
   const codeClass = classnames('toolbar-button','code', {active: active && active.code});
   return (<Toolbar >
-    <button className={boldClass} disabled={disabled} onClick={toggle('toggleBold')}>
+    <button className={boldClass} disabled={disabled} onClick={toggleStyle('toggleBold')}>
       <Icon size={ICON_SIZE} icon={bold} />
     </button>
-    <button className={italicClass} disabled={disabled} onClick={toggle('toggleItalic')}>
+    <button className={italicClass} disabled={disabled} onClick={toggleStyle('toggleItalic')}>
       <Icon size={ICON_SIZE} icon={italic} />
     </button>
-    <button className={ulClass} disabled={disabled} onClick={toggle('toggleUnderline')}>
+    <button className={ulClass} disabled={disabled} onClick={toggleStyle('toggleUnderline')}>
       <Icon size={ICON_SIZE} icon={underline} />
     </button>
-    <button className={codeClass} disabled={disabled} onClick={toggle('toggleCode')}>
+    <button className={codeClass} disabled={disabled} onClick={toggleStyle('toggleCode')}>
       <Icon size={ICON_SIZE} icon={code} />
     </button>
     <select value={currentHeader} disabled={disabled} onChange={toggleHeader}>
