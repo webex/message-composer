@@ -130,10 +130,10 @@
   {
     "id": {
       "scope": "mwegman.message-composer",
-      "name": "toolbar"
+      "name": "markdown"
     },
     "isSymlink": false,
-    "hash": "85c16f694bfecf955c9a0ae762b8300ddda60e6a"
+    "hash": "07b8c6bfcb09f1171aa6fd43c457a537efa31a01"
   },
   {
     "id": {
@@ -146,10 +146,10 @@
   {
     "id": {
       "scope": "mwegman.message-composer",
-      "name": "markdown"
+      "name": "toolbar"
     },
     "isSymlink": false,
-    "hash": "07b8c6bfcb09f1171aa6fd43c457a537efa31a01"
+    "hash": "85c16f694bfecf955c9a0ae762b8300ddda60e6a"
   },
   {
     "id": {
