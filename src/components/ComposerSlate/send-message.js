@@ -207,7 +207,7 @@ const serializePlugin = (value) => {
         }
         convertMarkdown({editor, done: true});
         const content = cleanUpContent(html.serialize(editor.value));
-
+        
         const message = {
           displayName,
           content,
@@ -220,10 +220,12 @@ const serializePlugin = (value) => {
           message.groupMentions = groupMentions;
           groupMentions = [];
         }
-        editor.props.send(message);
-
         editor.props.onChange({value});
-        setTimeout(() => editor.focus());
+        
+        setTimeout(() => {
+          editor.props.send(message);
+          editor.focus();
+        });
       },
     },
   }

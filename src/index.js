@@ -73,19 +73,18 @@ const setValue = (v, num) => {
   spaces[num] = v;
 };
 
-const placeholder = 'Write your message in this space.'
 
 const Example = (props) => {
   const [message, setMessage] = useState('');
   const [number, setNumber] = useState(1);
-
+  
   const show = (num) => {
     setMessage('');
     setNumber(num);
   };
-
+  
   const other = (number === 1) ? 2 : 1;
-
+  
   const draft = {
     id: number,
     value: spaces[number],
@@ -96,36 +95,41 @@ const Example = (props) => {
   const setEmitter = (e) => {
     emitter.current = e;
   };
-
+  
   const focus = (e) => {
     e.preventDefault();
     emitter.current.emit('FOCUS');
   };
-
+  
   const insertText = (t) => (e) => {
     e.preventDefault();
     emitter.current.emit('INSERT_TEXT', t);
   }
-
+  
   const send = (e) => {
     e.preventDefault();
     emitter.current.emit('SEND');
   }
-
+  
   const notifyKeyDown = (event) => {
     console.log('Key pressed', event);
   }
-
+  
   const [disabled, setDisabled] = useState(false);
   const toggleDisabled = () => {
     setDisabled(!disabled);
   }
-
+  
   const [isMarkdownDisabled, setMarkdownDisabled] = useState(false);
   const toggleMarkdownDisabled = () => {
     setMarkdownDisabled(!isMarkdownDisabled);
   };
-
+  
+  const [placeholder, setPlaceholder] = useState('Write your message in this space.');
+  const changePlaceholder = () => {
+    setPlaceholder('This is a new placeholder');
+  };
+  
   const markdown = useMemo(() => ({
     disabled: isMarkdownDisabled,
   }), [isMarkdownDisabled]);
@@ -151,6 +155,7 @@ const Example = (props) => {
         <button onClick={toggleDisabled}>{(disabled) ? 'enable' : 'disable'}</button>
         <button onClick={toggleMarkdownDisabled}>{(isMarkdownDisabled) ? 'enable markdown' : 'disable markdown'}</button>
         <button onClick={send}>SEND</button>
+        <button onClick={changePlaceholder}>Change placeholder</button>
       </div>
     </div>
   );

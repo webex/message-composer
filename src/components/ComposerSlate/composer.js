@@ -169,6 +169,16 @@ const Composer = ({
     }
   });
 
+  // Slate won't update placeholder until text has been inserted and deleted.
+  // TODO: Remove this when Slate is fixed
+  useEffect(() => {
+    setTimeout(() =>
+      editor.current
+        .insertText('a')
+        .deleteBackward(1)
+    );
+  }, [placeholder]);
+
   const draftRootClass = classnames('draft-root', {disabled});
   return (
     <div className={draftRootClass} onClick={focus} onKeyPress={focus} role="textbox" tabIndex={-1}>
