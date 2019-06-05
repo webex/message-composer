@@ -6,7 +6,6 @@
   "author": "Michael Wegman (mwegman@cisco.com)",
   "license": "MIT",
   "dependencies": {
-    "@slate-editor/bold-plugin": "^5.1.0",
     "classnames": "^2.2.6",
     "commonmark": "^0.29.0",
     "draft-js": "^0.10.5",

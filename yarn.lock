@@ -197,23 +197,6 @@
     lodash "^4.17.11"
     to-fast-properties "^2.0.0"
 
-"@slate-editor/bold-plugin@^5.1.0":
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/@slate-editor/bold-plugin/-/bold-plugin-5.1.0.tgz#cc63cba01e1527808d325c6ded41fcbb7b2701ca"
-  integrity sha512-18ppqv813jEAsYXVuYopLis0DwLc5pkdprttUpvYdk9X8YviiEFYdx/M6csvQI49zKlpkmA5nPjeJvAhA2P4rw==
-  dependencies:
-    "@slate-editor/utils" "^5.1.0"
-    classnames "^2.2.5"
-    react "^16.2.0"
-    react-fontawesome "^1.6.1"
-
-"@slate-editor/utils@^5.1.0":
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/@slate-editor/utils/-/utils-5.1.0.tgz#905e42a705a3d3334de0b766588a03c1844b643c"
-  integrity sha512-lVv9DfqCRV0alLnPH8N+tZUhu8UNEKlaRkiwVDVV2Z54LDHVuKGC0yFxMKRQOeex2n2S2cbTXrB8I7YOnBqhHw==
-  dependencies:
-    react "^16.2.0"
-
 "@types/events@*":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@types/events/-/events-3.0.0.tgz#2862f3f58a9a7f7c3e78d79f130dd4d71c25c2a7"
@@ -1033,7 +1016,7 @@ class-utils@^0.3.5:
     isobject "^3.0.0"
     static-extend "^0.1.1"
 
-classnames@^2.2.5, classnames@^2.2.6:
+classnames@^2.2.6:
   version "2.2.6"
   resolved "https://registry.yarnpkg.com/classnames/-/classnames-2.2.6.tgz#43935bffdd291f326dad0a205309b38d00f650ce"
   integrity sha512-JR/iSQOSt+LQIWwrwEzJ9uk0xfN3mTVYMwt1Ir5mUcSN6pU+V4zQFFaJsclJbPuAUQH+yfWef6tm7l1quW3C8Q==
@@ -4216,7 +4199,7 @@ promise@^7.1.1:
   dependencies:
     asap "~2.0.3"
 
-prop-types@^15.5.6, prop-types@^15.5.8, prop-types@^15.6.2, prop-types@^15.7.2:
+prop-types@^15.5.8, prop-types@^15.6.2, prop-types@^15.7.2:
   version "15.7.2"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.7.2.tgz#52c41e75b8c87e72b9d9360e0206b99dcbffa6c5"
   integrity sha512-8QQikdH7//R2vurIJSutZ1smHYTcLpRWEOlHnzcWHmBYrOGUysKwSsrC89BCiFj3CbrfJ/nXFdJepOVrY1GCHQ==
@@ -4375,13 +4358,6 @@ react-dom@^16.8.6:
     prop-types "^15.6.2"
     scheduler "^0.13.6"
 
-react-fontawesome@^1.6.1:
-  version "1.6.1"
-  resolved "https://registry.yarnpkg.com/react-fontawesome/-/react-fontawesome-1.6.1.tgz#eddce17e7dc731aa09fd4a186688a61793a16c5c"
-  integrity sha1-7dzhfn3HMaoJ/UoYZoimF5OhbFw=
-  dependencies:
-    prop-types "^15.5.6"
-
 react-html-parser@^2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/react-html-parser/-/react-html-parser-2.0.2.tgz#6dbe1ddd2cebc1b34ca15215158021db5fc5685e"
@@ -4414,7 +4390,7 @@ react-portal@^4.2.0:
   dependencies:
     prop-types "^15.5.8"
 
-react@^16.2.0, react@^16.8.6:
+react@^16.8.6:
   version "16.8.6"
   resolved "https://registry.yarnpkg.com/react/-/react-16.8.6.tgz#ad6c3a9614fd3a4e9ef51117f54d888da01f2bbe"
   integrity sha512-pC0uMkhLaHm11ZSJULfOBqV4tIZkx87ZLvbbQYunNixAAvjnC+snJCg0XQXn9VIsttVsbZP/H/ewzgsd5fxKXw==
