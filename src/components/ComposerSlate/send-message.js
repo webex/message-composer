@@ -54,6 +54,7 @@ const cleanUpContent = (content) => {
   return newContent;
 }
 
+/* eslint-disable jsx-a11y/heading-has-content */
 const blocks = {
   blockquote: <blockquote/>,
   list: <ul/>,
@@ -64,6 +65,7 @@ const blocks = {
   h4: <h4/>,
   h5: <h5/>,
 };
+/* eslint-enable jsx-a11y/heading-has-content */
 
 const rules = [
   {
@@ -104,6 +106,8 @@ const rules = [
           case 'h4':
           case 'h5':
             return cloneElement(blocks[obj.type], {}, children);
+          default:
+            return null;
         }
       }
       else if (obj.object === 'inline') {
@@ -167,6 +171,8 @@ const rules = [
             return convertMarkdownToHTML(children[0]);
           case 'plain':
             return <>{addNewLine(children)}</>;
+          default:
+            return null;
         }
       }
     },
@@ -202,10 +208,7 @@ const serializePlugin = (value) => {
       sendMessage(editor) {
         const displayName = Text.serialize(editor.value);
 
-        for (const node of editor.value.document.nodes) {
-          convertMarkdown({editor, node});
-        }
-        convertMarkdown({editor, done: true});
+        convertMarkdown({editor});
         const content = cleanUpContent(html.serialize(editor.value));
         
         const message = {

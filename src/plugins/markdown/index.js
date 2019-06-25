@@ -38,7 +38,12 @@ const codeEnd = /^```$/m;
 
 let codeBeginPointer;
 
-const markCode = ({editor, blockNode}) => {
+const markCode = ({editor, blockNode, done}) => {
+  if (done) {
+    codeBeginPointer = null;
+    return;
+  }
+
   if (blockNode.getTexts().size === 1) {
     const textNode = blockNode.getFirstText();
     if (!codeBeginPointer && codeBegin.test(textNode.text)) {
@@ -49,7 +54,7 @@ const markCode = ({editor, blockNode}) => {
       };
     }
     else if (codeBeginPointer && codeEnd.test(textNode.text)) {
-      const match = codeEnd.exec(textNode.text);
+      codeEnd.exec(textNode.text);
       const codeEndPointer = {
         node: textNode,
       };
@@ -67,14 +72,10 @@ const markCode = ({editor, blockNode}) => {
   }
 };
 
-export const convertMarkdown = ({editor, node: blockNode, done}) => {
-  if (editor.props.markdown.disabled) return;
-
-  let foundListItem = false;
+const _convertMarkdown = ({editor, node: blockNode, done}) => {
+  let foundListItem = false;  
   if (!done) {
-    if (blockNode.object !== 'block') return;
-
-    markCode({editor, blockNode});
+    if (blockNode.object !== 'block' || blockNode.type === 'code') return;
 
     for (let node of blockNode.getTexts()) {
       const string = node.text;
@@ -106,6 +107,11 @@ export const convertMarkdown = ({editor, node: blockNode, done}) => {
             }
           }
           else if (token.type === 'code') {
+            // Ignore the 'tab' version of code
+            if (token.content.length > 0 && token.content.charAt(0) === '\t') {
+              return;
+            }
+
             // Remove the first and last characters which are backticks
             const length = token.content.length - 2;
             editor.moveFocusForward(1)
@@ -133,9 +139,6 @@ export const convertMarkdown = ({editor, node: blockNode, done}) => {
       }
     }
   }
-  else {
-    codeBeginPointer = null;
-  }
 
   if (listStartNode && !foundListItem) {
     // This is the end of the list. Wrap it in a list element
@@ -145,6 +148,22 @@ export const convertMarkdown = ({editor, node: blockNode, done}) => {
     listStartNode = null;
     listEndNode = null;
   }
+};
+
+export const convertMarkdown = ({editor}) => {
+  if (editor.props.markdown.disabled) return;
+
+  // Find all of the code blocks to avoid converting
+  // code block inner texts to markdown
+  for (const blockNode of editor.value.document.nodes) {
+    markCode({editor, blockNode});
+  }
+  markCode({editor, done: true});
+
+  for (const node of editor.value.document.nodes) {
+    _convertMarkdown({editor, node});
+  }
+  _convertMarkdown({editor, done: true});
 };
 
 const MarkDown = () => {
