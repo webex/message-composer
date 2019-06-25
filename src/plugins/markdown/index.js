@@ -1,5 +1,4 @@
 import Prism from 'prismjs'
-import 'prismjs/components/prism-markup';
 import 'prismjs/components/prism-markdown';
 
 const lineMarkdowns = {
@@ -18,6 +17,12 @@ const canPreview = ({type}) => !!previewMarkdowns[type];
 
 let listStartNode;
 let listEndNode;
+
+// Title must have a space between the '#' and the content
+const isInvalidTitle = (token) => {
+  return token.type === 'title' && Array.isArray(token.content) && token.content[1]
+    && token.content[1][0] !== ' ';
+}
 
 const lineContentLength = (token) => {
   if (Array.isArray(token.content)) {
@@ -84,7 +89,7 @@ const _convertMarkdown = ({editor, node: blockNode, done}) => {
 
       editor.moveToStartOfNode(node);
       for (const token of tokens) {
-        if (typeof token === 'string') {
+        if (typeof token === 'string' || isInvalidTitle(token)) {
           editor.moveForward(token.length);
         }
         else {
@@ -107,20 +112,23 @@ const _convertMarkdown = ({editor, node: blockNode, done}) => {
             }
           }
           else if (token.type === 'code') {
-            // Ignore the 'tab' version of code
-            if (token.content.length > 0 && token.content.charAt(0) === '\t') {
-              return;
+            // Non-backtick 'code' block
+            if (token.content.length > 0 && token.content.charAt(0) !== '`') {
+              editor.moveFocusForward(token.length)
+                .addMark(token.type)
+                .moveAnchorForward(token.length);
             }
-
-            // Remove the first and last characters which are backticks
-            const length = token.content.length - 2;
-            editor.moveFocusForward(1)
-              .delete()
-              .moveFocusForward(length)
-              .addMark(token.type)
-              .moveAnchorForward(length)
-              .moveFocusForward(1)
-              .delete();
+            else {
+              // Remove the first and last characters which are backticks
+              const length = token.content.length - 2;
+              editor.moveFocusForward(1)
+                .delete()
+                .moveFocusForward(length)
+                .addMark(token.type)
+                .moveAnchorForward(length)
+                .moveFocusForward(1)
+                .delete();
+            }
           }
           else if (token.type !== 'tag') {
             for (const i of token.content) {
