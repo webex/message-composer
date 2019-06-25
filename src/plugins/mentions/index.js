@@ -69,6 +69,7 @@ export default function() {
             emitter.emit('MOVE_UP');
             return true;
             case ('Enter'):
+            case ('Tab'):
             event.preventDefault();
             emitter.emit('SELECT');
             return true;
@@ -76,6 +77,8 @@ export default function() {
             event.preventDefault();
             emitter.emit('DISABLE');
               return true;
+            default:
+              return false;
           }
         }
         return next();
