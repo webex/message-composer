@@ -122,7 +122,7 @@ const rules = [
 
             return (
               <spark-mention data-object-type={objectType} data-group-type={id}>
-                {obj.data.get('displayName')}
+                {obj.data.get('mentionDisplay')}
               </spark-mention>
             );
           }
@@ -134,7 +134,7 @@ const rules = [
 
             return (
               <spark-mention data-object-type={objectType} data-object-id={id}>
-                {obj.data.get('displayName')}
+                {obj.data.get('mentionDisplay')}
               </spark-mention>
             );
           }

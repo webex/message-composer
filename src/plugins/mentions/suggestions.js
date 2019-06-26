@@ -31,13 +31,16 @@ const Suggestions = (props) => {
     editor
     .insertText(' ')
     .insertInlineAtRange(selectedRange, {
-      data: item,
+      data: {
+        ...item,
+        mentionDisplay: editor.props.mentions.getDisplay(item),
+      },
       nodes: [
         {
           object: 'text',
           leaves: [
             {
-              text: `@${item.displayName}`,
+              text: `@${editor.props.mentions.getDisplay(item)}`,
             },
           ],
         },

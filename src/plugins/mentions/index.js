@@ -25,6 +25,7 @@ const defaultMentionProps = {
   filter: () => Promise.resolve([]),
   renderSuggestion: () => null,
   renderInsert: () => null,
+  getDisplay: () => '',
 };
 
 export default function() {
@@ -78,7 +79,7 @@ export default function() {
             emitter.emit('DISABLE');
               return true;
             default:
-              return false;
+              return next();
           }
         }
         return next();

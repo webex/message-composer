@@ -65,6 +65,9 @@ const mentions = {
     const style = {background: 'lightblue'};
     const text = (user.objectType === 'person') ? user.displayName.split(' ')[0] : user.displayName;
     return <b style={style}>{text}</b>;
+  },
+  getDisplay: (user) => {
+    return (user.objectType === 'person') ? user.displayName.split(' ')[0] : user.displayName;
   }
 }
 
