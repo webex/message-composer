@@ -38,6 +38,11 @@ const getTitleType = (length) => {
   return `h${type}`;
 }
 
+const urlRegex = /(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])/igm;
+const markdownUrlRegex = /\[[^\]]+\]\((?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])\)/igm;
+
+const emailRegex = /(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))/igm;
+
 const codeBegin = /^```[\s]?([\S]*)$/m;
 const codeEnd = /^```$/m;
 
@@ -75,6 +80,13 @@ const markCode = ({editor, blockNode, done}) => {
       codeBeginPointer = null;
     }
   }
+};
+
+const isClearMark = ({editor}) => {
+  editor.moveFocusForward(1);
+  const isClear = editor.value.activeMarks.some(mark => mark.type === 'clear');
+  editor.moveFocusBackward(1);
+  return isClear;
 };
 
 const _convertMarkdown = ({editor, node: blockNode, done}) => {
@@ -131,15 +143,23 @@ const _convertMarkdown = ({editor, node: blockNode, done}) => {
             }
           }
           else if (token.type !== 'tag') {
+            const isClear = isClearMark({editor}); // If clear, skip these markdown tokens
             for (const i of token.content) {
               if (typeof i === 'string') {
                 editor.moveFocusForward(i.length);
-                editor.addMark(token.type);
+                if (!isClear) {
+                  editor.addMark(token.type);
+                }
                 editor.moveAnchorForward(i.length);
               }
               else {
                 editor.moveFocusForward(i.length);
-                editor.delete();
+                if (isClear) {
+                  editor.moveAnchorForward(i.length);
+                }
+                else {
+                  editor.delete();
+                }
               }
             }
           }
@@ -158,6 +178,35 @@ const _convertMarkdown = ({editor, node: blockNode, done}) => {
   }
 };
 
+const setRegexMarks = ({editor, regex, type}) => {
+  regex.lastIndex = 0;
+  let test = regex.exec(editor.value.document.text);
+  while (test) {
+    editor
+      .moveTo(test.index)
+      .moveFocusForward(test[0].length)
+      .setMark(type);
+
+    test = regex.exec(editor.value.document.text);
+  }
+};
+
+const setAnyMarks = ({editor, regex}) => {
+  return setRegexMarks({editor, regex, type: 'clear'});
+};
+
+const setUrlMarks = ({editor}) => {
+  return setAnyMarks({editor, regex: urlRegex});
+};
+
+const setEmailMarks = ({editor}) => {
+  return setAnyMarks({editor, regex: emailRegex});
+};
+
+const setMarkdownUrlMarks = ({editor}) => {
+  return setRegexMarks({editor, regex: markdownUrlRegex, type: 'url'});
+};
+
 export const convertMarkdown = ({editor}) => {
   if (editor.props.markdown.disabled) return;
 
@@ -167,11 +216,15 @@ export const convertMarkdown = ({editor}) => {
     markCode({editor, blockNode});
   }
   markCode({editor, done: true});
-
+  
+  setUrlMarks({editor});
+  setEmailMarks({editor});
   for (const node of editor.value.document.nodes) {
     _convertMarkdown({editor, node});
   }
   _convertMarkdown({editor, done: true});
+  
+  setMarkdownUrlMarks({editor});
 };
 
 const MarkDown = () => {

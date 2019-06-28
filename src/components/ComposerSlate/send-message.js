@@ -171,6 +171,8 @@ const rules = [
             return convertMarkdownToHTML(children[0]);
           case 'plain':
             return <>{addNewLine(children)}</>;
+          case 'clear':
+            return <>{children}</>;
           default:
             return null;
         }
