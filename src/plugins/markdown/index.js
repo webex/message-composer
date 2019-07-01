@@ -82,10 +82,23 @@ const markCode = ({editor, blockNode, done}) => {
   }
 };
 
-const isClearMark = ({editor}) => {
-  editor.moveFocusForward(1);
-  const isClear = editor.value.activeMarks.some(mark => mark.type === 'clear');
-  editor.moveFocusBackward(1);
+const isClearMark = ({editor, length}) => {
+  const isCharClear = (editor) => {
+    editor.moveFocusForward(1);
+    const isClear = editor.value.marks.some(mark => mark.type === 'clear');
+    editor.moveFocusBackward(1);
+    return isClear;  
+  };
+  
+  const count = length || 1;
+  // Check the first character
+  if (isCharClear(editor)) return true;
+
+  const endCharLocation = length - 1;
+  editor.moveForward(endCharLocation);
+  // Check the last character
+  const isClear = isCharClear(editor);
+  editor.moveBackward(endCharLocation);
   return isClear;
 };
 
@@ -143,7 +156,7 @@ const _convertMarkdown = ({editor, node: blockNode, done}) => {
             }
           }
           else if (token.type !== 'tag') {
-            const isClear = isClearMark({editor}); // If clear, skip these markdown tokens
+            const isClear = isClearMark({editor, length: token.length}); // If clear, skip these markdown tokens
             for (const i of token.content) {
               if (typeof i === 'string') {
                 editor.moveFocusForward(i.length);
