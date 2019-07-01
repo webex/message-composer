@@ -82,24 +82,15 @@ const markCode = ({editor, blockNode, done}) => {
   }
 };
 
-const isClearMark = ({editor, length}) => {
-  const isCharClear = (editor) => {
-    editor.moveFocusForward(1);
-    const isClear = editor.value.marks.some(mark => mark.type === 'clear');
-    editor.moveFocusBackward(1);
-    return isClear;  
-  };
-  
-  const count = length || 1;
-  // Check the first character
-  if (isCharClear(editor)) return true;
-
-  const endCharLocation = length - 1;
-  editor.moveForward(endCharLocation);
-  // Check the last character
-  const isClear = isCharClear(editor);
-  editor.moveBackward(endCharLocation);
-  return isClear;
+// Hide Emails and URLs from markdown parsing
+const replaceRegex = (value, regex) => {
+  return value.replace(regex, ({length}) => '0'.repeat(length));
+};
+const hideEmail = (value) => {
+  return replaceRegex(value, emailRegex);
+};
+const hideUrl = (value) => {
+  return replaceRegex(value, urlRegex);
 };
 
 const _convertMarkdown = ({editor, node: blockNode, done}) => {
@@ -108,7 +99,7 @@ const _convertMarkdown = ({editor, node: blockNode, done}) => {
     if (blockNode.object !== 'block' || blockNode.type === 'code') return;
 
     for (let node of blockNode.getTexts()) {
-      const string = node.text;
+      const string = hideEmail(hideUrl(node.text));
       const grammar = Prism.languages.markdown;
       const tokens = Prism.tokenize(string, grammar);
 
@@ -133,7 +124,7 @@ const _convertMarkdown = ({editor, node: blockNode, done}) => {
             }
             else {
               const type = (token.type === 'title') ? getTitleType(length) : token.type;
-              editor.setBlocks({type, data: {test: 'Can I find this'}});
+              editor.setBlocks({type});
             }
           }
           else if (token.type === 'code') {
@@ -156,23 +147,20 @@ const _convertMarkdown = ({editor, node: blockNode, done}) => {
             }
           }
           else if (token.type !== 'tag') {
-            const isClear = isClearMark({editor, length: token.length}); // If clear, skip these markdown tokens
             for (const i of token.content) {
               if (typeof i === 'string') {
-                editor.moveFocusForward(i.length);
-                if (!isClear) {
-                  editor.addMark(token.type);
-                }
-                editor.moveAnchorForward(i.length);
+                editor.moveFocusForward(i.length)
+                  .addMark(token.type)
+                  .moveAnchorForward(i.length);
+              }
+              else if (token.type === 'punctuation') {
+                editor.moveFocusForward(i.length)
+                  .delete();
               }
               else {
-                editor.moveFocusForward(i.length);
-                if (isClear) {
-                  editor.moveAnchorForward(i.length);
-                }
-                else {
-                  editor.delete();
-                }
+                editor.moveFocusForward(i.length)
+                  .addMark(i.type)
+                  .moveAnchorForward(i.length);
               }
             }
           }
@@ -183,41 +171,12 @@ const _convertMarkdown = ({editor, node: blockNode, done}) => {
 
   if (listStartNode && !foundListItem) {
     // This is the end of the list. Wrap it in a list element
-    editor.moveAnchorToStartOfNode(listStartNode);
-    editor.moveFocusToEndOfNode(listEndNode);
-    editor.wrapBlock('list');
+    editor.moveAnchorToStartOfNode(listStartNode)
+      .moveFocusToEndOfNode(listEndNode)
+      .wrapBlock('list');
     listStartNode = null;
     listEndNode = null;
   }
-};
-
-const setRegexMarks = ({editor, regex, type}) => {
-  regex.lastIndex = 0;
-  let test = regex.exec(editor.value.document.text);
-  while (test) {
-    editor
-      .moveTo(test.index)
-      .moveFocusForward(test[0].length)
-      .setMark(type);
-
-    test = regex.exec(editor.value.document.text);
-  }
-};
-
-const setAnyMarks = ({editor, regex}) => {
-  return setRegexMarks({editor, regex, type: 'clear'});
-};
-
-const setUrlMarks = ({editor}) => {
-  return setAnyMarks({editor, regex: urlRegex});
-};
-
-const setEmailMarks = ({editor}) => {
-  return setAnyMarks({editor, regex: emailRegex});
-};
-
-const setMarkdownUrlMarks = ({editor}) => {
-  return setRegexMarks({editor, regex: markdownUrlRegex, type: 'url'});
 };
 
 export const convertMarkdown = ({editor}) => {
@@ -230,14 +189,10 @@ export const convertMarkdown = ({editor}) => {
   }
   markCode({editor, done: true});
   
-  setUrlMarks({editor});
-  setEmailMarks({editor});
   for (const node of editor.value.document.nodes) {
     _convertMarkdown({editor, node});
   }
   _convertMarkdown({editor, done: true});
-  
-  setMarkdownUrlMarks({editor});
 };
 
 const MarkDown = () => {
@@ -250,7 +205,7 @@ const MarkDown = () => {
   
       const decorations = [];
 
-      const string = node.text
+      const string = hideUrl(hideEmail(node.text));
       const grammar = Prism.languages.markdown;
       const tokens = Prism.tokenize(string, grammar);
 
@@ -270,7 +225,6 @@ const MarkDown = () => {
           start,
         };
       }
-      
 
       let {texts, startText, endText, startOffset, endOffset, start} = resetVars(node);
   
