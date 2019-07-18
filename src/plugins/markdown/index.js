@@ -1,10 +1,11 @@
-import Prism from 'prismjs'
+import Prism from 'prismjs';
 import 'prismjs/components/prism-markdown';
 
 const lineMarkdowns = {
   blockquote: true,
   list: true,
   title: true,
+  hr: true,
 };
 const isLineMarkdown = ({type}) => !!lineMarkdowns[type];
 
@@ -38,10 +39,8 @@ const getTitleType = (length) => {
   return `h${type}`;
 }
 
-const urlRegex = /(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])/igm;
-const markdownUrlRegex = /\[[^\]]+\]\((?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])\)/igm;
-
-const emailRegex = /(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))/igm;
+const urlRegex = /(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#/%=~_|$?!:,.]*\)|[A-Z0-9+&@#/%=~_|$])/igm;
+const emailRegex = /(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))/igm;
 
 const codeBegin = /^```[\s]?([\S]*)$/m;
 const codeEnd = /^```$/m;
@@ -98,70 +97,79 @@ const _convertMarkdown = ({editor, node: blockNode, done}) => {
   if (!done) {
     if (blockNode.object !== 'block' || blockNode.type === 'code') return;
 
-    for (let node of blockNode.getTexts()) {
-      const string = hideEmail(hideUrl(node.text));
-      const grammar = Prism.languages.markdown;
-      const tokens = Prism.tokenize(string, grammar);
+    let input = '';
+    for (let node of blockNode.nodes) {
+      if (node.type) {
+        // Don't want any inlines mistaken for markdown
+        input += '0'.repeat(node.text.length);
+      }
+      else {
+        input += node.text;
+      }
+    }
 
-      editor.moveToStartOfNode(node);
-      for (const token of tokens) {
-        if (typeof token === 'string' || isInvalidTitle(token)) {
-          editor.moveForward(token.length);
-        }
-        else {
-          if (isLineMarkdown(token)) {
-            const length = lineContentLength(token);
-            editor.moveFocusForward(length);
-            editor.delete();
+    const string = hideEmail(hideUrl(input));
+    const grammar = Prism.languages.markdown;
+    const tokens = Prism.tokenize(string, grammar);
 
-            if (token.type === 'list') {
-              foundListItem = true;
-              editor.setBlocks('list-item');
-              if (!listStartNode) {
-                listStartNode = node;
-              }
-              listEndNode = node;
+    editor.moveToStartOfNode(blockNode);
+    for (const token of tokens) {
+      if (typeof token === 'string' || isInvalidTitle(token)) {
+        editor.moveForward(token.length);
+      }
+      else {
+        if (isLineMarkdown(token)) {
+          const length = lineContentLength(token);
+          editor.moveFocusForward(length);
+          editor.delete();
+
+          if (token.type === 'list') {
+            foundListItem = true;
+            editor.setBlocks('list-item');
+            if (!listStartNode) {
+              listStartNode = blockNode;
             }
-            else {
-              const type = (token.type === 'title') ? getTitleType(length) : token.type;
-              editor.setBlocks({type});
-            }
+            listEndNode = blockNode;
           }
-          else if (token.type === 'code') {
-            // Non-backtick 'code' block
-            if (token.content.length > 0 && token.content.charAt(0) !== '`') {
-              editor.moveFocusForward(token.length)
+          else {
+            const type = (token.type === 'title') ? getTitleType(length) : token.type;
+            editor.setBlocks({type});
+          }
+        }
+        else if (token.type === 'code') {
+          // Non-backtick 'code' block
+          if (token.content.length > 0 && token.content.charAt(0) !== '`') {
+            editor.moveFocusForward(token.length)
+              .addMark(token.type)
+              .moveAnchorForward(token.length);
+          }
+          else {
+            // Remove the first and last characters which are backticks
+            const length = token.content.length - 2;
+            editor.moveFocusForward(1)
+              .delete()
+              .moveFocusForward(length)
+              .addMark(token.type)
+              .moveAnchorForward(length)
+              .moveFocusForward(1)
+              .delete();
+          }
+        }
+        else if (token.type !== 'tag') {
+          for (const i of token.content) {
+            if (typeof i === 'string') {
+              editor.moveFocusForward(i.length)
                 .addMark(token.type)
-                .moveAnchorForward(token.length);
+                .moveAnchorForward(i.length);
             }
-            else {
-              // Remove the first and last characters which are backticks
-              const length = token.content.length - 2;
-              editor.moveFocusForward(1)
-                .delete()
-                .moveFocusForward(length)
-                .addMark(token.type)
-                .moveAnchorForward(length)
-                .moveFocusForward(1)
+            else if (token.type === 'punctuation') {
+              editor.moveFocusForward(i.length)
                 .delete();
             }
-          }
-          else if (token.type !== 'tag') {
-            for (const i of token.content) {
-              if (typeof i === 'string') {
-                editor.moveFocusForward(i.length)
-                  .addMark(token.type)
-                  .moveAnchorForward(i.length);
-              }
-              else if (token.type === 'punctuation') {
-                editor.moveFocusForward(i.length)
-                  .delete();
-              }
-              else {
-                editor.moveFocusForward(i.length)
-                  .addMark(i.type)
-                  .moveAnchorForward(i.length);
-              }
+            else {
+              editor.moveFocusForward(i.length)
+                .addMark(i.type)
+                .moveAnchorForward(i.length);
             }
           }
         }

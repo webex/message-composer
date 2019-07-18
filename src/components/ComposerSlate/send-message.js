@@ -64,6 +64,7 @@ const blocks = {
   h3: <h3/>,
   h4: <h4/>,
   h5: <h5/>,
+  hr: <hr/>,
 };
 /* eslint-enable jsx-a11y/heading-has-content */
 
@@ -106,6 +107,8 @@ const rules = [
           case 'h4':
           case 'h5':
             return cloneElement(blocks[obj.type], {}, children);
+          case 'hr':
+            return cloneElement(blocks[obj.type]);
           default:
             return null;
         }

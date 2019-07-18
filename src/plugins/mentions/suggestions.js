@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef, useReducer} from 'react';
+import React, {useCallback, useEffect, useRef, useReducer} from 'react';
 import {Portal} from 'react-portal';
 import PropTypes from 'prop-types'
 import classnames from 'classnames';
@@ -7,7 +7,7 @@ import usePopper from './usePopper';
 import {getInput} from './utils';
 import {USER_MENTION_NODE_TYPE} from './types';
 
-const Suggestions = (props) => {
+const Suggestions = ({setFlags, children, editor, emitter, initialQuery, mentions,}) => { 
   const mentionsRef = useRef(null);
   const anchorRef = useRef(null);
   const suggestionRef = useRef(null);
@@ -19,9 +19,8 @@ const Suggestions = (props) => {
   });
   
   const onSelection = (item) => {
-    const editor = props.editor;
     const value = editor.value;
-    const [triggerSymbol, inputValue] = getInput(value);
+    const [, inputValue] = getInput(value);
     
     // Delete the captured value, including the `@` symbol
     editor.deleteBackward(inputValue.length + 1)
@@ -29,25 +28,25 @@ const Suggestions = (props) => {
     const selectedRange = editor.value.selection;
     
     editor
-    .insertText(' ')
-    .insertInlineAtRange(selectedRange, {
-      data: {
-        ...item,
-        mentionDisplay: editor.props.mentions.getDisplay(item),
-      },
-      nodes: [
-        {
-          object: 'text',
-          leaves: [
-            {
-              text: `@${editor.props.mentions.getDisplay(item)}`,
-            },
-          ],
+      .insertText(' ')
+      .insertInlineAtRange(selectedRange, {
+        data: {
+          ...item,
+          mentionDisplay: mentions.getDisplay(item),
         },
-      ],
-      type: USER_MENTION_NODE_TYPE,
-    })
-    .focus();
+        nodes: [
+          {
+            object: 'text',
+            leaves: [
+              {
+                text: `@${mentions.getDisplay(item)}`,
+              },
+            ],
+          },
+        ],
+        type: USER_MENTION_NODE_TYPE,
+      })
+      .focus();
   };
   
   const indexReducer = (state, action) => {
@@ -85,16 +84,16 @@ const Suggestions = (props) => {
   };
   const [state, dispatch] = useReducer(indexReducer, {disabled: false, items: [], index: 0});
   
-  const search = (q) => {
-    props.mentions.filter((q === null) ? '' : q)
-      .then((items) => props.emitter.emit('DISPATCH_SEARCH', items));
-  }
+  const search = useCallback((q) => {
+    mentions.filter((q === null) ? '' : q)
+      .then((items) => emitter.emit('DISPATCH_SEARCH', items));
+  }, [mentions, emitter]);
   const dispatchSearch = (items) => {
     dispatch({type: 'SET_ITEMS', payload: {items}});
   }
   useEffect(() => {
-    search(props.initialQuery)
-  }, []);
+    search(initialQuery)
+  }, []); /* eslint-disable-line react-hooks/exhaustive-deps */
   
   const moveUp = () => {
     dispatch({type: 'DECREMENT'});
@@ -110,34 +109,34 @@ const Suggestions = (props) => {
   }
 
   useEffect(() => {
-    props.emitter.on('MOVE_DOWN', moveDown);
-    props.emitter.on('MOVE_UP', moveUp);
-    props.emitter.on('SELECT', select);
-    props.emitter.on('DISABLE', disable);
-    props.emitter.on('SEARCH', search);
-    props.emitter.on('DISPATCH_SEARCH', dispatchSearch);
+    emitter.on('MOVE_DOWN', moveDown);
+    emitter.on('MOVE_UP', moveUp);
+    emitter.on('SELECT', select);
+    emitter.on('DISABLE', disable);
+    emitter.on('SEARCH', search);
+    emitter.on('DISPATCH_SEARCH', dispatchSearch);
 
     return () => {
-      props.emitter.off('MOVE_DOWN', moveDown);
-      props.emitter.off('MOVE_UP', moveUp);
-      props.emitter.off('SELECT', select);
-      props.emitter.off('DISABLE', disable);
-      props.emitter.off('SEARCH', search);
-      props.emitter.off('DISPATCH_SEARCH', dispatchSearch);
+      emitter.off('MOVE_DOWN', moveDown);
+      emitter.off('MOVE_UP', moveUp);
+      emitter.off('SELECT', select);
+      emitter.off('DISABLE', disable);
+      emitter.off('SEARCH', search);
+      emitter.off('DISPATCH_SEARCH', dispatchSearch);
     }
-  }, [props.emitter]);
+  }, [search, emitter]);
   
   useEffect(() => {
-    props.setFlags({
+    setFlags({
       open: true,
     });
     
     return () => {
-      props.setFlags({
+      setFlags({
         open: false,
       });
     }
-  }, [props.setFlags]);
+  }, [setFlags]);
 
   useEffect(() => {
     if (suggestionRef.current) {
@@ -147,10 +146,10 @@ const Suggestions = (props) => {
   
   let items;
   if (!state.disabled && state.items.length) {
-    props.setFlags({open: true});
+    setFlags({open: true});
     items = state.items.map((item, index) => {
       const active = index === state.index;
-      const {key, render} = props.mentions.renderSuggestion(item, {active});
+      const {key, render} = mentions.renderSuggestion(item, {active});
       const itemProps = {
         onMouseDown: (e) => {
           e.preventDefault();
@@ -174,7 +173,7 @@ const Suggestions = (props) => {
     });
   }
   else {
-    props.setFlags({open: false});
+    setFlags({open: false});
   }
 
   const suggestionsStyles = {
@@ -191,7 +190,7 @@ const Suggestions = (props) => {
   }
   return (
     <>
-      {props.children({ref: anchorRef})}
+      {children({ref: anchorRef})}
       <Portal>
         <div className="suggestion-list" role="list" ref={mentionsRef} style={suggestionsStyles} data-placement={placement}>
           {items}

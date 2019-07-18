@@ -2,7 +2,6 @@ import React, {useMemo, useState, useRef} from 'react';
 import ReactDOM from 'react-dom';
 
 import MessageComposer from './components/MessageComposer';
-import Toolbar from './components/Toolbar';
 
 import './styles.scss';
 
@@ -68,7 +67,7 @@ const mentions = {
   },
   getDisplay: (user) => {
     return (user.objectType === 'person') ? user.displayName.split(' ')[0] : user.displayName;
-  }
+  },
 }
 
 const spaces = [];
