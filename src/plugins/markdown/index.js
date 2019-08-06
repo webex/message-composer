@@ -92,6 +92,56 @@ const hideUrl = (value) => {
   return replaceRegex(value, urlRegex);
 };
 
+const initMarkRange = (node) => {
+  const resetVars = (node) => {
+    const texts = node.getTexts().toArray();
+    const startText = texts.shift();
+    const endText = startText;
+    const startOffset = 0;
+    const endOffset = 0;
+    const start = 0;
+    return {
+      texts,
+      startText,
+      endText,
+      startOffset,
+      endOffset,
+      start,
+    };
+  }
+
+  let {texts, startText, endText, startOffset, endOffset, start} = resetVars(node);
+
+  return ({editor, length, mark}) => {
+    startText = endText
+    startOffset = endOffset
+
+    const end = start + length
+
+    let available = startText.text.length - startOffset
+    let remaining = length
+
+    endOffset = startOffset + remaining
+
+    while (available < remaining) {
+      endText = texts.shift()
+      remaining = remaining - available
+      available = endText.text.length
+      endOffset = remaining
+    }
+
+    if (mark !== 'string') {
+      editor.moveAnchorToStartOfNode(startText)
+        .moveAnchorForward(startOffset)
+        .moveFocusToStartOfNode(endText)
+        .moveFocusForward(endOffset)
+        .addMark(mark);
+    }
+
+    start = end;
+  };
+};
+
 const _convertMarkdown = ({editor, node: blockNode, done}) => {
   let foundListItem = false;  
   if (!done) {
@@ -112,16 +162,15 @@ const _convertMarkdown = ({editor, node: blockNode, done}) => {
     const grammar = Prism.languages.markdown;
     const tokens = Prism.tokenize(string, grammar);
 
-    editor.moveToStartOfNode(blockNode);
+    const markRange = initMarkRange(blockNode);
     for (const token of tokens) {
       if (typeof token === 'string' || isInvalidTitle(token)) {
-        editor.moveForward(token.length);
+        markRange({editor, length: token.length, mark: 'string'});
       }
       else {
         if (isLineMarkdown(token)) {
           const length = lineContentLength(token);
-          editor.moveFocusForward(length);
-          editor.delete();
+          markRange({editor, length, mark: 'delete'})
 
           if (token.type === 'list') {
             foundListItem = true;
@@ -139,37 +188,26 @@ const _convertMarkdown = ({editor, node: blockNode, done}) => {
         else if (token.type === 'code') {
           // Non-backtick 'code' block
           if (token.content.length > 0 && token.content.charAt(0) !== '`') {
-            editor.moveFocusForward(token.length)
-              .addMark(token.type)
-              .moveAnchorForward(token.length);
+            markRange({editor, length: token.length, mark: token.type});
           }
           else {
             // Remove the first and last characters which are backticks
             const length = token.content.length - 2;
-            editor.moveFocusForward(1)
-              .delete()
-              .moveFocusForward(length)
-              .addMark(token.type)
-              .moveAnchorForward(length)
-              .moveFocusForward(1)
-              .delete();
+            markRange({editor, length: 1, mark: 'delete'});
+            markRange({editor, length, mark: token.type});
+            markRange({editor, length: 1, mark: 'delete'});
           }
         }
         else if (token.type !== 'tag') {
           for (const i of token.content) {
             if (typeof i === 'string') {
-              editor.moveFocusForward(i.length)
-                .addMark(token.type)
-                .moveAnchorForward(i.length);
+              markRange({editor, length: i.length, mark: token.type});
             }
             else if (token.type === 'punctuation') {
-              editor.moveFocusForward(i.length)
-                .delete();
+              markRange({editor, length: i.length, mark: 'delete'});
             }
             else {
-              editor.moveFocusForward(i.length)
-                .addMark(i.type)
-                .moveAnchorForward(i.length);
+              markRange({editor, length: i.length, mark: i.type});
             }
           }
         }

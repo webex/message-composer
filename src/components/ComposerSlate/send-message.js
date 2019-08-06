@@ -176,6 +176,8 @@ const rules = [
             return <>{addNewLine(children)}</>;
           case 'clear':
             return <>{children}</>;
+          case 'delete':
+            return <></>;
           default:
             return null;
         }
