@@ -16,8 +16,21 @@ const previewMarkdowns = {
 };
 const canPreview = ({type}) => !!previewMarkdowns[type];
 
-let listStartNode;
-let listEndNode;
+const lists = [];
+let currentList;
+
+const setOrderedListStartWith = (token) => {
+  const match = /(\d+)\./.exec(token.content);
+  return match && match[1];
+};
+const setCurrentList = ({blockNode, isOrderedList, token}) => {
+  currentList = {
+    startNode: blockNode,
+    endNode: blockNode,
+    isOrderedList,
+    startsWith: setOrderedListStartWith(token),
+  };
+};
 
 // Title must have a space between the '#' and the content
 const isInvalidTitle = (token) => {
@@ -171,14 +184,26 @@ const _convertMarkdown = ({editor, node: blockNode, done}) => {
         if (isLineMarkdown(token)) {
           const length = lineContentLength(token);
           markRange({editor, length, mark: 'delete'})
-
+          
           if (token.type === 'list') {
+            // Unordered list will be one character (-, #, etc)
+            // Ordered list will be digit plus a period
+            const isOrderedList = length > 1;
             foundListItem = true;
             editor.setBlocks('list-item');
-            if (!listStartNode) {
-              listStartNode = blockNode;
+            if (!currentList) {
+              // Start a list
+              setCurrentList({blockNode, isOrderedList, token});
             }
-            listEndNode = blockNode;
+            else if (currentList.isOrderedList !== isOrderedList) {
+              // New type of list. End the old one
+              lists.push(currentList);
+              setCurrentList({blockNode, isOrderedList, token});
+            }
+            else {
+              // Add to existing list
+              currentList.endNode = blockNode;
+            }
           }
           else {
             const type = (token.type === 'title') ? getTitleType(length) : token.type;
@@ -215,13 +240,23 @@ const _convertMarkdown = ({editor, node: blockNode, done}) => {
     }
   }
 
-  if (listStartNode && !foundListItem) {
-    // This is the end of the list. Wrap it in a list element
-    editor.moveAnchorToStartOfNode(listStartNode)
-      .moveFocusToEndOfNode(listEndNode)
-      .wrapBlock('list');
-    listStartNode = null;
-    listEndNode = null;
+  if (currentList && !foundListItem) {
+    lists.push(currentList);
+    currentList = null;
+  }
+
+  if (done) {
+    for (const list of lists) {
+      // Wrap it in a list element
+      const {startNode, endNode, isOrderedList, startsWith} = list;
+      const blockType = isOrderedList ? 'ordered-list' : 'unordered-list';
+      editor.moveAnchorToStartOfNode(startNode)
+        .moveFocusToEndOfNode(endNode)
+        .wrapBlock({type: blockType, data: {start: startsWith}});
+
+      currentList = null;
+    }
+    lists.length = 0;
   }
 };
 

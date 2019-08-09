@@ -57,7 +57,8 @@ const cleanUpContent = (content) => {
 /* eslint-disable jsx-a11y/heading-has-content */
 const blocks = {
   blockquote: <blockquote/>,
-  list: <ul/>,
+  'unordered-list': <ul/>,
+  'ordered-list': <ol/>,
   'list-item': <li/>,
   h1: <h1/>,
   h2: <h2/>,
@@ -100,13 +101,15 @@ const rules = [
               return <>{children}</>;
           case 'blockquote':
           case 'list-item':
-          case 'list':
+          case 'unordered-list':
           case 'h1':
           case 'h2':
           case 'h3':
           case 'h4':
           case 'h5':
             return cloneElement(blocks[obj.type], {}, children);
+          case 'ordered-list':
+            return cloneElement(blocks[obj.type], {start: obj.data.get('start')}, children);
           case 'hr':
             return cloneElement(blocks[obj.type]);
           default:
