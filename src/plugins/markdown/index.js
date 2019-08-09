@@ -228,11 +228,11 @@ const _convertMarkdown = ({editor, node: blockNode, done}) => {
             if (typeof i === 'string') {
               markRange({editor, length: i.length, mark: token.type});
             }
-            else if (token.type === 'punctuation') {
+            else if (i.type === 'punctuation') {
               markRange({editor, length: i.length, mark: 'delete'});
             }
             else {
-              markRange({editor, length: i.length, mark: i.type});
+              markRange({editor, length: i.length, mark: token.type});
             }
           }
         }
