@@ -138,18 +138,18 @@
   {
     "id": {
       "scope": "mwegman.message-composer",
-      "name": "markdown"
-    },
-    "isSymlink": false,
-    "hash": "07b8c6bfcb09f1171aa6fd43c457a537efa31a01"
-  },
-  {
-    "id": {
-      "scope": "mwegman.message-composer",
       "name": "mentions"
     },
     "isSymlink": false,
     "hash": "453e775779b6bb51e33dd71c50ac640a7f393a81"
+  },
+  {
+    "id": {
+      "scope": "mwegman.message-composer",
+      "name": "markdown"
+    },
+    "isSymlink": false,
+    "hash": "07b8c6bfcb09f1171aa6fd43c457a537efa31a01"
   },
   {
     "id": {
