@@ -1,8 +1,8 @@
 {
-  "name": "message-composer",
+  "name": "@webex/message-composer",
   "version": "0.0.1",
   "description": "React message composer",
-  "main": "index.js",
+  "main": "src/components/MessageComposer/index.js",
   "author": "Michael Wegman (mwegman@cisco.com)",
   "license": "MIT",
   "dependencies": {
@@ -57,5 +57,12 @@
   },
   "scripts": {
     "start": "webpack-dev-server --config webpack/dev.config.js"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://https://github.com/webex/message-composer"
+  },
+  "keywords": [
+    "message-composer"
+  ]
 }
