@@ -56,7 +56,7 @@
   },
   "scripts": {
     "start": "webpack-dev-server --config webpack/dev.config.js",
-    "transpile": "babel src -d dist --copy-files"
+    "build": "babel src -d dist --copy-files"
   },
   "repository": {
     "type": "git",

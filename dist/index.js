@@ -1,0 +1,1 @@
+export { default } from '.components/components/MessageComposer/index.js';

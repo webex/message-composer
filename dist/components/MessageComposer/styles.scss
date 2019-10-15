@@ -1,0 +1,22 @@
+.message-composer-container {
+  border: 1px solid #ddd;
+  display: grid;
+  grid-template-columns: auto;
+  grid-template-areas:
+  "toolbar"
+  "children"
+  "composer";
+
+  & .toolbar {
+    grid-area: toolbar;
+  }
+  
+  & .children {
+    grid-area: children;
+  }
+  
+  & .composer {
+    grid-area: composer;
+    padding: 5px;
+  }
+}
