@@ -34,8 +34,8 @@
     "@babel/plugin-proposal-optional-chaining": "^7.2.0",
     "@babel/plugin-syntax-jsx": "^7.2.0",
     "@babel/preset-react": "^7.0.0",
-    "babel": "^6.23.0",
     "babel-loader": "^8.0.5",
+    "babel-preset-minify": "^0.5.1",
     "clean-webpack-plugin": "^1.0.1",
     "css-loader": "^2.1.0",
     "dotenv-webpack": "^1.7.0",
@@ -58,7 +58,8 @@
   },
   "scripts": {
     "start": "webpack-dev-server --config webpack/dev.config.js",
-    "build": "babel src -d dist --copy-files"
+    "build": "babel src -d dist --copy-files --presets minify",
+    "prepublishOnly": "npm run build"
   },
   "repository": {
     "type": "git",
