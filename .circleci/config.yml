@@ -45,13 +45,17 @@ jobs:
           root: .
           paths: dist
 
-  release:
+  deploy:
     executor: main-executor
     steps:
       - checkout_from_workspace
       - run:
-          name: Publish
+          name: Authenticate with registry
+          command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/repo/.npmrc
+      - run:
+          name: Publish package
           command: npm publish
+
 
 # execute the jobs in a orderly manner
 workflows:
@@ -64,7 +68,7 @@ workflows:
           filters:
             branches:
               only: master
-      - release:
+      - deploy:
           requires:
             - build
           filters:
