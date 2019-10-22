@@ -51,7 +51,7 @@ jobs:
       - checkout_from_workspace
       - run:
           name: Authenticate with registry
-          command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/repo/.npmrc
+          command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/webex-message-composer/.npmrc
       - run:
           name: Publish package
           command: npm publish
