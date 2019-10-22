@@ -1,13 +1,1 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-
-const Toolbar = ({
-  children
-}) => React.createElement("div", {
-  className: "format-toolbar"
-}, children);
-
-Toolbar.propTypes = {
-  children: PropTypes.node
-};
-export default Toolbar;
+"use strict";Object.defineProperty(exports,"__esModule",{value:!0}),exports["default"]=void 0;var _react=_interopRequireDefault(require("react")),_propTypes=_interopRequireDefault(require("prop-types"));function _interopRequireDefault(a){return a&&a.__esModule?a:{default:a}}var Toolbar=function(a){var b=a.children;return _react["default"].createElement("div",{className:"format-toolbar"},b)};Toolbar.propTypes={children:_propTypes["default"].node};var _default=Toolbar;exports["default"]=_default;
