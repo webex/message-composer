@@ -1,1 +1,0 @@
-"use strict";var _composer=_interopRequireDefault(require("./composer"));Object.defineProperty(exports,"__esModule",{value:!0}),Object.defineProperty(exports,"default",{enumerable:!0,get:function get(){return _composer["default"]}});function _interopRequireDefault(a){return a&&a.__esModule?a:{default:a}}

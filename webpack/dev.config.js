@@ -17,7 +17,7 @@ module.exports = merge(common, {
     // ssh/hosts hack in README.md to pretend to be web.ciscospark.com
     // https: true,
     disableHostCheck: true,
-    port: 4000
+    port: 4001
   },
   mode: 'development',
   resolve: {

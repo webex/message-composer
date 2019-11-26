@@ -1,6 +1,6 @@
 {
   "name": "@webex/message-composer",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "React message composer",
   "main": "dist/components/MessageComposer/index.js",
   "author": "Michael Wegman (mwegman@cisco.com)",
@@ -22,10 +22,7 @@
     "react-html-parser": "^2.0.2",
     "react-icons-kit": "^1.2.1",
     "react-portal": "^4.2.0",
-    "slate": "0.45",
-    "slate-html-serializer": "^0.7.34",
-    "slate-plain-serializer": "^0.6.34",
-    "slate-react": "^0.21.24",
+    "slate-react": "0.22.10",
     "tiny-emitter": "^2.1.0"
   },
   "devDependencies": {
@@ -41,6 +38,7 @@
     "css-loader": "^2.1.0",
     "dotenv-webpack": "^1.7.0",
     "html-webpack-plugin": "^3.2.0",
+    "install-peers-cli": "2.1.1",
     "node-sass": "^4.12.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
@@ -60,7 +58,8 @@
   "scripts": {
     "start": "webpack-dev-server --config webpack/dev.config.js",
     "build": "babel src -d dist --copy-files --presets minify",
-    "prepublishOnly": "npm run build"
+    "prepare": "install-peers",
+    "prepublishOnly": "yarn build"
   },
   "repository": {
     "type": "git",
@@ -68,5 +67,10 @@
   },
   "keywords": [
     "message-composer"
-  ]
+  ],
+  "peerDependencies": {
+    "slate": "0.47.9",
+    "slate-html-serializer": "0.8.11",
+    "slate-plain-serializer": "0.7.11"
+  }
 }
