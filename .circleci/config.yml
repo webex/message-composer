@@ -51,11 +51,8 @@ jobs:
     steps:
       - checkout_from_workspace
       - run:
-          name: Authenticate with registry
-          command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/webex-message-composer/.npmrc
-      - run:
-          name: Publish package
-          command: npm publish --access=public
+          name: Update version and publish package
+          command: yarn run semantic-release
 
 
 # execute the jobs in a orderly manner

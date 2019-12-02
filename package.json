@@ -1,11 +1,20 @@
 {
   "name": "@webex/message-composer",
-  "version": "0.0.3",
+  "version": "0.0.0-semantically-released",
   "description": "React message composer",
   "main": "dist/components/MessageComposer/index.js",
   "author": "Michael Wegman (mwegman@cisco.com)",
   "license": "MIT",
+  "scripts": {
+    "start": "webpack-dev-server --config webpack/dev.config.js",
+    "build": "babel src -d dist --copy-files --presets minify",
+    "prepare": "install-peers",
+    "prepublishOnly": "yarn build",
+    "semantic-release": "semantic-release",
+    "semantic-release:dry-run": "semantic-release --dry-run"
+  },
   "dependencies": {
+    "@semantic-release/git": "7.0.18",
     "classnames": "^2.2.6",
     "commonmark": "^0.29.0",
     "draft-js": "^0.10.5",
@@ -32,18 +41,23 @@
     "@babel/plugin-syntax-jsx": "^7.2.0",
     "@babel/preset-env": "^7.6.3",
     "@babel/preset-react": "^7.0.0",
+    "@commitlint/cli": "8.2.0",
+    "@commitlint/config-conventional": "8.2.0",
+    "@semantic-release/changelog": "3.0.6",
     "babel-loader": "^8.0.5",
     "babel-preset-minify": "^0.5.1",
     "clean-webpack-plugin": "^1.0.1",
     "css-loader": "^2.1.0",
     "dotenv-webpack": "^1.7.0",
     "html-webpack-plugin": "^3.2.0",
+    "husky": "3.1.0",
     "install-peers-cli": "2.1.1",
     "node-sass": "^4.12.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "resolve-url-loader": "^3.0.0",
     "sass-loader": "^7.1.0",
+    "semantic-release": "15.13.31",
     "source-map-loader": "^0.2.4",
     "style-loader": "^0.23.1",
     "webpack": "^4.29.0",
@@ -52,25 +66,29 @@
     "webpack-merge": "^4.2.1",
     "write-file-webpack-plugin": "^4.5.0"
   },
-  "resolutions": {
-    "lodash": "^4.17.14"
-  },
-  "scripts": {
-    "start": "webpack-dev-server --config webpack/dev.config.js",
-    "build": "babel src -d dist --copy-files --presets minify",
-    "prepare": "install-peers",
-    "prepublishOnly": "yarn build"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://https://github.com/webex/message-composer"
-  },
-  "keywords": [
-    "message-composer"
-  ],
   "peerDependencies": {
     "slate": "0.45",
     "slate-html-serializer": "^0.7.34",
     "slate-plain-serializer": "^0.6.34"
+  },
+  "resolutions": {
+    "lodash": "^4.17.14"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/webex/message-composer"
+  },
+  "keywords": [
+    "message-composer"
+  ],
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -e $HUSKY_GIT_PARAMS"
+    }
   }
 }
