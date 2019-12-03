@@ -3,7 +3,6 @@ import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import {TinyEmitter} from 'tiny-emitter';
 
-//import Composer from '../Composer';
 import Composer from '../ComposerSlate'
 import ToolbarDefault from '../Toolbar';
 
@@ -19,7 +18,7 @@ const MessageComposer = ({
 }) => {
   const emitter = useRef(new TinyEmitter());
   const [active, setActive] = useState({});
-  
+
   useEffect(() => {
     setEmitter(emitter.current);
   }, [emitter]);
