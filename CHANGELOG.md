@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/webex/message-composer/compare/v1.0.0...v1.0.1) (2019-12-03)
+
+
+### Bug Fixes
+
+* **package:** fix package.json ([0f68457](https://github.com/webex/message-composer/commit/0f68457549b157245aec6de7e6f87c2ff09404c0))
+
 # 1.0.0 (2019-12-02)
 
 

@@ -1,6 +1,6 @@
 {
   "name": "@webex/message-composer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "React message composer",
   "main": "dist/components/MessageComposer/index.js",
   "author": "Michael Wegman (mwegman@cisco.com)",
