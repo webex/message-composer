@@ -3271,6 +3271,11 @@ dir-glob@^3.0.0, dir-glob@^3.0.1:
   dependencies:
     path-type "^4.0.0"
 
+direction@^0.1.5:
+  version "0.1.5"
+  resolved "https://registry.yarnpkg.com/direction/-/direction-0.1.5.tgz#ce5d797f97e26f8be7beff53f7dc40e1c1a9ec4c"
+  integrity sha1-zl15f5fib4vnvv9T99xA4cGp7Ew=
+
 dns-equal@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/dns-equal/-/dns-equal-1.0.0.tgz#b39e7f1da6eb0a75ba9c17324b34753c47e0654d"
@@ -3673,6 +3678,11 @@ esrecurse@^4.1.0:
   dependencies:
     estraverse "^4.1.0"
 
+esrever@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/esrever/-/esrever-0.2.0.tgz#96e9d28f4f1b1a76784cd5d490eaae010e7407b8"
+  integrity sha1-lunSj08bGnZ4TNXUkOquAQ50B7g=
+
 estraverse@^4.1.0, estraverse@^4.1.1:
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/estraverse/-/estraverse-4.3.0.tgz#398ad3f3c5a24948be7725e83d11a7de28cdbd1d"
@@ -3754,13 +3764,6 @@ execa@^3.2.0:
     p-finally "^2.0.0"
     signal-exit "^3.0.2"
     strip-final-newline "^2.0.0"
-
-executioner@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/executioner/-/executioner-2.0.1.tgz#add328e03bc45dd598f358fbb529fc0be0ec6fcd"
-  integrity sha1-rdMo4DvEXdWY81j7tSn8C+Dsb80=
-  dependencies:
-    mixly "^1.0.0"
 
 expand-brackets@^2.1.4:
   version "2.1.4"
@@ -4173,11 +4176,6 @@ fstream@^1.0.0, fstream@^1.0.12:
     inherits "~2.0.0"
     mkdirp ">=0.5 0"
     rimraf "2"
-
-fulcon@^1.0.1:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/fulcon/-/fulcon-1.0.2.tgz#8a4dfda4c73fcd9cc62a79d5045c392b45547320"
-  integrity sha1-ik39pMc/zZzGKnnVBFw5K0VUcyA=
 
 function-bind@^1.1.1:
   version "1.1.1"
@@ -4959,14 +4957,6 @@ init-package-json@^1.10.3:
     semver "2.x || 3.x || 4 || 5"
     validate-npm-package-license "^3.0.1"
     validate-npm-package-name "^3.0.0"
-
-install-peers-cli@2.1.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/install-peers-cli/-/install-peers-cli-2.1.1.tgz#01f88b52a930b7f09e57abb4da874ff9ef83a6b9"
-  integrity sha512-sCphUqbDtlSyv0KYE0tdsLUG/F6wMGR7hr3swkx1sAKJCj4b3hy41vTj0JtxL6pAoi86yGW8i1CCIv8Fg29NAA==
-  dependencies:
-    commander "^2.20.0"
-    executioner "^2.0.1"
 
 internal-ip@^4.3.0:
   version "4.3.0"
@@ -6292,13 +6282,6 @@ mixin-deep@^1.2.0:
   dependencies:
     for-in "^1.0.2"
     is-extendable "^1.0.1"
-
-mixly@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/mixly/-/mixly-1.0.0.tgz#9b5a2e1f63e6dfba0d30e6797ffae62ab1dc24ef"
-  integrity sha1-m1ouH2Pm37oNMOZ5f/rmKrHcJO8=
-  dependencies:
-    fulcon "^1.0.1"
 
 "mkdirp@>=0.5 0", mkdirp@^0.5.0, mkdirp@^0.5.1, mkdirp@~0.5.0, mkdirp@~0.5.1:
   version "0.5.1"
@@ -8649,6 +8632,18 @@ slate-hotkeys@^0.2.9:
     is-hotkey "0.1.4"
     slate-dev-environment "^0.2.2"
 
+slate-html-serializer@^0.7.34:
+  version "0.7.39"
+  resolved "https://registry.yarnpkg.com/slate-html-serializer/-/slate-html-serializer-0.7.39.tgz#efe3cc4783f1036fe33dac402be3cbfddcb2b9ef"
+  integrity sha512-ZNyVjqCasSa0M80+4W1bFXMhW4KJM7EE6dkyBOhQmIcuRX529xOahcz+6ZYK7fQn0Cyrye899OtX26LulAh/Ew==
+  dependencies:
+    type-of "^2.0.1"
+
+slate-plain-serializer@^0.6.34:
+  version "0.6.39"
+  resolved "https://registry.yarnpkg.com/slate-plain-serializer/-/slate-plain-serializer-0.6.39.tgz#5fb8d4dc530a2e7e0689548d48964ce242c4516a"
+  integrity sha512-EGl+Y+9Fw9IULtPg8sttydaeiAoaibJolMXNfqI79+5GWTQwJFIbg24keKvsTw+3f2RieaPu8fcrKyujKtZ7ZQ==
+
 slate-plain-serializer@^0.7.1:
   version "0.7.11"
   resolved "https://registry.yarnpkg.com/slate-plain-serializer/-/slate-plain-serializer-0.7.11.tgz#74ff6eb949e9fbd92ad98ed833d74d5082f2688b"
@@ -8685,6 +8680,20 @@ slate-react@^0.21.24:
     slate-react-placeholder "^0.1.20"
     tiny-invariant "^1.0.1"
     tiny-warning "^0.0.3"
+
+slate@0.45:
+  version "0.45.1"
+  resolved "https://registry.yarnpkg.com/slate/-/slate-0.45.1.tgz#6c6bfc9d0d54844e6d2541bcd6a840ec47bb78a1"
+  integrity sha512-kEavVrC9lhIu6SX6Xy7GUpHsjfCcr+RQXKJ2X5v1NEdHsqIf0CCHChAarkEp65QK9qx7oRDti/KWOdnYMsXc7Q==
+  dependencies:
+    debug "^3.1.0"
+    direction "^0.1.5"
+    esrever "^0.2.0"
+    is-plain-object "^2.0.4"
+    lodash "^4.17.4"
+    tiny-invariant "^1.0.1"
+    tiny-warning "^0.0.3"
+    type-of "^2.0.1"
 
 slide@^1.1.6, slide@~1.1.3, slide@~1.1.6:
   version "1.1.6"
@@ -9468,6 +9477,11 @@ type-is@~1.6.17, type-is@~1.6.18:
   dependencies:
     media-typer "0.3.0"
     mime-types "~2.1.24"
+
+type-of@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/type-of/-/type-of-2.0.1.tgz#e72a1741896568e9f628378d816d6912f7f23972"
+  integrity sha1-5yoXQYllaOn2KDeNgW1pEvfyOXI=
 
 type@^1.0.1:
   version "1.2.0"
