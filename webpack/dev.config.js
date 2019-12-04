@@ -7,7 +7,9 @@ const Dotenv = require('dotenv-webpack');
 
 const common = require('./common.config.js');
 
-module.exports = merge(common, {
+const mode = 'development';
+
+module.exports = merge(common(mode), {
   devtool: 'source-map',
   devServer: {
     stats: 'minimal',
@@ -19,7 +21,7 @@ module.exports = merge(common, {
     disableHostCheck: true,
     port: 4001
   },
-  mode: 'development',
+  mode,
   resolve: {
     symlinks: false,
     alias:
