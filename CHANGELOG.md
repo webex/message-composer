@@ -1,3 +1,11 @@
+## [1.0.2](https://github.com/webex/message-composer/compare/v1.0.1...v1.0.2) (2019-12-04)
+
+
+### Bug Fixes
+
+* **storybook:** move example app to storybook ([dfe295c](https://github.com/webex/message-composer/commit/dfe295cf9c206fe59e0f0be59bda6892818fc690))
+* **webpack:** use webpack for build step ([0728deb](https://github.com/webex/message-composer/commit/0728deb6ec883b53a5b804feffd9c20f32cb0c31))
+
 ## [1.0.1](https://github.com/webex/message-composer/compare/v1.0.0...v1.0.1) (2019-12-03)
 
 
