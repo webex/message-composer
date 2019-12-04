@@ -1,1 +1,1 @@
-export {default} from './components/MessageComposer';
+export {default} from './components/MessageComposer/index.js';

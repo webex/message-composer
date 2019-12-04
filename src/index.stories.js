@@ -1,7 +1,7 @@
 import React, {useMemo, useState, useRef} from 'react';
 import ReactDOM from 'react-dom';
 
-import MessageComposer from './components/MessageComposer';
+import MessageComposer from './index.js';
 
 import './styles.scss';
 
