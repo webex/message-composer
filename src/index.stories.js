@@ -96,6 +96,10 @@ export default {
 export const Example = () => {
   const [message, setMessage] = useState('');
   const [number, setNumber] = useState(1);
+  const [failSend, setFailSend] = useState(false);
+  const toggleFailSend = () => {
+    setFailSend(!failSend);
+  };
 
   const show = (num) => {
     setMessage('');
@@ -128,6 +132,12 @@ export const Example = () => {
   const send = (e) => {
     e.preventDefault();
     emitter.current.emit('SEND');
+  };
+
+  const onSend = (val) => {
+    setMessage(val);
+
+    return !failSend;
   };
 
   const notifyKeyDown = (event) => {
@@ -167,7 +177,7 @@ export const Example = () => {
           draft={draft}
           markdown={markdown}
           mentions={mentions}
-          send={(val) => setMessage(val)}
+          send={onSend}
           notifyKeyDown={notifyKeyDown}
           placeholder={placeholder}
           setEmitter={setEmitter}
@@ -179,6 +189,7 @@ export const Example = () => {
         <button onClick={insertText('@')}>@Mention</button>
         <button onClick={toggleDisabled}>{disabled ? 'enable' : 'disable'}</button>
         <button onClick={toggleMarkdownDisabled}>{isMarkdownDisabled ? 'enable markdown' : 'disable markdown'}</button>
+        <button onClick={toggleFailSend}>{failSend ? 'send message successfully' : 'make send message fail'}</button>
         <button onClick={send}>SEND</button>
         <button onClick={changePlaceholder}>Change placeholder</button>
       </div>

@@ -250,10 +250,12 @@ const serializePlugin = (value) => {
           message.groupMentions = groupMentions;
           groupMentions = [];
         }
-        editor.props.onChange({value});
+
+        if (editor.props.send(message)) {
+          editor.props.onChange({value});
+        }
 
         setTimeout(() => {
-          editor.props.send(message);
           editor.focus();
         });
       },
