@@ -7,7 +7,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 module.exports = (mode) => {
   const config = {
     entry: {
-      app: [path.resolve(__dirname, '../src/index.js')]
+      app: [path.resolve(__dirname, '../src/index.js')],
     },
     output: {
       filename: 'index.js',
@@ -15,17 +15,17 @@ module.exports = (mode) => {
       publicPath: '/',
       sourceMapFilename: '[file].map',
       libraryTarget: 'umd',
-      library: '@webex/message-composer'
+      library: '@webex/message-composer',
     },
     module: {
       rules: [
         {
           test: /\.(ttf|eot|woff|woff2)$/,
-          loader: 'file-loader'
+          loader: 'file-loader',
         },
         {
           test: /\.(jpe?g|png|gif|svg)$/,
-          loader: 'file-loader'
+          loader: 'file-loader',
         },
         {
           test: /\.scss$/,
@@ -37,42 +37,42 @@ module.exports = (mode) => {
               loader: 'sass-loader',
               options: {
                 sourceMap: true,
-                sourceMapContents: false
-              }
-            }
-          ]
+                sourceMapContents: false,
+              },
+            },
+          ],
         },
         {
           test: /\.css$/,
-          loader: 'style-loader!css-loader'
+          loader: 'style-loader!css-loader',
         },
         {
           test: /\.js$/,
           exclude: /node_modules/,
           use: ['source-map-loader'],
-          enforce: 'pre'
+          enforce: 'pre',
         },
         {
           test: /\.jsx?$/,
           exclude: /node_modules/,
           use: {
             loader: 'babel-loader',
-          }
-        }
-      ]
+          },
+        },
+      ],
     },
     node: {
-      fs: 'empty'
+      fs: 'empty',
     },
     plugins: [
       new Dotenv({
-        path: path.resolve(__dirname, '../.env')
+        path: path.resolve(__dirname, '../.env'),
       }),
       new CleanWebpackPlugin(['./dist/**/*'], {
-        root: path.resolve(__dirname, '..')
-      })
-    ]
-  }
+        root: path.resolve(__dirname, '..'),
+      }),
+    ],
+  };
 
   return config;
 };

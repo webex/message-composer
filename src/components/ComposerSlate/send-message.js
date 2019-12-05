@@ -10,25 +10,28 @@ const BLOCK_TAGS = {
   blockquote: 'quote',
   p: 'paragraph',
   pre: 'code',
-}
+};
 
 // Add a dictionary of mark tags.
 const MARK_TAGS = {
   em: 'italic',
   strong: 'bold',
   u: 'underline',
-}
+};
 
 let mentions = [];
 let groupMentions = [];
 
 const addNewLine = (children) => {
   if (children.length) {
-    const last = children[children.length-1];
+    const last = children[children.length - 1];
+
     if (last) {
-      children[children.length-1] = `${last}\n`;
+      // eslint-disable-next-line no-param-reassign
+      children[children.length - 1] = `${last}\n`;
     }
   }
+
   return children;
 };
 
@@ -37,9 +40,11 @@ const convertMarkdownToHTML = (md) => {
   const writer = new commonmark.HtmlRenderer();
   const parsed = reader.parse(md);
   let value = writer.render(parsed);
+
   value = value.replace(/^<p>([\s\S]*)<\/p>\s$/, '$1');
-  return (<>{ReactHtmlParser(value)}</>);
-}
+
+  return <>{ReactHtmlParser(value)}</>;
+};
 
 const cleanUpContent = (content) => {
   let newContent = content;
@@ -52,37 +57,40 @@ const cleanUpContent = (content) => {
   newContent = newContent.replace(/<div><\/div>/g, '<br>');
 
   return newContent;
-}
+};
 
 /* eslint-disable jsx-a11y/heading-has-content */
 const blocks = {
-  blockquote: <blockquote/>,
-  'unordered-list': <ul/>,
-  'ordered-list': <ol/>,
-  'list-item': <li/>,
-  h1: <h1/>,
-  h2: <h2/>,
-  h3: <h3/>,
-  h4: <h4/>,
-  h5: <h5/>,
-  hr: <hr/>,
+  blockquote: <blockquote />,
+  'unordered-list': <ul />,
+  'ordered-list': <ol />,
+  'list-item': <li />,
+  h1: <h1 />,
+  h2: <h2 />,
+  h3: <h3 />,
+  h4: <h4 />,
+  h5: <h5 />,
+  hr: <hr />,
 };
 /* eslint-enable jsx-a11y/heading-has-content */
 
 const rules = [
   {
     deserialize(el, next) {
-      const type = BLOCK_TAGS[el.tagName.toLowerCase()]
+      const type = BLOCK_TAGS[el.tagName.toLowerCase()];
+
       if (type) {
         return {
           object: 'block',
-          type: type,
+          type,
           data: {
             className: el.getAttribute('class'),
           },
           nodes: next(el.childNodes),
-        }
+        };
       }
+
+      return undefined;
     },
     serialize(obj, children) {
       if (obj.object === 'block') {
@@ -91,6 +99,7 @@ const rules = [
             return <div className={obj.data.get('className')}>{children}</div>;
           case 'code': {
             const lang = obj.data.get('language') || 'none';
+
             return (
               <pre>
                 <code className={`language-${lang}`}>{children}</code>
@@ -98,7 +107,7 @@ const rules = [
             );
           }
           case 'plain':
-              return <>{children}</>;
+            return <>{children}</>;
           case 'blockquote':
           case 'list-item':
           case 'unordered-list':
@@ -115,11 +124,11 @@ const rules = [
           default:
             return null;
         }
-      }
-      else if (obj.object === 'inline') {
+      } else if (obj.object === 'inline') {
         if (obj.type === 'userMention') {
           const id = obj.data.get('id');
           const objectType = obj.data.get('objectType');
+
           if (objectType === 'groupMention') {
             groupMentions.push({
               groupType: id,
@@ -132,47 +141,49 @@ const rules = [
               </spark-mention>
             );
           }
-          else {
-            mentions.push({
-              id,
-              objectType,
-            });
 
-            return (
-              <spark-mention data-object-type={objectType} data-object-id={id}>
-                {obj.data.get('mentionDisplay')}
-              </spark-mention>
-            );
-          }
+          mentions.push({
+            id,
+            objectType,
+          });
+
+          return (
+            <spark-mention data-object-type={objectType} data-object-id={id}>
+              {obj.data.get('mentionDisplay')}
+            </spark-mention>
+          );
         }
       }
+
+      return undefined;
     },
   },
   // Add a new rule that handles marks...
   {
     deserialize(el, next) {
-      const type = MARK_TAGS[el.tagName.toLowerCase()]
+      const type = MARK_TAGS[el.tagName.toLowerCase()];
+
       if (type) {
         return {
           object: 'mark',
-          type: type,
+          type,
           nodes: next(el.childNodes),
-        }
+        };
       }
+
+      return undefined;
     },
     serialize(obj, children) {
       if (obj.object === 'mark') {
         switch (obj.type) {
           case 'bold':
-            return <strong>{children}</strong>
+            return <strong>{children}</strong>;
           case 'italic':
-            return <em>{children}</em>
+            return <em>{children}</em>;
           case 'underline':
-            return <u>{children}</u>
+            return <u>{children}</u>;
           case 'code':
-            return (
-              <code className="language-none">{children}</code>
-            );
+            return <code className="language-none">{children}</code>;
           case 'url':
             return convertMarkdownToHTML(children[0]);
           case 'plain':
@@ -185,33 +196,38 @@ const rules = [
             return null;
         }
       }
+
+      return undefined;
     },
   },
 ];
 
-const html = new Html({ rules });
+const html = new Html({rules});
 
 const serializePlugin = (value) => {
   const notifyKeyDown = (editor, event) => {
     if (editor.props.notifyKeyDown) {
       editor.props.notifyKeyDown(event);
     }
-  }
-  
+  };
+
   return {
     onKeyDown(event, editor, next) {
       if (event.shiftKey) {
         notifyKeyDown(editor, event);
+
         return next();
       }
 
       if (event.key === 'Enter') {
         event.preventDefault();
         editor.sendMessage();
+
         return true;
       }
 
       notifyKeyDown(editor, event);
+
       return next();
     },
     commands: {
@@ -220,11 +236,12 @@ const serializePlugin = (value) => {
 
         convertMarkdown({editor});
         const content = cleanUpContent(html.serialize(editor.value));
-        
+
         const message = {
           displayName,
           content,
         };
+
         if (mentions.length) {
           message.mentions = mentions;
           mentions = [];
@@ -234,14 +251,14 @@ const serializePlugin = (value) => {
           groupMentions = [];
         }
         editor.props.onChange({value});
-        
+
         setTimeout(() => {
           editor.props.send(message);
           editor.focus();
         });
       },
     },
-  }
-}
+  };
+};
 
 export default serializePlugin;

@@ -19,31 +19,18 @@ module.exports = merge(common(mode), {
     // ssh/hosts hack in README.md to pretend to be web.ciscospark.com
     // https: true,
     disableHostCheck: true,
-    port: 4001
+    port: 4001,
   },
   mode,
   resolve: {
     symlinks: false,
-    alias:
-      process.env.SDK_DIR &&
-      glob
-        .sync('**/package.json', {
-          cwd: path.resolve(process.env.SDK_DIR, './packages/node_modules')
-        })
-        .map((p) => path.dirname(p))
-        .reduce((alias, packageName) => {
-          // Substitute ./node_modules with a locally built sdk
-          alias[`${packageName}`] = path.resolve(process.env.SDK_DIR, `./packages/node_modules/${packageName}`);
-
-          return alias;
-        }, {})
   },
   plugins: [
     new Dotenv({
       path: '.env',
-      systemvars: true
+      systemvars: true,
     }),
-    new WriteFilePlugin()
+    new WriteFilePlugin(),
   ],
-  watch: true
+  watch: true,
 });
