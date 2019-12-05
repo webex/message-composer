@@ -1,10 +1,3 @@
-# [1.1.0](https://github.com/webex/message-composer/compare/v1.0.2...v1.1.0) (2019-12-05)
-
-
-### Features
-
-* **emitter:** add update emitter event ([5da0155](https://github.com/webex/message-composer/commit/5da01550f9d6526945fbaf4b8ecb0dc049f2f3ae))
-
 ## [1.0.2](https://github.com/webex/message-composer/compare/v1.0.1...v1.0.2) (2019-12-04)
 
 
