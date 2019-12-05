@@ -38,12 +38,14 @@ export default function() {
         gDecorations = null;
       }
     }
+
     return null;
-  }
+  };
 
   const Plugin = () => {
-    let initialQuery
+    let initialQuery;
     const emitter = new TinyEmitter();
+
     emitter.on('SEARCH', (query) => {
       initialQuery = query;
     });
@@ -56,53 +58,57 @@ export default function() {
     const isOpen = () => flags.open;
 
     let lastInputValue = null;
-    
+
     return {
       onKeyDown(event, editor, next) {
         if (isOpen()) {
           switch (event.key) {
-            case ('ArrowDown'):
-            event.preventDefault();
-            emitter.emit('MOVE_DOWN');
-            return true;
-            case ('ArrowUp'):
-            event.preventDefault();
-            emitter.emit('MOVE_UP');
-            return true;
-            case ('Enter'):
-            case ('Tab'):
-            event.preventDefault();
-            emitter.emit('SELECT');
-            return true;
-            case ('Escape'):
-            event.preventDefault();
-            emitter.emit('DISABLE');
+            case 'ArrowDown':
+              event.preventDefault();
+              emitter.emit('MOVE_DOWN');
+
+              return true;
+            case 'ArrowUp':
+              event.preventDefault();
+              emitter.emit('MOVE_UP');
+
+              return true;
+            case 'Enter':
+            case 'Tab':
+              event.preventDefault();
+              emitter.emit('SELECT');
+
+              return true;
+            case 'Escape':
+              event.preventDefault();
+              emitter.emit('DISABLE');
+
               return true;
             default:
               return next();
           }
         }
+
         return next();
       },
 
       onChange(editor, next) {
-        const [triggerSymbol, inputValue] = getInput(editor.value)
-        
+        const [triggerSymbol, inputValue] = getInput(editor.value);
+
         if (inputValue !== lastInputValue) {
           lastInputValue = inputValue;
-          
+
           if (hasValidAncestors(editor.value)) {
             emitter.emit('SEARCH', inputValue);
           }
-          
-          const { selection } = editor.value
-          
-          let decorations = editor.value.decorations.filter(
-            value => value.mark.type !== CONTEXT_MARK_TYPE
-          );
-            
+
+          const {selection} = editor.value;
+
+          let decorations = editor.value.decorations.filter((value) => value.mark.type !== CONTEXT_MARK_TYPE);
+
           if (inputValue !== null && hasValidAncestors(editor.value)) {
             const endOfTrigger = selection.start.offset - inputValue.length;
+
             decorations = decorations.push({
               anchor: {
                 key: selection.start.key,
@@ -115,7 +121,7 @@ export default function() {
               mark: {
                 type: CONTEXT_MARK_TYPE,
               },
-            })
+            });
           }
 
           gDecorations = decorations;
@@ -148,21 +154,17 @@ export default function() {
             </Suggestions>
           );
         }
-    
+
         return next();
       },
 
       renderNode(props, editor, next) {
-        const { attributes, node } = props
-    
+        const {attributes, node} = props;
+
         if (node.type === USER_MENTION_NODE_TYPE) {
-          return (
-            <span {...attributes}>
-              {editor.props.mentions.renderInsert(node.data.toJS())}
-            </span>
-          );
+          return <span {...attributes}>{editor.props.mentions.renderInsert(node.data.toJS())}</span>;
         }
-    
+
         return next();
       },
 
@@ -170,7 +172,7 @@ export default function() {
         clearSuggestionsMarker(editor) {
           gDecorations = editor.value.decorations.filter((value) => value.mark.type !== CONTEXT_MARK_TYPE);
         },
-        clearSuggestionsLastInput(editor) {
+        clearSuggestionsLastInput() {
           lastInputValue = null;
         },
       },
@@ -183,4 +185,4 @@ export default function() {
     markMention,
     Plugin,
   };
-};
+}

@@ -1,13 +1,13 @@
 import React, {useCallback, useEffect, useRef, useReducer} from 'react';
 import {Portal} from 'react-portal';
-import PropTypes from 'prop-types'
+import PropTypes from 'prop-types';
 import classnames from 'classnames';
 
 import usePopper from './usePopper';
 import {getInput} from './utils';
 import {USER_MENTION_NODE_TYPE} from './types';
 
-const Suggestions = ({setFlags, children, editor, emitter, initialQuery, mentions,}) => {
+const Suggestions = ({setFlags, children, editor, emitter, initialQuery, mentions}) => {
   const mentionsRef = useRef(null);
   const anchorRef = useRef(null);
   const suggestionRef = useRef(null);
@@ -19,11 +19,11 @@ const Suggestions = ({setFlags, children, editor, emitter, initialQuery, mention
   });
 
   const onSelection = (item) => {
-    const value = editor.value;
+    const {value} = editor;
     const [, inputValue] = getInput(value);
 
     // Delete the captured value, including the `@` symbol
-    editor.deleteBackward(inputValue.length + 1)
+    editor.deleteBackward(inputValue.length + 1);
 
     const selectedRange = editor.value.selection;
 
@@ -52,47 +52,50 @@ const Suggestions = ({setFlags, children, editor, emitter, initialQuery, mention
   const indexReducer = (state, action) => {
     switch (action.type) {
       case 'INCREMENT':
-      return {
-        ...state,
-        index: (state.index !== (state.items.length - 1)) ? state.index + 1 : 0,
-      };
+        return {
+          ...state,
+          index: state.index !== state.items.length - 1 ? state.index + 1 : 0,
+        };
       case 'DECREMENT':
-      return {
-        ...state,
-        index: (state.index !== 0) ? state.index - 1 : state.items.length - 1,
-      };
+        return {
+          ...state,
+          index: state.index !== 0 ? state.index - 1 : state.items.length - 1,
+        };
       case 'SET_ITEMS':
-      return {
-        ...state,
-        items: action.payload.items,
-        disabled: false,
-        index: 0,
-      };
+        return {
+          ...state,
+          items: action.payload.items,
+          disabled: false,
+          index: 0,
+        };
       case 'DISABLE':
-      return {
-        ...state,
-        disabled: true,
-      };
+        return {
+          ...state,
+          disabled: true,
+        };
       case 'ENABLE':
-      return {
-        ...state,
-        disabled: false,
-      }
+        return {
+          ...state,
+          disabled: false,
+        };
       default:
-      throw new Error();
+        throw new Error();
     }
   };
   const [state, dispatch] = useReducer(indexReducer, {disabled: false, items: [], index: 0});
 
-  const search = useCallback((q) => {
-    mentions.filter((q === null) ? '' : q)
-      .then((items) => emitter.emit('DISPATCH_SEARCH', items));
-  }, [mentions, emitter]);
+  const search = useCallback(
+    (q) => {
+      mentions.filter(q === null ? '' : q).then((items) => emitter.emit('DISPATCH_SEARCH', items));
+    },
+    [mentions, emitter]
+  );
   const dispatchSearch = (items) => {
     dispatch({type: 'SET_ITEMS', payload: {items}});
-  }
+  };
+
   useEffect(() => {
-    search(initialQuery)
+    search(initialQuery);
   }, []); /* eslint-disable-line react-hooks/exhaustive-deps */
 
   const moveUp = () => {
@@ -106,7 +109,7 @@ const Suggestions = ({setFlags, children, editor, emitter, initialQuery, mention
   };
   const disable = () => {
     dispatch({type: 'DISABLE'});
-  }
+  };
 
   useEffect(() => {
     emitter.on('MOVE_DOWN', moveDown);
@@ -125,7 +128,7 @@ const Suggestions = ({setFlags, children, editor, emitter, initialQuery, mention
       emitter.off('SEARCH', search);
       emitter.off('DISPATCH_SEARCH', dispatchSearch);
       editor.props.emitter.off('UPDATE', search);
-    }
+    };
   }, [editor, search, emitter]);
 
   useEffect(() => {
@@ -137,7 +140,7 @@ const Suggestions = ({setFlags, children, editor, emitter, initialQuery, mention
       setFlags({
         open: false,
       });
-    }
+    };
   }, [setFlags]);
 
   useEffect(() => {
@@ -147,6 +150,7 @@ const Suggestions = ({setFlags, children, editor, emitter, initialQuery, mention
   });
 
   let items;
+
   if (!state.disabled && state.items.length) {
     setFlags({open: true});
     items = state.items.map((item, index) => {
@@ -167,14 +171,10 @@ const Suggestions = ({setFlags, children, editor, emitter, initialQuery, mention
         role: 'listitem',
         key,
       };
-      return (
-        <div {...itemProps}>
-          {render}
-        </div>
-      )
+
+      return <div {...itemProps}>{render}</div>;
     });
-  }
-  else {
+  } else {
     setFlags({open: false});
   }
 
@@ -187,14 +187,22 @@ const Suggestions = ({setFlags, children, editor, emitter, initialQuery, mention
     maxHeight: '15em',
     overflow: 'scroll',
   };
+
   if (!items) {
     suggestionsStyles.display = 'none';
   }
+
   return (
     <>
       {children({ref: anchorRef})}
       <Portal>
-        <div className="suggestion-list" role="list" ref={mentionsRef} style={suggestionsStyles} data-placement={placement}>
+        <div
+          className="suggestion-list"
+          role="list"
+          ref={mentionsRef}
+          style={suggestionsStyles}
+          data-placement={placement}
+        >
           {items}
         </div>
       </Portal>
@@ -204,14 +212,19 @@ const Suggestions = ({setFlags, children, editor, emitter, initialQuery, mention
 
 Suggestions.propTypes = {
   children: PropTypes.func.isRequired,
-  editor: PropTypes.object,
-  emitter: PropTypes.object,
+  editor: PropTypes.object.isRequired,
+  emitter: PropTypes.object.isRequired,
   initialQuery: PropTypes.string,
   mentions: PropTypes.shape({
     filter: PropTypes.func,
     renderSuggestion: PropTypes.func,
-  }),
-  setFlags: PropTypes.func,
+    getDisplay: PropTypes.func,
+  }).isRequired,
+  setFlags: PropTypes.func.isRequired,
+};
+
+Suggestions.defaultProps = {
+  initialQuery: undefined,
 };
 
 export default React.memo(Suggestions);
