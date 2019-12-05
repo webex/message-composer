@@ -1,3 +1,18 @@
+# [1.1.0](https://github.com/webex/message-composer/compare/v1.0.2...v1.1.0) (2019-12-05)
+
+
+### Features
+
+* **css:** include separate css file ([00a68e9](https://github.com/webex/message-composer/commit/00a68e958c808325bb06abe5ab3c7e8fdabc68ed))
+* **emitter:** add update emitter event ([5ccc37f](https://github.com/webex/message-composer/commit/5ccc37fad8b8e968fba0cbc28276bd0bdaeb2b25))
+* **emitter:** add update emitter event ([5da0155](https://github.com/webex/message-composer/commit/5da01550f9d6526945fbaf4b8ecb0dc049f2f3ae))
+* **emitter:** add update emitter event ([#21](https://github.com/webex/message-composer/issues/21)) ([2fc91c2](https://github.com/webex/message-composer/commit/2fc91c2f8c7869f2ff147b568016698c9230b3f8))
+
+
+### Reverts
+
+* Revert "chore(release): 1.0.2 [skip ci]" ([0353510](https://github.com/webex/message-composer/commit/03535102d092e944c0785f520c7fa562c69f8f64))
+
 ## [1.0.2](https://github.com/webex/message-composer/compare/v1.0.1...v1.0.2) (2019-12-04)
 
 
