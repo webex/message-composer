@@ -7,26 +7,26 @@ import usePopper from './usePopper';
 import {getInput} from './utils';
 import {USER_MENTION_NODE_TYPE} from './types';
 
-const Suggestions = ({setFlags, children, editor, emitter, initialQuery, mentions,}) => {
+const Suggestions = ({setFlags, children, editor, emitter, initialQuery, mentions,}) => { 
   const mentionsRef = useRef(null);
   const anchorRef = useRef(null);
   const suggestionRef = useRef(null);
-
+  
   const {styles, placement} = usePopper({
     referrenceRef: anchorRef,
     popperRef: mentionsRef,
     placement: 'top-start',
   });
-
+  
   const onSelection = (item) => {
     const value = editor.value;
     const [, inputValue] = getInput(value);
-
+    
     // Delete the captured value, including the `@` symbol
     editor.deleteBackward(inputValue.length + 1)
-
+    
     const selectedRange = editor.value.selection;
-
+    
     editor
       .insertText(' ')
       .insertInlineAtRange(selectedRange, {
@@ -48,7 +48,7 @@ const Suggestions = ({setFlags, children, editor, emitter, initialQuery, mention
       })
       .focus();
   };
-
+  
   const indexReducer = (state, action) => {
     switch (action.type) {
       case 'INCREMENT':
@@ -83,7 +83,7 @@ const Suggestions = ({setFlags, children, editor, emitter, initialQuery, mention
     }
   };
   const [state, dispatch] = useReducer(indexReducer, {disabled: false, items: [], index: 0});
-
+  
   const search = useCallback((q) => {
     mentions.filter((q === null) ? '' : q)
       .then((items) => emitter.emit('DISPATCH_SEARCH', items));
@@ -94,7 +94,7 @@ const Suggestions = ({setFlags, children, editor, emitter, initialQuery, mention
   useEffect(() => {
     search(initialQuery)
   }, []); /* eslint-disable-line react-hooks/exhaustive-deps */
-
+  
   const moveUp = () => {
     dispatch({type: 'DECREMENT'});
   };
@@ -115,7 +115,6 @@ const Suggestions = ({setFlags, children, editor, emitter, initialQuery, mention
     emitter.on('DISABLE', disable);
     emitter.on('SEARCH', search);
     emitter.on('DISPATCH_SEARCH', dispatchSearch);
-    editor.props.emitter.on('UPDATE', search);
 
     return () => {
       emitter.off('MOVE_DOWN', moveDown);
@@ -124,15 +123,14 @@ const Suggestions = ({setFlags, children, editor, emitter, initialQuery, mention
       emitter.off('DISABLE', disable);
       emitter.off('SEARCH', search);
       emitter.off('DISPATCH_SEARCH', dispatchSearch);
-      editor.props.emitter.off('UPDATE', search);
     }
-  }, [editor, search, emitter]);
-
+  }, [search, emitter]);
+  
   useEffect(() => {
     setFlags({
       open: true,
     });
-
+    
     return () => {
       setFlags({
         open: false,
@@ -145,7 +143,7 @@ const Suggestions = ({setFlags, children, editor, emitter, initialQuery, mention
       suggestionRef.current.scrollIntoView(false);
     }
   });
-
+  
   let items;
   if (!state.disabled && state.items.length) {
     setFlags({open: true});
@@ -171,7 +169,7 @@ const Suggestions = ({setFlags, children, editor, emitter, initialQuery, mention
         <div {...itemProps}>
           {render}
         </div>
-      )
+      ) 
     });
   }
   else {
