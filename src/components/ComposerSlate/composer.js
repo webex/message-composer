@@ -79,11 +79,11 @@ const Composer = ({
   disabled, draft, notifyKeyDown, placeholder,
 }) => {
   const editor = useRef(null);
-  
+
   const focus = () => editor.current.focus();
 
   const insert = (s) => editor.current.insertText(s);
-  
+
   const toggleStyle = (type) => {
     editor.current.toggleMark(type)
   };
@@ -124,7 +124,7 @@ const Composer = ({
       emitter.off('SEND');
     }
   }, [emitter]);
-  
+
   const activeStates = useRef({});
   const updateActiveStates = (value) => {
     if (active) {
@@ -194,6 +194,7 @@ const Composer = ({
         send={send}
         markdown={markdown}
         mentions={mentions}
+        emitter={emitter}
       />
     </div>
   );
