@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/webex/message-composer/compare/v1.1.0...v1.1.1) (2019-12-05)
+
+
+### Bug Fixes
+
+* **eslint:** add eslint ([1225013](https://github.com/webex/message-composer/commit/1225013c256cd6697df671cfe1e204d0481c173c))
+
 # [1.1.0](https://github.com/webex/message-composer/compare/v1.0.2...v1.1.0) (2019-12-05)
 
 
