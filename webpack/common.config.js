@@ -30,7 +30,7 @@ module.exports = (mode) => {
         {
           test: /\.scss$/,
           use: [
-            mode === 'development' ? 'style-loader' : MiniCssExtractPlugin.loader, // creates style nodes from JS strings
+            'style-loader', // creates style nodes from JS strings
             'css-loader', // translates CSS into CommonJS
             'resolve-url-loader', // resolves sass urls properly
             {
