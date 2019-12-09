@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/webex/message-composer/compare/v1.1.2...v1.2.0) (2019-12-09)
+
+
+### Features
+
+* **send-message:** clear message if send was successful ([52baa64](https://github.com/webex/message-composer/commit/52baa648c33117055b8a61072e998118b90216a9))
+
 ## [1.1.2](https://github.com/webex/message-composer/compare/v1.1.1...v1.1.2) (2019-12-05)
 
 
