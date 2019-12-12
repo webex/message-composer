@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/webex/message-composer/compare/v1.2.0...v1.2.1) (2019-12-12)
+
+
+### Bug Fixes
+
+* **composer:** remove draft from useEffect dependencies ([5e2592b](https://github.com/webex/message-composer/commit/5e2592b3a7ae2e809e170e749a8d2f876275f506))
+
 # [1.2.0](https://github.com/webex/message-composer/compare/v1.1.2...v1.2.0) (2019-12-09)
 
 
