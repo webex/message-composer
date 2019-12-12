@@ -170,7 +170,8 @@ const Composer = ({emitter, active, markdown, mentions, send, disabled, draft, n
     if (draft.save) {
       draft.save(value, draft.id);
     }
-  }, [draft, value]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
 
   useEffect(() => {
     const val = markMention(editor.current);

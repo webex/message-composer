@@ -17,6 +17,7 @@ module.exports = (mode) => {
       libraryTarget: 'umd',
       library: '@webex/message-composer',
     },
+    devtool: mode === 'development' ? 'cheap-module-source-map' : 'source-map',
     module: {
       rules: [
         {
