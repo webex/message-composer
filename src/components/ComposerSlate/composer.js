@@ -105,6 +105,7 @@ const Composer = ({emitter, active, markdown, mentions, send, disabled, draft, n
     emitter.on('INSERT_TEXT', insert);
 
     emitter.on('SEND', () => editor.current.sendMessage());
+    emitter.on('CLEAR', () => editor.current.clearMessage());
 
     return () => {
       emitter.off('toggleBold');
@@ -121,6 +122,7 @@ const Composer = ({emitter, active, markdown, mentions, send, disabled, draft, n
       emitter.off('INSERT_TEXT', insert);
 
       emitter.off('SEND');
+      emitter.off('CLEAR');
     };
   }, [emitter]);
 

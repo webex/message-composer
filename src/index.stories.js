@@ -134,6 +134,11 @@ export const Example = () => {
     emitter.current.emit('SEND');
   };
 
+  const clear = (e) => {
+    e.preventDefault();
+    emitter.current.emit('CLEAR');
+  };
+
   const onSend = (val) => {
     setMessage(val);
 
@@ -191,6 +196,7 @@ export const Example = () => {
         <button onClick={toggleMarkdownDisabled}>{isMarkdownDisabled ? 'enable markdown' : 'disable markdown'}</button>
         <button onClick={toggleFailSend}>{failSend ? 'send message successfully' : 'make send message fail'}</button>
         <button onClick={send}>SEND</button>
+        <button onClick={clear}>CLEAR</button>
         <button onClick={changePlaceholder}>Change placeholder</button>
       </div>
     </div>

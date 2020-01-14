@@ -259,6 +259,13 @@ const serializePlugin = (value) => {
           editor.focus();
         });
       },
+      clearMessage(editor) {
+        editor.props.onChange({value});
+
+        setTimeout(() => {
+          editor.focus();
+        });
+      },
     },
   };
 };
