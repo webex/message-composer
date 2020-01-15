@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/webex/message-composer/compare/v1.2.1...v1.3.0) (2020-01-15)
+
+
+### Features
+
+* **message-composer:** add 'clear' emitter to clear message-composer ([#27](https://github.com/webex/message-composer/issues/27)) ([1d2df46](https://github.com/webex/message-composer/commit/1d2df463c7ec2ff7e2017d29f00f745460cfd90b))
+
 ## [1.2.1](https://github.com/webex/message-composer/compare/v1.2.0...v1.2.1) (2019-12-12)
 
 
