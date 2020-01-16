@@ -93,7 +93,7 @@ export default {
   title: 'MessageComposer',
 };
 
-export const Example = () => {
+const Example = (composerType) => {
   const [message, setMessage] = useState('');
   const [number, setNumber] = useState(1);
   const [failSend, setFailSend] = useState(false);
@@ -186,6 +186,7 @@ export const Example = () => {
           notifyKeyDown={notifyKeyDown}
           placeholder={placeholder}
           setEmitter={setEmitter}
+          composerType={composerType}
         />
         <br />
         <div>Sending: {JSON.stringify(message)}</div>
@@ -202,3 +203,6 @@ export const Example = () => {
     </div>
   );
 };
+
+export const Slate = () => Example('slate');
+export const Quill = () => Example('quill');

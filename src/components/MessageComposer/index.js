@@ -3,7 +3,8 @@ import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import {TinyEmitter} from 'tiny-emitter';
 
-import Composer from '../ComposerSlate';
+import SlateComposer from '../ComposerSlate';
+import QuillComposer from '../ComposerQuill';
 import ToolbarDefault from '../Toolbar';
 
 import './styles.scss';
@@ -43,6 +44,7 @@ const MessageComposer = ({
   setEmitter,
   notifyKeyDown,
   placeholder,
+  composerType,
 }) => {
   const emitter = useRef(new TinyEmitter());
   const [active, setActive] = useState({});
@@ -57,9 +59,25 @@ const MessageComposer = ({
 
   const containerClasses = classnames('message-composer-container', {disabled});
 
+  let Composer;
+
+  switch (composerType) {
+    default:
+    case 'slate': {
+      Composer = SlateComposer;
+      break;
+    }
+    case 'quill': {
+      Composer = QuillComposer;
+      break;
+    }
+  }
+
   return (
     <div className={containerClasses}>
-      <div className="toolbar">{toolbarDom}</div>
+      <div className="toolbar" id="toolbar">
+        {toolbarDom}
+      </div>
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
       <div className="composer" onClick={focus}>
         <Composer
@@ -99,6 +117,7 @@ MessageComposer.propTypes = {
   notifyKeyDown: PropTypes.func,
   send: PropTypes.func,
   placeholder: PropTypes.string,
+  composerType: PropTypes.oneOf(['slate', 'quill']),
 };
 
 MessageComposer.defaultProps = {
@@ -112,6 +131,7 @@ MessageComposer.defaultProps = {
   notifyKeyDown: null,
   send: undefined,
   placeholder: '',
+  composerType: 'slate',
 };
 
 export default MessageComposer;
