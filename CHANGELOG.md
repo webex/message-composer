@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/webex/message-composer/compare/v1.3.0...v1.4.0) (2020-01-16)
+
+
+### Features
+
+* **quill:** add quill composer ([1390e87](https://github.com/webex/message-composer/commit/1390e87846a9040f9d5552d364799e9ba2abb163))
+
 # [1.3.0](https://github.com/webex/message-composer/compare/v1.2.1...v1.3.0) (2020-01-15)
 
 
