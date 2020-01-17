@@ -37,7 +37,8 @@
     "react-icons-kit": "^1.2.1",
     "react-portal": "^4.2.0",
     "slate-react": "^0.21.24",
-    "tiny-emitter": "^2.1.0"
+    "tiny-emitter": "^2.1.0",
+    "turndown": "^5.0.3"
   },
   "devDependencies": {
     "@babel/cli": "^7.6.4",
