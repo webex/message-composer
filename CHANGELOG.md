@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/webex/message-composer/compare/v1.4.0...v1.5.0) (2020-01-22)
+
+
+### Features
+
+* **quill:** add handling for reply and edit messages ([dd987b5](https://github.com/webex/message-composer/commit/dd987b54a9e097ca1bff309a5e76c2a96e2de07f))
+
 # [1.4.0](https://github.com/webex/message-composer/compare/v1.3.0...v1.4.0) (2020-01-16)
 
 
