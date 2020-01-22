@@ -41,6 +41,7 @@ class Composer extends React.Component {
     const bindings = {
       enter: {
         key: 13,
+        // need to bind our own this or else quill will bind their own and cause us to not be able to access other class methods
         handler: this.handleEnter.bind(this),
       },
     };
