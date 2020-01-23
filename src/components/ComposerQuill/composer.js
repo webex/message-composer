@@ -29,18 +29,20 @@ class Composer extends React.Component {
     this.insert = this.insert.bind(this);
     this.handleEnter = this.handleEnter.bind(this);
     this.handleTextChange = this.handleTextChange.bind(this);
+    this.saveToDraft = this.saveToDraft.bind(this);
   }
 
   componentDidMount() {
     const {draft, emitter} = this.props;
 
     emitter.on('INSERT_TEXT', this.insert);
-    emitter.on('SEND', this.handleEnter());
+    emitter.on('SEND', this.handleEnter);
 
     const bindings = {
       enter: {
         key: 13,
-        handler: this.handleEnter(),
+        // need to bind our own this or else quill will bind their own and cause us to not be able to access other class methods
+        handler: this.handleEnter.bind(this),
       },
     };
 
@@ -62,10 +64,13 @@ class Composer extends React.Component {
       placeholder: 'Compose something awesome...',
     });
 
-    // inserts text into composer
+    // inserts the initial text to the composer
+    // may contain formats as html tags, so convert those to markdowns
     if (draft?.value) {
-      // converts text from html to markdown
-      const text = td.turndown(draft.value);
+      // replace new lines with <br> tag so turndown can convert it properly
+      const modified = draft.value.replace(/\n/g, '<br />');
+      // converts text from html to a string with markdown
+      const text = td.turndown(modified);
 
       this.quill.setText(text);
     }
@@ -74,25 +79,36 @@ class Composer extends React.Component {
 
     // TODO: using this for testing, remove in final release
     window.quill = this.quill;
+    window.md = md;
+    window.td = td;
+  }
+
+  componentDidUpdate(prevProps) {
+    const {draft} = this.props;
+    const prevDraft = prevProps.draft;
+
+    // updates the text in the composer as we switch conversations
+    if (prevDraft.id !== draft.id) {
+      if (draft?.value) {
+        this.quill.setText(draft.value);
+      } else {
+        this.quill.setText('');
+      }
+    }
   }
 
   handleEnter() {
-    // TODO: Don't know if there is a better way to do this but...
-    // the function passed to keyboard binding will that this binded with quill
-    // but we need to access this.props. So we grab it here and save it off as a variable.
-    // That way we can use it in the returned function.
     const {send} = this.props;
+    const text = this.quill.getText().trim();
+    // converts text from markdown to html
+    const parsed = md.renderInline(text);
 
-    return () => {
-      const text = this.quill.root.textContent;
-      // converts text from markdown to html
-      const parsed = md.renderInline(text);
+    // TODO: we probably want to remove the markdown characters from text before we pass to displayName
 
-      // TODO: we probably want to remove the markdown characters from text before we pass to displayName
-
-      send({displayName: text, content: parsed});
-      this.quill.setText('');
-    };
+    send({displayName: text, content: parsed});
+    // clear the composer and reset the draft
+    this.quill.setText('');
+    this.saveToDraft();
   }
 
   // Goes through the list and checks if the search term is in it
@@ -111,15 +127,24 @@ class Composer extends React.Component {
     }
   }
 
-  handleTextChange() {
-    const {draft, notifyKeyDown} = this.props;
+  handleTextChange(delta, oldDelta, source) {
+    const {notifyKeyDown} = this.props;
 
-    if (notifyKeyDown) {
-      notifyKeyDown();
+    // only do these stuff if user initiated
+    if (source === 'user') {
+      if (notifyKeyDown) {
+        notifyKeyDown();
+      }
+
+      this.saveToDraft();
     }
+  }
+
+  saveToDraft() {
+    const {draft} = this.props;
 
     if (draft?.save) {
-      draft.save(this.quill.root.textContent, draft.id);
+      draft.save(this.quill.getText().trim(), draft.id);
     }
   }
 
