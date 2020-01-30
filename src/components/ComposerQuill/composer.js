@@ -1,9 +1,12 @@
 import React from 'react';
+import ReactDOMServer from 'react-dom/server';
+import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import MarkdownIt from 'markdown-it';
 import Turndown from 'turndown';
 
 import Quill from './quill';
+import './styles.scss';
 
 const md = new MarkdownIt('commonmark'); // converts markdown to html
 const td = new Turndown(); // converts html to markdown
@@ -11,6 +14,8 @@ const td = new Turndown(); // converts html to markdown
 // Turndown escapes markdown characters to prevent them from being compiled back to html
 // We don't need this, so we're just going to return the text without any escaped characters
 td.escape = (text) => text;
+// Turndown tries to convert all html elements. This is a filter for the ones to keep
+td.keep(['spark-mention']);
 
 // TODO: Test list for mention. We will get this list from client later
 const list = [
@@ -30,6 +35,7 @@ class Composer extends React.Component {
     this.handleEnter = this.handleEnter.bind(this);
     this.handleTextChange = this.handleTextChange.bind(this);
     this.saveToDraft = this.saveToDraft.bind(this);
+    this.renderMentionItem = this.renderMentionItem.bind(this);
   }
 
   componentDidMount() {
@@ -52,9 +58,13 @@ class Composer extends React.Component {
           bindings,
         },
         mention: {
+          dataAttributes: ['objectType'],
           defaultMenuOrientation: 'top',
           mentionDenotationChars: ['@'],
-          source: this.handleMention,
+          onSelect: this.handleMentionSelect,
+          renderItem: this.renderMentionItem,
+          source: this.handleMention.bind(this),
+          spaceAfterInsert: false,
         },
         toolbar: {
           container: '#toolbar',
@@ -71,8 +81,10 @@ class Composer extends React.Component {
       const modified = draft.value.replace(/\n/g, '<br />');
       // converts text from html to a string with markdown
       const text = td.turndown(modified);
+      // there may be mentions, so convert it to deltas before we insert
+      const contents = this.buildContents(text);
 
-      this.quill.setText(text);
+      this.quill.setContents(contents);
     }
 
     this.quill.on('text-change', this.handleTextChange);
@@ -90,16 +102,47 @@ class Composer extends React.Component {
     // updates the text in the composer as we switch conversations
     if (prevDraft.id !== draft.id) {
       if (draft?.value) {
-        this.quill.setText(draft.value);
+        // there may be mentions, so convert it to deltas before we insert
+        const contents = this.buildContents(draft.value);
+
+        this.quill.setContents(contents);
       } else {
         this.quill.setText('');
       }
     }
   }
 
+  // gets the text inside the composer
+  getQuillText(quill) {
+    const sb = [];
+    const contents = quill.getContents();
+
+    contents.forEach((op) => {
+      if (typeof op.insert === 'string') {
+        sb.push(op.insert);
+      } else if (typeof op.insert === 'object') {
+        if (op.insert.mention) {
+          const {mention} = op.insert;
+
+          if (mention.objectType === 'groupMention') {
+            sb.push("<spark-mention data-object-type='groupMention' data-group-type='all'>");
+            sb.push(mention.value);
+            sb.push('</spark-mention>');
+          } else {
+            sb.push(`<spark-mention data-object-type='person' data-object-id='${mention.id}'>`);
+            sb.push(mention.value);
+            sb.push('</spark-mention>');
+          }
+        }
+      }
+    });
+
+    return sb.join('');
+  }
+
   handleEnter() {
     const {send} = this.props;
-    const text = this.quill.getText().trim();
+    const text = this.getQuillText(this.quill);
     // converts text from markdown to html
     const parsed = md.renderInline(text);
 
@@ -113,18 +156,39 @@ class Composer extends React.Component {
 
   // Goes through the list and checks if the search term is in it
   handleMention(searchTerm, renderList) {
+    // console.log('mentions this', this);
+
+    const {mentions} = this.props;
+    const {participants} = mentions;
+
+    const participants2 = participants.current;
+
+    // console.log('mentions participants', participants2);
+
     if (searchTerm.length === 0) {
-      renderList(list, searchTerm);
+      renderList(participants2, searchTerm);
     } else {
       const matches = [];
 
-      for (let i = 0; i < list.length; i += 1) {
-        if (list[i].value.toLowerCase().indexOf(searchTerm.toLowerCase()) >= 0) {
-          matches.push(list[i]);
+      for (let i = 0; i < participants2.length; i += 1) {
+        if (participants2[i].value.toLowerCase().indexOf(searchTerm.toLowerCase()) >= 0) {
+          matches.push(participants2[i]);
         }
       }
       renderList(matches, searchTerm);
     }
+  }
+
+  handleMentionSelect(item, insertItem) {
+    const name = item.value;
+    const index = name.indexOf(' ');
+
+    if (index > 1) {
+      item.value = name.substring(0, index);
+    }
+
+    // console.log('mention item', item);
+    insertItem(item);
   }
 
   handleTextChange(delta, oldDelta, source) {
@@ -144,7 +208,7 @@ class Composer extends React.Component {
     const {draft} = this.props;
 
     if (draft?.save) {
-      draft.save(this.quill.getText().trim(), draft.id);
+      draft.save(this.getQuillText(this.quill), draft.id);
     }
   }
 
@@ -153,6 +217,63 @@ class Composer extends React.Component {
     const range = this.quill.getSelection();
 
     this.quill.insertText(range.index, text);
+  }
+
+  // converts a string of text into operation deltas
+  buildContents(text) {
+    const split = text.split(/(<spark-mention [a-zA-Z0-9-='"\s]+>.+?<\/spark-mention>)/);
+
+    const contents = split.map((line) => {
+      // convert spark-mention into a mention delta
+      if (line.indexOf('<spark-mention ') === 0) {
+        // converts the string to a html element so we can grab the data
+        const object = new DOMParser().parseFromString(line, 'text/xml');
+        // DOMParser returns a document but we just need the first element
+        const mention = object.firstChild;
+        const objectType = mention.getAttribute('data-object-type');
+        let objectId;
+
+        if (objectType === 'person') {
+          objectId = mention.getAttribute('data-object-id');
+        }
+
+        return {
+          insert: {
+            mention: {
+              index: 0,
+              denotationChar: '@',
+              id: objectId,
+              objectType,
+              value: mention.textContent,
+            },
+          },
+        };
+      }
+
+      // otherwise just insert the text
+      return {insert: line};
+    });
+
+    return contents;
+  }
+
+  renderMentionItem(item) {
+    // console.log('mention item', item);
+    const {mentions} = this.props;
+    const {getAvatar} = mentions;
+    const avatar = getAvatar(item.id);
+
+    // console.log('mention render', avatar);
+
+    // const div = document.createElement('div');
+
+    // ReactDOM.render(avatar, div);
+
+    // const result = ReactDOMServer.renderToStaticMarkup(avatar);
+
+    // console.log('mention result', result);
+
+    return avatar;
   }
 
   render() {
