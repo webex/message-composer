@@ -2,5 +2,21 @@
   .ql-mention-list-container {
     max-height: 220px;
     overflow-y: auto;
+
+    .ql-mention-list-item {
+      display: flex;
+
+      .ql-mention-avatar {
+        background-color: lightgray;
+        border-radius: 1000px;
+        font-size: .525rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 1.6rem;
+        width: 1.6rem;
+        margin: auto 10px;
+      }
+    }
   }
 }

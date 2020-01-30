@@ -1,6 +1,4 @@
 import React from 'react';
-import ReactDOMServer from 'react-dom/server';
-import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import MarkdownIt from 'markdown-it';
 import Turndown from 'turndown';
@@ -58,7 +56,7 @@ class Composer extends React.Component {
           bindings,
         },
         mention: {
-          dataAttributes: ['objectType'],
+          dataAttributes: ['objectType', 'src'],
           defaultMenuOrientation: 'top',
           mentionDenotationChars: ['@'],
           onSelect: this.handleMentionSelect,
@@ -258,22 +256,33 @@ class Composer extends React.Component {
   }
 
   renderMentionItem(item) {
-    // console.log('mention item', item);
-    const {mentions} = this.props;
-    const {getAvatar} = mentions;
-    const avatar = getAvatar(item.id);
+    let avatar;
+    const {id, src, value} = item;
 
-    // console.log('mention render', avatar);
+    if (src) {
+      // if we have a picture then use that
+      avatar = `<img class='ql-mention-avatar' src='${src}'>`;
+    } else {
+      let result;
 
-    // const div = document.createElement('div');
+      if (id === 'all') {
+        result = '@';
+      } else {
+        // otherwise get the initials of the name
+        const initials = [value.charAt(0)];
+        const space = value.indexOf(' ');
 
-    // ReactDOM.render(avatar, div);
+        if (space >= 0) {
+          initials.push(value.charAt(space + 1));
+        }
 
-    // const result = ReactDOMServer.renderToStaticMarkup(avatar);
+        result = initials.join('').toUpperCase();
+      }
 
-    // console.log('mention result', result);
+      avatar = `<span class='ql-mention-avatar'>${result}</span>`;
+    }
 
-    return avatar;
+    return `${avatar}${value}`;
   }
 
   render() {
