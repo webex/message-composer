@@ -1,4 +1,10 @@
 .ql-container {
+  .ql-editor {
+    &:focus {
+      box-shadow: none;
+    }
+  }
+
   .ql-mention-list-container {
     max-height: 220px;
     overflow-y: auto;
