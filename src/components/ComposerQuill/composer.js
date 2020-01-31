@@ -15,15 +15,6 @@ td.escape = (text) => text;
 // Turndown tries to convert all html elements. This is a filter for the ones to keep
 td.keep(['spark-mention']);
 
-// TODO: Test list for mention. We will get this list from client later
-const list = [
-  {id: 1, value: 'Michael'},
-  {id: 1, value: 'Pam'},
-  {id: 1, value: 'Jim'},
-  {id: 1, value: 'Dwight'},
-  {id: 1, value: 'Toby'},
-];
-
 class Composer extends React.Component {
   constructor(props) {
     super(props);
@@ -56,7 +47,7 @@ class Composer extends React.Component {
           bindings,
         },
         mention: {
-          dataAttributes: ['objectType', 'src'],
+          dataAttributes: ['displayName', 'objectType', 'src'],
           defaultMenuOrientation: 'top',
           mentionDenotationChars: ['@'],
           onSelect: this.handleMentionSelect,
@@ -112,30 +103,32 @@ class Composer extends React.Component {
 
   // gets the text inside the composer
   getQuillText(quill) {
-    const sb = [];
     const contents = quill.getContents();
+    let sb = '';
 
     contents.forEach((op) => {
       if (typeof op.insert === 'string') {
-        sb.push(op.insert);
+        // if its just a string then we can insert right away
+        sb += op.insert;
       } else if (typeof op.insert === 'object') {
         if (op.insert.mention) {
+          // if it's a mention object, convert it to a string with spark-mention tag
           const {mention} = op.insert;
 
           if (mention.objectType === 'groupMention') {
-            sb.push("<spark-mention data-object-type='groupMention' data-group-type='all'>");
-            sb.push(mention.value);
-            sb.push('</spark-mention>');
+            sb += "<spark-mention data-object-type='groupMention' data-group-type='all'>";
+            sb += mention.value;
+            sb += '</spark-mention>';
           } else {
-            sb.push(`<spark-mention data-object-type='person' data-object-id='${mention.id}'>`);
-            sb.push(mention.value);
-            sb.push('</spark-mention>');
+            sb += `<spark-mention data-object-type='person' data-object-id='${mention.id}'>`;
+            sb += mention.value;
+            sb += '</spark-mention>';
           }
         }
       }
     });
 
-    return sb.join('');
+    return sb;
   }
 
   handleEnter() {
@@ -154,23 +147,16 @@ class Composer extends React.Component {
 
   // Goes through the list and checks if the search term is in it
   handleMention(searchTerm, renderList) {
-    // console.log('mentions this', this);
-
-    const {mentions} = this.props;
-    const {participants} = mentions;
-
-    const participants2 = participants.current;
-
-    // console.log('mentions participants', participants2);
+    const participants = this.props.mentions.participants.current;
 
     if (searchTerm.length === 0) {
-      renderList(participants2, searchTerm);
+      renderList(participants, searchTerm);
     } else {
       const matches = [];
 
-      for (let i = 0; i < participants2.length; i += 1) {
-        if (participants2[i].value.toLowerCase().indexOf(searchTerm.toLowerCase()) >= 0) {
-          matches.push(participants2[i]);
+      for (let i = 0; i < participants.length; i += 1) {
+        if (participants[i].displayName.toLowerCase().indexOf(searchTerm.toLowerCase()) >= 0) {
+          matches.push(participants[i]);
         }
       }
       renderList(matches, searchTerm);
@@ -178,15 +164,16 @@ class Composer extends React.Component {
   }
 
   handleMentionSelect(item, insertItem) {
-    const name = item.value;
+    const copy = {...item};
+    const name = item.displayName;
     const index = name.indexOf(' ');
 
+    // insert just the first name
     if (index > 1) {
-      item.value = name.substring(0, index);
+      copy.value = name.substring(0, index);
     }
 
-    // console.log('mention item', item);
-    insertItem(item);
+    insertItem(copy);
   }
 
   handleTextChange(delta, oldDelta, source) {
@@ -256,33 +243,53 @@ class Composer extends React.Component {
   }
 
   renderMentionItem(item) {
+    const {id, src, displayName} = item;
+    let classes = 'ql-mention-avatar';
     let avatar;
-    const {id, src, value} = item;
+    let secondary;
 
     if (src) {
       // if we have a picture then use that
-      avatar = `<img class='ql-mention-avatar' src='${src}'>`;
+      avatar = `<img class='${classes}' src='${src}'>`;
     } else {
-      let result;
+      // otherwise we build it ourself
+      let initials;
 
       if (id === 'all') {
-        result = '@';
+        // avatar is a circle @ for all
+        classes += ' all';
+        initials = '@';
+        secondary = 'Mention everyone in this space';
       } else {
-        // otherwise get the initials of the name
-        const initials = [value.charAt(0)];
-        const space = value.indexOf(' ');
+        // use the initials of the name as the avatar
+        let chars = displayName.charAt(0);
+        const space = displayName.indexOf(' ');
 
         if (space >= 0) {
-          initials.push(value.charAt(space + 1));
+          chars += displayName.charAt(space + 1);
         }
 
-        result = initials.join('').toUpperCase();
+        initials = chars.toUpperCase();
       }
 
-      avatar = `<span class='ql-mention-avatar'>${result}</span>`;
+      avatar = `<div class='${classes}'>${initials}</div>`;
     }
 
-    return `${avatar}${value}`;
+    // build the text element
+    let text = '';
+
+    text += "<div class='ql-mention-item-text'>";
+    text += "<div class='ql-mention-item-text-primary'>";
+    text += displayName;
+    text += '</div>';
+    if (secondary) {
+      text += "<div class='ql-mention-item-text-secondary'>";
+      text += secondary;
+      text += '</div>';
+    }
+    text += '</div>';
+
+    return `${avatar}${text}`;
   }
 
   render() {
@@ -305,12 +312,18 @@ Composer.propTypes = {
     off: PropTypes.func,
     emit: PropTypes.func,
   }).isRequired,
+  mentions: PropTypes.shape({
+    participants: PropTypes.shape({
+      current: PropTypes.array,
+    }),
+  }),
   notifyKeyDown: PropTypes.func,
   send: PropTypes.func,
 };
 
 Composer.defaultProps = {
   draft: {},
+  mentions: undefined,
   notifyKeyDown: undefined,
   send: undefined,
 };
