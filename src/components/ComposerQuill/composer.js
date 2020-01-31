@@ -24,7 +24,6 @@ class Composer extends React.Component {
     this.handleEnter = this.handleEnter.bind(this);
     this.handleTextChange = this.handleTextChange.bind(this);
     this.saveToDraft = this.saveToDraft.bind(this);
-    this.renderMentionItem = this.renderMentionItem.bind(this);
   }
 
   componentDidMount() {
@@ -168,10 +167,8 @@ class Composer extends React.Component {
     const name = item.displayName;
     const index = name.indexOf(' ');
 
-    // insert just the first name
-    if (index > 1) {
-      copy.value = name.substring(0, index);
-    }
+    // get the first name if there is one, otherwise copy the name
+    copy.value = index > 0 ? name.substring(0, index) : name;
 
     insertItem(copy);
   }
