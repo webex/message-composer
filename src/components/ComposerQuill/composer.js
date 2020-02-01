@@ -4,6 +4,7 @@ import MarkdownIt from 'markdown-it';
 import Turndown from 'turndown';
 
 import Quill from './quill';
+import {buildContents, buildMentionAvatar, buildMentionText, getFirstName, getQuillText} from './utils';
 import './styles.scss';
 
 const md = new MarkdownIt('commonmark'); // converts markdown to html
@@ -23,6 +24,7 @@ class Composer extends React.Component {
     this.insert = this.insert.bind(this);
     this.handleEnter = this.handleEnter.bind(this);
     this.handleTextChange = this.handleTextChange.bind(this);
+    this.handleMentionSelect = this.handleMentionSelect.bind(this);
     this.saveToDraft = this.saveToDraft.bind(this);
   }
 
@@ -50,7 +52,7 @@ class Composer extends React.Component {
           defaultMenuOrientation: 'top',
           mentionDenotationChars: ['@'],
           onSelect: this.handleMentionSelect,
-          renderItem: this.renderMentionItem,
+          renderItem: this.handleMentionItem,
           source: this.handleMention.bind(this),
           spaceAfterInsert: false,
         },
@@ -70,7 +72,7 @@ class Composer extends React.Component {
       // converts text from html to a string with markdown
       const text = td.turndown(modified);
       // there may be mentions, so convert it to deltas before we insert
-      const contents = this.buildContents(text);
+      const contents = buildContents(text);
 
       this.quill.setContents(contents);
     }
@@ -91,7 +93,7 @@ class Composer extends React.Component {
     if (prevDraft.id !== draft.id) {
       if (draft?.value) {
         // there may be mentions, so convert it to deltas before we insert
-        const contents = this.buildContents(draft.value);
+        const contents = buildContents(draft.value);
 
         this.quill.setContents(contents);
       } else {
@@ -100,39 +102,9 @@ class Composer extends React.Component {
     }
   }
 
-  // gets the text inside the composer
-  getQuillText(quill) {
-    const contents = quill.getContents();
-    let sb = '';
-
-    contents.forEach((op) => {
-      if (typeof op.insert === 'string') {
-        // if its just a string then we can insert right away
-        sb += op.insert;
-      } else if (typeof op.insert === 'object') {
-        if (op.insert.mention) {
-          // if it's a mention object, convert it to a string with spark-mention tag
-          const {mention} = op.insert;
-
-          if (mention.objectType === 'groupMention') {
-            sb += "<spark-mention data-object-type='groupMention' data-group-type='all'>";
-            sb += mention.value;
-            sb += '</spark-mention>';
-          } else {
-            sb += `<spark-mention data-object-type='person' data-object-id='${mention.id}'>`;
-            sb += mention.value;
-            sb += '</spark-mention>';
-          }
-        }
-      }
-    });
-
-    return sb;
-  }
-
   handleEnter() {
     const {send} = this.props;
-    const text = this.getQuillText(this.quill);
+    const text = getQuillText(this.quill);
     // converts text from markdown to html
     const parsed = md.renderInline(text);
 
@@ -144,31 +116,58 @@ class Composer extends React.Component {
     this.saveToDraft();
   }
 
-  // Goes through the list and checks if the search term is in it
+  // When user types @, this renders the mention list
   handleMention(searchTerm, renderList) {
     const participants = this.props.mentions.participants.current;
+    let matches;
 
+    // Goes through the list and checks if the search term is in it
     if (searchTerm.length === 0) {
-      renderList(participants, searchTerm);
+      matches = participants.slice(0, 20);
     } else {
-      const matches = [];
+      matches = [];
 
       for (let i = 0; i < participants.length; i += 1) {
+        if (matches.length >= 20) {
+          // only show up to 20 people
+          break;
+        }
+
         if (participants[i].displayName.toLowerCase().indexOf(searchTerm.toLowerCase()) >= 0) {
           matches.push(participants[i]);
         }
       }
-      renderList(matches, searchTerm);
     }
+
+    renderList(matches, searchTerm);
   }
 
+  // This renders each item in the mention list
+  // The return is set as the innerHTML of an element
+  handleMentionItem(item) {
+    const avatar = buildMentionAvatar(item);
+    const text = buildMentionText(item);
+
+    return `${avatar}${text}`;
+  }
+
+  // Called when user selects a mention item
   handleMentionSelect(item, insertItem) {
+    const participants = this.props.mentions.participants.current;
     const copy = {...item};
     const name = item.displayName;
-    const index = name.indexOf(' ');
+    const first = getFirstName(name);
 
-    // get the first name if there is one, otherwise copy the name
-    copy.value = index > 0 ? name.substring(0, index) : name;
+    // show just the first name unless someone else has the same first name
+    // check how many other participants have the same first name
+    const duplicates = participants.reduce((sum, participant) => {
+      const given = getFirstName(participant.displayName);
+
+      return first === given ? sum + 1 : sum;
+    }, 0);
+
+    // if there is more than one of you, then show full name instead
+    copy.value = duplicates > 1 ? name : first;
 
     insertItem(copy);
   }
@@ -190,7 +189,7 @@ class Composer extends React.Component {
     const {draft} = this.props;
 
     if (draft?.save) {
-      draft.save(this.getQuillText(this.quill), draft.id);
+      draft.save(getQuillText(this.quill), draft.id);
     }
   }
 
@@ -199,94 +198,6 @@ class Composer extends React.Component {
     const range = this.quill.getSelection();
 
     this.quill.insertText(range.index, text);
-  }
-
-  // converts a string of text into operation deltas
-  buildContents(text) {
-    const split = text.split(/(<spark-mention [a-zA-Z0-9-='"\s]+>.+?<\/spark-mention>)/);
-
-    const contents = split.map((line) => {
-      // convert spark-mention into a mention delta
-      if (line.indexOf('<spark-mention ') === 0) {
-        // converts the string to a html element so we can grab the data
-        const object = new DOMParser().parseFromString(line, 'text/xml');
-        // DOMParser returns a document but we just need the first element
-        const mention = object.firstChild;
-        const objectType = mention.getAttribute('data-object-type');
-        let objectId;
-
-        if (objectType === 'person') {
-          objectId = mention.getAttribute('data-object-id');
-        }
-
-        return {
-          insert: {
-            mention: {
-              index: 0,
-              denotationChar: '@',
-              id: objectId,
-              objectType,
-              value: mention.textContent,
-            },
-          },
-        };
-      }
-
-      // otherwise just insert the text
-      return {insert: line};
-    });
-
-    return contents;
-  }
-
-  renderMentionItem(item) {
-    const {id, src, displayName} = item;
-    let classes = 'ql-mention-avatar';
-    let avatar;
-    let secondary;
-
-    if (src) {
-      // if we have a picture then use that
-      avatar = `<img class='${classes}' src='${src}'>`;
-    } else {
-      // otherwise we build it ourself
-      let initials;
-
-      if (id === 'all') {
-        // avatar is a circle @ for all
-        classes += ' all';
-        initials = '@';
-        secondary = 'Mention everyone in this space';
-      } else {
-        // use the initials of the name as the avatar
-        let chars = displayName.charAt(0);
-        const space = displayName.indexOf(' ');
-
-        if (space >= 0) {
-          chars += displayName.charAt(space + 1);
-        }
-
-        initials = chars.toUpperCase();
-      }
-
-      avatar = `<div class='${classes}'>${initials}</div>`;
-    }
-
-    // build the text element
-    let text = '';
-
-    text += "<div class='ql-mention-item-text'>";
-    text += "<div class='ql-mention-item-text-primary'>";
-    text += displayName;
-    text += '</div>';
-    if (secondary) {
-      text += "<div class='ql-mention-item-text-secondary'>";
-      text += secondary;
-      text += '</div>';
-    }
-    text += '</div>';
-
-    return `${avatar}${text}`;
   }
 
   render() {
