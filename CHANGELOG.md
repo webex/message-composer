@@ -1,3 +1,19 @@
+# [1.7.0](https://github.com/webex/message-composer/compare/v1.6.0...v1.7.0) (2020-02-05)
+
+
+### Bug Fixes
+
+* **mentions:** display full name; created utils file ([923c18d](https://github.com/webex/message-composer/commit/923c18d4f46cbad1f1918f2689410bb91f027776))
+* **mentions:** small bugs ([f363a5c](https://github.com/webex/message-composer/commit/f363a5c731ba8718348dafc7a01054edd3fd04c8))
+
+
+### Features
+
+* **mentions:** add mentions ([df90e9d](https://github.com/webex/message-composer/commit/df90e9d738b3a66ffb434a0c93978d1c8c33aec6))
+* **mentions:** maybe it'll work someday ([fd67688](https://github.com/webex/message-composer/commit/fd6768868ea6276afcf7b9c7002c16ffee7cd32d))
+* **mentions:** simple avatars ([9dda99f](https://github.com/webex/message-composer/commit/9dda99f8bcc1bd508ff6345885854d826c5100c4))
+* **quill:** styling touchup ([3c49eae](https://github.com/webex/message-composer/commit/3c49eae94bcd9356b9453769376f00da37858531))
+
 # [1.6.0](https://github.com/webex/message-composer/compare/v1.5.0...v1.6.0) (2020-01-23)
 
 
