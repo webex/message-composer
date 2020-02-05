@@ -1,0 +1,57 @@
+.ql-container {
+  .ql-editor {
+    &:focus {
+      box-shadow: none;
+    }
+  }
+
+  .ql-mention-list-container {
+    max-height: 220px;
+    width: initial;
+    min-width: 270px;
+    max-width: 400px;
+    overflow-y: auto;
+
+    .ql-mention-list-item {
+      display: flex;
+      align-items: center;
+      line-height: initial;
+      padding: initial;
+      overflow: hidden;
+
+      .ql-mention-avatar {
+        display: flex;
+        flex: 0 0 auto;
+        align-items: center;
+        justify-content: center;
+        background-color: lightgray;
+        font-size: .7rem;
+        height: 1.6rem;
+        width: 1.6rem;
+        border-radius: 1000px;
+        margin: auto 10px;
+
+        &.all {
+          font-size: .9rem;
+        }
+      }
+
+      .ql-mention-item-text {
+        display: flex;
+        flex-direction: column;
+        padding-right: 10px;
+
+        .ql-mention-item-text-primary {
+          white-space: nowrap;
+          overflow: hidden;
+        }
+
+        .ql-mention-item-text-secondary {
+          font-size: 12px;
+          line-height: 12px;
+          color: gray;
+        }
+      }
+    }
+  }
+}

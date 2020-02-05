@@ -58,6 +58,7 @@ const MessageComposer = ({
   const toolbarDom = <Toolbar emitter={emitter.current} active={active} disabled={disabled} />;
 
   const containerClasses = classnames('message-composer-container', {disabled});
+  let composerClasses = 'composer';
 
   let Composer;
 
@@ -65,6 +66,7 @@ const MessageComposer = ({
     default:
     case 'slate': {
       Composer = SlateComposer;
+      composerClasses += ' slate';
       break;
     }
     case 'quill': {
@@ -79,7 +81,7 @@ const MessageComposer = ({
         {toolbarDom}
       </div>
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
-      <div className="composer" onClick={focus}>
+      <div className={composerClasses} onClick={focus}>
         <Composer
           send={send}
           markdown={markdown}

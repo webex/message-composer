@@ -4,6 +4,8 @@ import MarkdownIt from 'markdown-it';
 import Turndown from 'turndown';
 
 import Quill from './quill';
+import {buildContents, buildMentionAvatar, buildMentionText, getFirstName, getQuillText} from './utils';
+import './styles.scss';
 
 const md = new MarkdownIt('commonmark'); // converts markdown to html
 const td = new Turndown(); // converts html to markdown
@@ -11,15 +13,8 @@ const td = new Turndown(); // converts html to markdown
 // Turndown escapes markdown characters to prevent them from being compiled back to html
 // We don't need this, so we're just going to return the text without any escaped characters
 td.escape = (text) => text;
-
-// TODO: Test list for mention. We will get this list from client later
-const list = [
-  {id: 1, value: 'Michael'},
-  {id: 1, value: 'Pam'},
-  {id: 1, value: 'Jim'},
-  {id: 1, value: 'Dwight'},
-  {id: 1, value: 'Toby'},
-];
+// Turndown tries to convert all html elements. This is a filter for the ones to keep
+td.keep(['spark-mention']);
 
 class Composer extends React.Component {
   constructor(props) {
@@ -29,6 +24,7 @@ class Composer extends React.Component {
     this.insert = this.insert.bind(this);
     this.handleEnter = this.handleEnter.bind(this);
     this.handleTextChange = this.handleTextChange.bind(this);
+    this.handleMentionSelect = this.handleMentionSelect.bind(this);
     this.saveToDraft = this.saveToDraft.bind(this);
   }
 
@@ -52,9 +48,13 @@ class Composer extends React.Component {
           bindings,
         },
         mention: {
+          dataAttributes: ['displayName', 'objectType', 'src'],
           defaultMenuOrientation: 'top',
           mentionDenotationChars: ['@'],
-          source: this.handleMention,
+          onSelect: this.handleMentionSelect,
+          renderItem: this.handleMentionItem,
+          source: this.handleMention.bind(this),
+          spaceAfterInsert: false,
         },
         toolbar: {
           container: '#toolbar',
@@ -71,8 +71,10 @@ class Composer extends React.Component {
       const modified = draft.value.replace(/\n/g, '<br />');
       // converts text from html to a string with markdown
       const text = td.turndown(modified);
+      // there may be mentions, so convert it to deltas before we insert
+      const contents = buildContents(text);
 
-      this.quill.setText(text);
+      this.quill.setContents(contents);
     }
 
     this.quill.on('text-change', this.handleTextChange);
@@ -90,7 +92,10 @@ class Composer extends React.Component {
     // updates the text in the composer as we switch conversations
     if (prevDraft.id !== draft.id) {
       if (draft?.value) {
-        this.quill.setText(draft.value);
+        // there may be mentions, so convert it to deltas before we insert
+        const contents = buildContents(draft.value);
+
+        this.quill.setContents(contents);
       } else {
         this.quill.setText('');
       }
@@ -99,7 +104,7 @@ class Composer extends React.Component {
 
   handleEnter() {
     const {send} = this.props;
-    const text = this.quill.getText().trim();
+    const text = getQuillText(this.quill);
     // converts text from markdown to html
     const parsed = md.renderInline(text);
 
@@ -111,20 +116,60 @@ class Composer extends React.Component {
     this.saveToDraft();
   }
 
-  // Goes through the list and checks if the search term is in it
+  // When user types @, this renders the mention list
   handleMention(searchTerm, renderList) {
-    if (searchTerm.length === 0) {
-      renderList(list, searchTerm);
-    } else {
-      const matches = [];
+    const participants = this.props.mentions.participants.current;
+    let matches;
 
-      for (let i = 0; i < list.length; i += 1) {
-        if (list[i].value.toLowerCase().indexOf(searchTerm.toLowerCase()) >= 0) {
-          matches.push(list[i]);
+    // Goes through the list and checks if the search term is in it
+    if (searchTerm.length === 0) {
+      matches = participants.slice(0, 20);
+    } else {
+      matches = [];
+
+      for (let i = 0; i < participants.length; i += 1) {
+        if (matches.length >= 20) {
+          // only show up to 20 people
+          break;
+        }
+
+        if (participants[i].displayName.toLowerCase().indexOf(searchTerm.toLowerCase()) >= 0) {
+          matches.push(participants[i]);
         }
       }
-      renderList(matches, searchTerm);
     }
+
+    renderList(matches, searchTerm);
+  }
+
+  // This renders each item in the mention list
+  // The return is set as the innerHTML of an element
+  handleMentionItem(item) {
+    const avatar = buildMentionAvatar(item);
+    const text = buildMentionText(item);
+
+    return `${avatar}${text}`;
+  }
+
+  // Called when user selects a mention item
+  handleMentionSelect(item, insertItem) {
+    const participants = this.props.mentions.participants.current;
+    const copy = {...item};
+    const name = item.displayName;
+    const first = getFirstName(name);
+
+    // show just the first name unless someone else has the same first name
+    // check how many other participants have the same first name
+    const duplicates = participants.reduce((sum, participant) => {
+      const given = getFirstName(participant.displayName);
+
+      return first === given ? sum + 1 : sum;
+    }, 0);
+
+    // if there is more than one of you, then show full name instead
+    copy.value = duplicates > 1 ? name : first;
+
+    insertItem(copy);
   }
 
   handleTextChange(delta, oldDelta, source) {
@@ -144,7 +189,7 @@ class Composer extends React.Component {
     const {draft} = this.props;
 
     if (draft?.save) {
-      draft.save(this.quill.getText().trim(), draft.id);
+      draft.save(getQuillText(this.quill), draft.id);
     }
   }
 
@@ -175,12 +220,18 @@ Composer.propTypes = {
     off: PropTypes.func,
     emit: PropTypes.func,
   }).isRequired,
+  mentions: PropTypes.shape({
+    participants: PropTypes.shape({
+      current: PropTypes.array,
+    }),
+  }),
   notifyKeyDown: PropTypes.func,
   send: PropTypes.func,
 };
 
 Composer.defaultProps = {
   draft: {},
+  mentions: undefined,
   notifyKeyDown: undefined,
   send: undefined,
 };
