@@ -7,7 +7,7 @@ import Quill from './quill';
 import {buildContents, buildMentionAvatar, buildMentionText, getFirstName, getQuillText} from './utils';
 import './styles.scss';
 
-const md = new MarkdownIt('commonmark'); // converts markdown to html
+const md = new MarkdownIt('commonmark', {breaks: true}); // converts markdown to html
 const td = new Turndown(); // converts html to markdown
 
 // Turndown escapes markdown characters to prevent them from being compiled back to html
@@ -26,6 +26,7 @@ class Composer extends React.Component {
     this.handleTextChange = this.handleTextChange.bind(this);
     this.handleMentionSelect = this.handleMentionSelect.bind(this);
     this.saveToDraft = this.saveToDraft.bind(this);
+    this.openMentionList = this.openMentionList.bind(this);
   }
 
   componentDidMount() {
@@ -33,6 +34,7 @@ class Composer extends React.Component {
 
     emitter.on('INSERT_TEXT', this.insert);
     emitter.on('SEND', this.handleEnter);
+    emitter.on('OPEN_MENTION', this.openMentionList);
 
     const bindings = {
       enter: {
@@ -78,11 +80,6 @@ class Composer extends React.Component {
     }
 
     this.quill.on('text-change', this.handleTextChange);
-
-    // TODO: using this for testing, remove in final release
-    window.quill = this.quill;
-    window.md = md;
-    window.td = td;
   }
 
   componentDidUpdate(prevProps) {
@@ -104,13 +101,40 @@ class Composer extends React.Component {
 
   handleEnter() {
     const {send} = this.props;
-    const text = getQuillText(this.quill);
+
+    // get the text from the composer as-is and a sanitized version
+    // check the sanitized version if there are markdown or mentions in it
+    // if there are, then we will parse and use the sanitized version
+    // otherwise we will send the original without the content property
+    const {original, sanitized} = getQuillText(this.quill);
+
     // converts text from markdown to html
-    const parsed = md.renderInline(text);
+    // element tags will have new lines after them which we don't want so we remove them here too
+    // new lines in the text will be represented with a br tag so no need to worry about them
+    const parsed = md.render(sanitized).replace(/\n/g, '');
 
-    // TODO: we probably want to remove the markdown characters from text before we pass to displayName
+    // after parsing, text will have the p tags around it, remove them so we can check if there are other html tags present
+    // we can ignore p tags because if there are no other element tags, we can just display the original text instead
+    const shortened = parsed.replace(/<\/?p>/g, '');
 
-    send({displayName: text, content: parsed});
+    // checks if we have any other html tags. this would indicate there were markdowns in the original text
+    // this should not match <br /> tags
+    const hasMarkdown = /<.+?>.+<\/.+?>/.test(shortened);
+
+    const object = {displayName: original.trim()};
+
+    // if there are no markdowns, then we only need to send the displayName for the activity object
+    // if there are markdowns, then strip the markdowns from the text for displayName
+    // and send content with the html tags
+    if (hasMarkdown) {
+      // removes all html tags
+      const stripped = shortened.replace(/<.+?>/g, '');
+
+      object.displayName = stripped;
+      object.content = parsed;
+    }
+
+    send(object);
     // clear the composer and reset the draft
     this.quill.setText('');
     this.saveToDraft();
@@ -187,17 +211,38 @@ class Composer extends React.Component {
 
   saveToDraft() {
     const {draft} = this.props;
+    const {original} = getQuillText(this.quill);
 
     if (draft?.save) {
-      draft.save(getQuillText(this.quill), draft.id);
+      draft.save(original, draft.id);
     }
   }
 
   // Inserts text into the composer at cursor position
   insert(text) {
-    const range = this.quill.getSelection();
+    // length of the content in the editor
+    const length = this.quill.getLength();
+    // position of cursor in the editor
+    const selection = this.quill.getSelection();
+    // selection will be null if user hasn't selected the editor yet
+    // in that case, insert to the end of the line
+    const index = selection ? selection.index : length - 1;
 
-    this.quill.insertText(range.index, text);
+    // insert the text and move cursor to after it
+    this.quill.insertText(index, text, 'user');
+    this.quill.setSelection(index + text.length);
+  }
+
+  openMentionList() {
+    const length = this.quill.getLength();
+    const selection = this.quill.getSelection();
+    const index = selection ? selection.index : length - 1;
+
+    // to open the mention list, we need to clear the user's selection first
+    // then insert the @ character and set the selection to after the character
+    this.quill.setSelection();
+    this.quill.insertText(index, '@');
+    this.quill.setSelection(index + 1);
   }
 
   render() {
