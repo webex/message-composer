@@ -54,9 +54,10 @@ export function getQuillText(quill) {
       // if its just a string then we can insert right away
       original += op.insert;
 
-      // convert < and > characters to their html entities instead
+      // convert '<' and '>' characters to their html entities instead
       // we don't want to mix html tags the user sent with our conversion of markdown to html
-      sanitized += op.insert.replace(/<(.*?)>/g, (match, p1) => `&lt;${p1}&gt;`);
+      // replace '<' to '&lt;', and replace '>' NOT at the beginning of a line to '&gt;'
+      sanitized += op.insert.replace(/</g, '&lt;').replace(/(?<!^)>/gm, '&gt;');
     } else if (typeof op.insert === 'object') {
       if (op.insert.mention) {
         // if it's a mention object, convert it to a string with spark-mention tag
@@ -90,7 +91,7 @@ export function buildMentionAvatar(item) {
 
   if (src) {
     // if we have a picture then use that
-    avatar = `<img class='${classes}' src='${src}'>`;
+    avatar = `<img class='${classes}' alt='Avatar for ${displayName}' src='${src}'>`;
   } else {
     // otherwise we build it ourself
     let initials;
