@@ -43,18 +43,26 @@ export function buildContents(text) {
 }
 
 // gets the text inside the composer
+// returns the original string and sanitized version
 export function getQuillText(quill) {
   const contents = quill.getContents();
-  let sb = '';
+  let original = '';
+  let sanitized = '';
 
   contents.forEach((op) => {
     if (typeof op.insert === 'string') {
       // if its just a string then we can insert right away
-      sb += op.insert;
+      original += op.insert;
+
+      // convert '<' and '>' characters to their html entities instead
+      // we don't want to mix html tags the user sent with our conversion of markdown to html
+      // replace '<' to '&lt;', and replace '>' NOT at the beginning of a line to '&gt;'
+      sanitized += op.insert.replace(/</g, '&lt;').replace(/(?<!^)>/gm, '&gt;');
     } else if (typeof op.insert === 'object') {
       if (op.insert.mention) {
         // if it's a mention object, convert it to a string with spark-mention tag
         const {mention} = op.insert;
+        let sb = '';
 
         if (mention.objectType === 'groupMention') {
           sb += "<spark-mention data-object-type='groupMention' data-group-type='all'>";
@@ -65,11 +73,14 @@ export function getQuillText(quill) {
           sb += mention.value;
           sb += '</spark-mention>';
         }
+
+        original += sb;
+        sanitized += sb;
       }
     }
   });
 
-  return sb;
+  return {original, sanitized};
 }
 
 // builds up the avatar for a mention item
@@ -80,7 +91,7 @@ export function buildMentionAvatar(item) {
 
   if (src) {
     // if we have a picture then use that
-    avatar = `<img class='${classes}' src='${src}'>`;
+    avatar = `<img class='${classes}' alt='Avatar for ${displayName}' src='${src}'>`;
   } else {
     // otherwise we build it ourself
     let initials;
