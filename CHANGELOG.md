@@ -1,3 +1,15 @@
+# [1.8.0](https://github.com/webex/message-composer/compare/v1.7.0...v1.8.0) (2020-02-07)
+
+
+### Bug Fixes
+
+* **quill:** add avatar alt text; use andrew's idea of carot conversion ([7d7a86b](https://github.com/webex/message-composer/commit/7d7a86b0a7dff0177982500fa1d32543bdc9b485))
+
+
+### Features
+
+* **quill:** fixed formatting and all other bugs ([78880c1](https://github.com/webex/message-composer/commit/78880c1fd8ec7ed6591cd9d00de404ea69c67bcf))
+
 # [1.7.0](https://github.com/webex/message-composer/compare/v1.6.0...v1.7.0) (2020-02-05)
 
 
