@@ -57,7 +57,7 @@ export function getQuillText(quill) {
       // convert '<' and '>' characters to their html entities instead
       // we don't want to mix html tags the user sent with our conversion of markdown to html
       // replace '<' to '&lt;', and replace '>' NOT at the beginning of a line to '&gt;'
-      sanitized += op.insert.replace(/</g, '&lt;').replace(/(?<!^)>/gm, '&gt;');
+      sanitized += op.insert.replace(/</g, '&lt;').replace(/(?!^)>/gm, '&gt;');
     } else if (typeof op.insert === 'object') {
       if (op.insert.mention) {
         // if it's a mention object, convert it to a string with spark-mention tag
