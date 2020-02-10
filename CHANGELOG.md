@@ -1,3 +1,10 @@
+## [1.8.1](https://github.com/webex/message-composer/compare/v1.8.0...v1.8.1) (2020-02-10)
+
+
+### Bug Fixes
+
+* **quill:** safari doesn't support lookbehind, use lookahead instead ([19479ff](https://github.com/webex/message-composer/commit/19479ff386c9afd7a3f4f6851c1f5676e5804f12))
+
 # [1.8.0](https://github.com/webex/message-composer/compare/v1.7.0...v1.8.0) (2020-02-07)
 
 
