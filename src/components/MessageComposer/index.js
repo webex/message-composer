@@ -5,33 +5,11 @@ import {TinyEmitter} from 'tiny-emitter';
 
 import SlateComposer from '../ComposerSlate';
 import QuillComposer from '../ComposerQuill';
-import ToolbarDefault from '../Toolbar';
+import withCrash from '../WithCrash';
 
+import CreateToolbar from './create-toolbar';
+import ComposerCrash from './composer-crash';
 import './styles.scss';
-
-const CreateToolbar = ({emitter, active, disabled}) => (
-  <ToolbarDefault emitter={emitter} active={active} disabled={disabled} />
-);
-
-CreateToolbar.propTypes = {
-  emitter: PropTypes.shape({
-    on: PropTypes.func,
-    off: PropTypes.func,
-    emit: PropTypes.func,
-  }).isRequired,
-  active: PropTypes.shape({
-    bold: PropTypes.bool,
-    italic: PropTypes.bool,
-    underline: PropTypes.bool,
-    code: PropTypes.bool,
-  }),
-  disabled: PropTypes.bool,
-};
-
-CreateToolbar.defaultProps = {
-  disabled: false,
-  active: undefined,
-};
 
 const MessageComposer = ({
   send,
@@ -45,6 +23,9 @@ const MessageComposer = ({
   notifyKeyDown,
   placeholder,
   composerType,
+  hasError,
+  resetError,
+  onError,
 }) => {
   const emitter = useRef(new TinyEmitter());
   const [active, setActive] = useState({});
@@ -53,11 +34,15 @@ const MessageComposer = ({
     setEmitter(emitter.current);
   }, [emitter, setEmitter]);
 
+  const containerClasses = classnames('message-composer-container', {disabled, hasError});
+
+  if (hasError) {
+    return <ComposerCrash containerClasses={containerClasses} resetError={resetError} />;
+  }
   const focus = () => emitter.current.emit('FOCUS');
 
   const toolbarDom = <Toolbar emitter={emitter.current} active={active} disabled={disabled} />;
 
-  const containerClasses = classnames('message-composer-container', {disabled});
   let composerClasses = 'composer';
 
   let Composer;
@@ -92,6 +77,7 @@ const MessageComposer = ({
           active={setActive}
           notifyKeyDown={notifyKeyDown}
           placeholder={placeholder}
+          onError={onError}
         />
       </div>
       <div className="children">{children}</div>
@@ -99,14 +85,18 @@ const MessageComposer = ({
   );
 };
 
+MessageComposer.displayName = 'MessageComposer';
+
 MessageComposer.propTypes = {
   children: PropTypes.node,
+  composerType: PropTypes.oneOf(['slate', 'quill']),
   disabled: PropTypes.bool,
   draft: PropTypes.shape({
     id: PropTypes.any,
     value: PropTypes.object,
     save: PropTypes.func,
   }),
+  hasError: PropTypes.bool,
   markdown: PropTypes.shape({
     disabled: PropTypes.bool,
   }),
@@ -114,26 +104,30 @@ MessageComposer.propTypes = {
     filter: PropTypes.func,
     renderSuggestion: PropTypes.func,
   }),
-  Toolbar: PropTypes.func,
-  setEmitter: PropTypes.func,
   notifyKeyDown: PropTypes.func,
-  send: PropTypes.func,
+  onError: PropTypes.func,
   placeholder: PropTypes.string,
-  composerType: PropTypes.oneOf(['slate', 'quill']),
+  resetError: PropTypes.func,
+  send: PropTypes.func,
+  setEmitter: PropTypes.func,
+  Toolbar: PropTypes.func,
 };
 
 MessageComposer.defaultProps = {
   children: undefined,
+  composerType: 'slate',
   disabled: false,
   draft: undefined,
-  Toolbar: CreateToolbar,
-  setEmitter: () => {},
+  hasError: false,
   markdown: undefined,
   mentions: undefined,
   notifyKeyDown: null,
-  send: undefined,
+  onError: undefined,
   placeholder: '',
-  composerType: 'slate',
+  resetError: undefined,
+  send: undefined,
+  setEmitter: () => {},
+  Toolbar: CreateToolbar,
 };
 
-export default MessageComposer;
+export default withCrash(MessageComposer);

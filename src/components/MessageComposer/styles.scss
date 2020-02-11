@@ -21,4 +21,37 @@
     grid-area: composer;
     padding: 5px;
   }
+
+  &.hasError{ 
+    height: 102px;
+    background-color: #fdf1f1;
+
+    .error-title {
+      grid-area: toolbar;
+      margin: auto 20px 0;
+      color: #c7372f;
+      font-weight: bold;
+    }
+
+    .error-message {
+      grid-area: children;
+      margin: 0px 20px auto;
+      color: #eb3323;
+      font-size: 0.875rem;
+    }
+
+    .error-reload {
+      grid-area: composer;
+      margin: auto 20px;
+      color: #eb3323;
+      font-size: 0.875rem;
+
+      .reload-button {
+        border: none;
+        background-color: inherit;
+        color: inherit;
+        padding: 0;
+      }
+    }
+  }
 }
