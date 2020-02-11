@@ -152,8 +152,6 @@ class Composer extends React.Component {
     const {onError} = this.props;
 
     try {
-      this.setState({shouldError: true});
-
       const participants = this.props.mentions.participants.current;
       let matches;
 
@@ -248,8 +246,6 @@ class Composer extends React.Component {
     const {onError} = this.props;
 
     try {
-      this.props.fake.crashMe('fake', this.fake);
-
       // length of the content in the editor
       const length = this.quill.getLength();
       // position of cursor in the editor
@@ -281,10 +277,6 @@ class Composer extends React.Component {
   }
 
   render() {
-    if (this.state?.shouldError) {
-      this.props.fake.crashMe('fake', this.fake);
-    }
-
     return (
       <div id="quill-container">
         <div id="quill-composer" />
