@@ -6,10 +6,13 @@ import {isFunction} from 'lodash';
 
 import Quill from './quill';
 import {buildContents, buildMentionAvatar, buildMentionText, getFirstName, getQuillText} from './utils';
+import SanitizePlugin from './sanitize';
 import './styles.scss';
 
 const md = new MarkdownIt('commonmark', {breaks: true}); // converts markdown to html
-const td = new Turndown(); // converts html to markdown
+const td = new Turndown({codeBlockStyle: 'fenced'}); // converts html to markdown
+
+md.use(SanitizePlugin);
 
 // Turndown escapes markdown characters to prevent them from being compiled back to html
 // We don't need this, so we're just going to return the text without any escaped characters
@@ -81,6 +84,8 @@ class Composer extends React.Component {
     }
 
     this.quill.on('text-change', this.handleTextChange);
+
+    window.md = md;
   }
 
   componentDidUpdate(prevProps) {
@@ -108,22 +113,26 @@ class Composer extends React.Component {
       // check the sanitized version if there are markdown or mentions in it
       // if there are, then we will parse and use the sanitized version
       // otherwise we will send the original without the content property
-      const {original, sanitized} = getQuillText(this.quill);
+      const text = getQuillText(this.quill);
+      // console.log('send original', original);
+      // console.log('send sanitized', sanitized);
 
       // converts text from markdown to html
       // element tags will have new lines after them which we don't want so we remove them here too
       // new lines in the text will be represented with a br tag so no need to worry about them
-      const parsed = md.render(sanitized).replace(/\n/g, '');
+      const parsed = md.render(text).replace(/>\n/g, '>');
+      console.log('send parsed', parsed);
 
       // after parsing, text will have the p tags around it, remove them so we can check if there are other html tags present
       // we can ignore p tags because if there are no other element tags, we can just display the original text instead
       const shortened = parsed.replace(/<\/?p>/g, '');
+      // console.log('send shortened', shortened);
 
       // checks if we have any other html tags. this would indicate there were markdowns in the original text
       // this should not match <br /> tags
-      const hasMarkdown = /<.+?>.+<\/.+?>/.test(shortened);
+      const hasMarkdown = /<.+?>(?:.|\n)+<\/.+?>/.test(shortened);
 
-      const object = {displayName: original.trim()};
+      const object = {displayName: text.trim()};
 
       // if there are no markdowns, then we only need to send the displayName for the activity object
       // if there are markdowns, then strip the markdowns from the text for displayName
@@ -131,10 +140,13 @@ class Composer extends React.Component {
       if (hasMarkdown) {
         // removes all html tags
         const stripped = shortened.replace(/<.+?>/g, '');
+        // console.log('send stripped', stripped);
 
         object.displayName = stripped;
         object.content = parsed;
       }
+
+      console.log('send object', object);
 
       send(object);
       // clear the composer and reset the draft
@@ -234,10 +246,10 @@ class Composer extends React.Component {
 
   saveToDraft() {
     const {draft} = this.props;
-    const {original} = getQuillText(this.quill);
+    const text = getQuillText(this.quill);
 
     if (draft?.save) {
-      draft.save(original, draft.id);
+      draft.save(text, draft.id);
     }
   }
 

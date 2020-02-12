@@ -43,21 +43,14 @@ export function buildContents(text) {
 }
 
 // gets the text inside the composer
-// returns the original string and sanitized version
 export function getQuillText(quill) {
   const contents = quill.getContents();
-  let original = '';
-  let sanitized = '';
+  let text = '';
 
   contents.forEach((op) => {
     if (typeof op.insert === 'string') {
       // if its just a string then we can insert right away
-      original += op.insert;
-
-      // convert '<' and '>' characters to their html entities instead
-      // we don't want to mix html tags the user sent with our conversion of markdown to html
-      // replace '<' to '&lt;', and replace '>' NOT at the beginning of a line to '&gt;'
-      sanitized += op.insert.replace(/</g, '&lt;').replace(/(?!^)>/gm, '&gt;');
+      text += op.insert;
     } else if (typeof op.insert === 'object') {
       if (op.insert.mention) {
         // if it's a mention object, convert it to a string with spark-mention tag
@@ -74,13 +67,12 @@ export function getQuillText(quill) {
           sb += '</spark-mention>';
         }
 
-        original += sb;
-        sanitized += sb;
+        text += sb;
       }
     }
   });
 
-  return {original, sanitized};
+  return text;
 }
 
 // builds up the avatar for a mention item
