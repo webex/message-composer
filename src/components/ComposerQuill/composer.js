@@ -9,9 +9,16 @@ import {buildContents, buildMentionAvatar, buildMentionText, getFirstName, getQu
 import SanitizePlugin from './sanitize';
 import './styles.scss';
 
-const md = new MarkdownIt('commonmark', {breaks: true}); // converts markdown to html
-const td = new Turndown({codeBlockStyle: 'fenced'}); // converts html to markdown
+// converts markdown to html
+// options: break converts new line (\n) into <br> tags
+const md = new MarkdownIt('commonmark', {breaks: true});
 
+// converts html to markdown
+// options: codeBlockStyle: 'fenced' will wrap code blocks around ``` rather than the default of indents
+const td = new Turndown({codeBlockStyle: 'fenced'});
+
+// not a full sanitization plugin
+// only converts < and > carots to their html entities
 md.use(SanitizePlugin);
 
 // Turndown escapes markdown characters to prevent them from being compiled back to html
@@ -73,10 +80,15 @@ class Composer extends React.Component {
     // inserts the initial text to the composer
     // may contain formats as html tags, so convert those to markdowns
     if (draft?.value) {
-      // replace new lines with <br> tag so turndown can convert it properly
-      const modified = draft.value.replace(/\n/g, '<br />');
+      // replace new lines with <br> tag and new line so it will display properly
+      // turndown will trim \n in text, so add a <br> tag since we want the line break
+      // but turndown doesn't trim them in code blocks, but will ignore <br> tags
+      const modified = draft.value.replace(/\n/g, '<br />\n');
+
       // converts text from html to a string with markdown
-      const text = td.turndown(modified);
+      // remove the extra new line before the close code fence
+      const text = td.turndown(modified).replace(/\n```/g, '```');
+
       // there may be mentions, so convert it to deltas before we insert
       const contents = buildContents(text);
 
@@ -86,6 +98,7 @@ class Composer extends React.Component {
     this.quill.on('text-change', this.handleTextChange);
 
     window.md = md;
+    window.td = td;
   }
 
   componentDidUpdate(prevProps) {
@@ -109,13 +122,8 @@ class Composer extends React.Component {
     const {onError, send} = this.props;
 
     try {
-      // get the text from the composer as-is and a sanitized version
-      // check the sanitized version if there are markdown or mentions in it
-      // if there are, then we will parse and use the sanitized version
-      // otherwise we will send the original without the content property
+      // gets the text from the composer with mentions
       const text = getQuillText(this.quill);
-      // console.log('send original', original);
-      // console.log('send sanitized', sanitized);
 
       // converts text from markdown to html
       // element tags will have new lines after them which we don't want so we remove them here too
@@ -126,21 +134,19 @@ class Composer extends React.Component {
       // after parsing, text will have the p tags around it, remove them so we can check if there are other html tags present
       // we can ignore p tags because if there are no other element tags, we can just display the original text instead
       const shortened = parsed.replace(/<\/?p>/g, '');
-      // console.log('send shortened', shortened);
 
-      // checks if we have any other html tags. this would indicate there were markdowns in the original text
+      // checks if we have any other html tags. this would indicate there were markdowns or mentions in the original text
       // this should not match <br /> tags
       const hasMarkdown = /<.+?>(?:.|\n)+<\/.+?>/.test(shortened);
 
       const object = {displayName: text.trim()};
 
-      // if there are no markdowns, then we only need to send the displayName for the activity object
-      // if there are markdowns, then strip the markdowns from the text for displayName
+      // if there are no markdowns, then we only need to send the displayName for the activity object with the original text
+      // if there are markdowns, then strip the markdowns from the parsed text for displayName
       // and send content with the html tags
       if (hasMarkdown) {
         // removes all html tags
         const stripped = shortened.replace(/<.+?>/g, '');
-        // console.log('send stripped', stripped);
 
         object.displayName = stripped;
         object.content = parsed;
@@ -148,6 +154,7 @@ class Composer extends React.Component {
 
       console.log('send object', object);
 
+      // TODO: are we supposed to send mention ids back??
       send(object);
       // clear the composer and reset the draft
       this.quill.setText('');

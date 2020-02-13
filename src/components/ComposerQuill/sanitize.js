@@ -1,12 +1,12 @@
-const mentionPersonRegex = /<spark-mention data-object-type='person' data-object-id='[\w-]+'>/;
+const mentionPersonRegex = /<spark-mention data-object-type='person' data-object-id='[\w-]{36}'>/;
 const mentionGroupRegex = /<spark-mention data-object-type='groupMention' data-group-type='all'>/;
 const mentionCloseRegex = /<\/spark-mention>/;
 
+// not a full sanitization plugin
+// only converts < and > carots to their html entities
 function sanitizerPlugin(md) {
-  // changes any carrots (<, >) the user types to html entities
+  // changes any carots (<, >) the user types to html entities
   function sanitizeInline(state) {
-    console.log('plugin state', state);
-
     // state.tokens are the contents of the editor as an array of html objects
     state.tokens.forEach((token) => {
       const {type} = token;
