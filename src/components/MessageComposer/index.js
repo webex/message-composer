@@ -5,10 +5,8 @@ import {TinyEmitter} from 'tiny-emitter';
 
 import SlateComposer from '../ComposerSlate';
 import QuillComposer from '../ComposerQuill';
-import withCrash from '../WithCrash';
 
 import CreateToolbar from './create-toolbar';
-import ComposerCrash from './composer-crash';
 import './styles.scss';
 
 const MessageComposer = ({
@@ -23,8 +21,6 @@ const MessageComposer = ({
   notifyKeyDown,
   placeholder,
   composerType,
-  hasError,
-  resetError,
   onError,
 }) => {
   const emitter = useRef(new TinyEmitter());
@@ -34,11 +30,7 @@ const MessageComposer = ({
     setEmitter(emitter.current);
   }, [emitter, setEmitter]);
 
-  const containerClasses = classnames('message-composer-container', {disabled, hasError});
-
-  if (hasError) {
-    return <ComposerCrash containerClasses={containerClasses} resetError={resetError} />;
-  }
+  const containerClasses = classnames('message-composer-container', {disabled});
   const focus = () => emitter.current.emit('FOCUS');
 
   const toolbarDom = <Toolbar emitter={emitter.current} active={active} disabled={disabled} />;
@@ -96,7 +88,6 @@ MessageComposer.propTypes = {
     value: PropTypes.object,
     save: PropTypes.func,
   }),
-  hasError: PropTypes.bool,
   markdown: PropTypes.shape({
     disabled: PropTypes.bool,
   }),
@@ -107,7 +98,6 @@ MessageComposer.propTypes = {
   notifyKeyDown: PropTypes.func,
   onError: PropTypes.func,
   placeholder: PropTypes.string,
-  resetError: PropTypes.func,
   send: PropTypes.func,
   setEmitter: PropTypes.func,
   Toolbar: PropTypes.func,
@@ -118,16 +108,14 @@ MessageComposer.defaultProps = {
   composerType: 'slate',
   disabled: false,
   draft: undefined,
-  hasError: false,
   markdown: undefined,
   mentions: undefined,
   notifyKeyDown: null,
   onError: undefined,
   placeholder: '',
-  resetError: undefined,
   send: undefined,
   setEmitter: () => {},
   Toolbar: CreateToolbar,
 };
 
-export default withCrash(MessageComposer);
+export default MessageComposer;
