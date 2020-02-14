@@ -2,7 +2,7 @@ import React from 'react';
 import {isFunction} from 'lodash';
 import PropTypes from 'prop-types';
 
-const withCrash = (WrappedComponent) => {
+const withCrash = (WrappedComponent, ErrorComponent) => {
   class Crash extends React.Component {
     constructor(props) {
       super(props);
@@ -28,8 +28,13 @@ const withCrash = (WrappedComponent) => {
       this.setState({hasError: false});
     }
 
+    // TODO: MOVE TO CLIENT!!
     render() {
       const {onCrash, ...otherProps} = this.props;
+
+      if (error) {
+        return <ErrorComponent resetError />;
+      }
 
       return <WrappedComponent {...this.state} {...otherProps} resetError={this.resetError} />;
     }

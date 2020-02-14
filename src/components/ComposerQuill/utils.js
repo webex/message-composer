@@ -75,6 +75,24 @@ export function getQuillText(quill) {
   return text;
 }
 
+// get the mention objects currently in the editor
+export function getMentions(quill) {
+  const contents = quill.getContents();
+  const mentions = [];
+
+  contents.forEach((op) => {
+    if (typeof op.insert === 'object' && op.insert.mention) {
+      const {mention} = op.insert;
+
+      mentions.push({
+        id: mention.id,
+      });
+    }
+  });
+
+  return mentions.length > 0 ? mentions : undefined;
+}
+
 // builds up the avatar for a mention item
 export function buildMentionAvatar(item) {
   const {id, src, displayName} = item;

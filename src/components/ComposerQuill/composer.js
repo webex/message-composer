@@ -5,7 +5,7 @@ import Turndown from 'turndown';
 import {isFunction} from 'lodash';
 
 import Quill from './quill';
-import {buildContents, buildMentionAvatar, buildMentionText, getFirstName, getQuillText} from './utils';
+import {buildContents, buildMentionAvatar, buildMentionText, getFirstName, getQuillText, getMentions} from './utils';
 import SanitizePlugin from './sanitize';
 import './styles.scss';
 
@@ -41,7 +41,7 @@ class Composer extends React.Component {
   }
 
   componentDidMount() {
-    const {draft, emitter} = this.props;
+    const {draft, emitter, placeholder} = this.props;
 
     emitter.on('INSERT_TEXT', this.insert);
     emitter.on('SEND', this.handleEnter);
@@ -74,20 +74,23 @@ class Composer extends React.Component {
         },
       },
       formats: ['mention'],
-      placeholder: 'Compose something awesome...',
+      placeholder,
     });
 
     // inserts the initial text to the composer
     // may contain formats as html tags, so convert those to markdowns
     if (draft?.value) {
+      console.log('draft', draft.value);
       // replace new lines with <br> tag and new line so it will display properly
       // turndown will trim \n in text, so add a <br> tag since we want the line break
       // but turndown doesn't trim them in code blocks, but will ignore <br> tags
       const modified = draft.value.replace(/\n/g, '<br />\n');
+      console.log('modified', modified);
 
       // converts text from html to a string with markdown
       // remove the extra new line before the close code fence
       const text = td.turndown(modified).replace(/\n```/g, '```');
+      console.log('text', text);
 
       // there may be mentions, so convert it to deltas before we insert
       const contents = buildContents(text);
@@ -97,12 +100,13 @@ class Composer extends React.Component {
 
     this.quill.on('text-change', this.handleTextChange);
 
+    window.ql = this.quill;
     window.md = md;
     window.td = td;
   }
 
   componentDidUpdate(prevProps) {
-    const {draft} = this.props;
+    const {draft, placeholder} = this.props;
     const prevDraft = prevProps.draft;
 
     // updates the text in the composer as we switch conversations
@@ -116,6 +120,11 @@ class Composer extends React.Component {
         this.quill.setText('');
       }
     }
+
+    // update the placeholder if it changed
+    if (prevProps.placeholder !== placeholder) {
+      this.quill.root.dataset.placeholder = placeholder;
+    }
   }
 
   handleEnter() {
@@ -124,6 +133,9 @@ class Composer extends React.Component {
     try {
       // gets the text from the composer with mentions
       const text = getQuillText(this.quill);
+
+      // gets the ids that were mentioned
+      const mentions = getMentions(this.quill);
 
       // converts text from markdown to html
       // element tags will have new lines after them which we don't want so we remove them here too
@@ -150,6 +162,11 @@ class Composer extends React.Component {
 
         object.displayName = stripped;
         object.content = parsed;
+      }
+
+      // if there are mentions then include them in the object
+      if (mentions) {
+        object.mentions = mentions;
       }
 
       console.log('send object', object);
@@ -262,6 +279,7 @@ class Composer extends React.Component {
 
   // Inserts text into the composer at cursor position
   insert(text) {
+    this.setState({crash: true});
     const {onError} = this.props;
 
     try {
@@ -296,11 +314,11 @@ class Composer extends React.Component {
   }
 
   render() {
-    return (
-      <div id="quill-container">
-        <div id="quill-composer" />
-      </div>
-    );
+    if (this.state?.crash) {
+      this.props.crash.crash();
+    }
+
+    return <div id="quill-composer" />;
   }
 }
 
@@ -324,6 +342,7 @@ Composer.propTypes = {
   }),
   notifyKeyDown: PropTypes.func,
   onError: PropTypes.func,
+  placeholder: PropTypes.string,
   send: PropTypes.func,
 };
 
@@ -332,6 +351,7 @@ Composer.defaultProps = {
   mentions: undefined,
   notifyKeyDown: undefined,
   onError: undefined,
+  placeholder: 'Compose something awesome...',
   send: undefined,
 };
 
