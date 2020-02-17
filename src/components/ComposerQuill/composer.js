@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import MarkdownIt from 'markdown-it';
 import Turndown from 'turndown';
+import {isFunction} from 'lodash';
 
 import Quill from './quill';
 import {buildContents, buildMentionAvatar, buildMentionText, getFirstName, getQuillText} from './utils';
@@ -100,70 +101,84 @@ class Composer extends React.Component {
   }
 
   handleEnter() {
-    const {send} = this.props;
+    const {onError, send} = this.props;
 
-    // get the text from the composer as-is and a sanitized version
-    // check the sanitized version if there are markdown or mentions in it
-    // if there are, then we will parse and use the sanitized version
-    // otherwise we will send the original without the content property
-    const {original, sanitized} = getQuillText(this.quill);
+    try {
+      // get the text from the composer as-is and a sanitized version
+      // check the sanitized version if there are markdown or mentions in it
+      // if there are, then we will parse and use the sanitized version
+      // otherwise we will send the original without the content property
+      const {original, sanitized} = getQuillText(this.quill);
 
-    // converts text from markdown to html
-    // element tags will have new lines after them which we don't want so we remove them here too
-    // new lines in the text will be represented with a br tag so no need to worry about them
-    const parsed = md.render(sanitized).replace(/\n/g, '');
+      // converts text from markdown to html
+      // element tags will have new lines after them which we don't want so we remove them here too
+      // new lines in the text will be represented with a br tag so no need to worry about them
+      const parsed = md.render(sanitized).replace(/\n/g, '');
 
-    // after parsing, text will have the p tags around it, remove them so we can check if there are other html tags present
-    // we can ignore p tags because if there are no other element tags, we can just display the original text instead
-    const shortened = parsed.replace(/<\/?p>/g, '');
+      // after parsing, text will have the p tags around it, remove them so we can check if there are other html tags present
+      // we can ignore p tags because if there are no other element tags, we can just display the original text instead
+      const shortened = parsed.replace(/<\/?p>/g, '');
 
-    // checks if we have any other html tags. this would indicate there were markdowns in the original text
-    // this should not match <br /> tags
-    const hasMarkdown = /<.+?>.+<\/.+?>/.test(shortened);
+      // checks if we have any other html tags. this would indicate there were markdowns in the original text
+      // this should not match <br /> tags
+      const hasMarkdown = /<.+?>.+<\/.+?>/.test(shortened);
 
-    const object = {displayName: original.trim()};
+      const object = {displayName: original.trim()};
 
-    // if there are no markdowns, then we only need to send the displayName for the activity object
-    // if there are markdowns, then strip the markdowns from the text for displayName
-    // and send content with the html tags
-    if (hasMarkdown) {
-      // removes all html tags
-      const stripped = shortened.replace(/<.+?>/g, '');
+      // if there are no markdowns, then we only need to send the displayName for the activity object
+      // if there are markdowns, then strip the markdowns from the text for displayName
+      // and send content with the html tags
+      if (hasMarkdown) {
+        // removes all html tags
+        const stripped = shortened.replace(/<.+?>/g, '');
 
-      object.displayName = stripped;
-      object.content = parsed;
+        object.displayName = stripped;
+        object.content = parsed;
+      }
+
+      send(object);
+      // clear the composer and reset the draft
+      this.quill.setText('');
+      this.saveToDraft();
+    } catch (e) {
+      if (isFunction(onError)) {
+        onError('QuillComposer', 'handleEnter', e);
+      }
     }
-
-    send(object);
-    // clear the composer and reset the draft
-    this.quill.setText('');
-    this.saveToDraft();
   }
 
   // When user types @, this renders the mention list
   handleMention(searchTerm, renderList) {
-    const participants = this.props.mentions.participants.current;
-    let matches;
+    const {onError} = this.props;
 
-    // Goes through the list and checks if the search term is in it
-    if (searchTerm.length === 0) {
-      matches = participants.slice(0, 20);
-    } else {
-      matches = [];
+    try {
+      const participants = this.props.mentions.participants.current;
+      let matches;
 
-      for (let i = 0; i < participants.length; i += 1) {
-        if (matches.length >= 20) {
-          // only show up to 20 people
-          break;
-        }
+      // Goes through the list and checks if the search term is in it
+      if (searchTerm.length === 0) {
+        matches = participants.slice(0, 20);
+      } else {
+        matches = [];
 
-        if (participants[i].displayName.toLowerCase().indexOf(searchTerm.toLowerCase()) >= 0) {
-          matches.push(participants[i]);
+        for (let i = 0; i < participants.length; i += 1) {
+          if (matches.length >= 20) {
+            // only show up to 20 people
+            break;
+          }
+
+          if (participants[i].displayName.toLowerCase().indexOf(searchTerm.toLowerCase()) >= 0) {
+            matches.push(participants[i]);
+          }
         }
       }
-    }
 
-    renderList(matches, searchTerm);
+      renderList(matches, searchTerm);
+    } catch (e) {
+      if (isFunction(onError)) {
+        onError('QuillComposer', 'handleMention', e);
+      }
+    }
   }
 
   // This renders each item in the mention list
@@ -177,23 +192,31 @@ class Composer extends React.Component {
 
   // Called when user selects a mention item
   handleMentionSelect(item, insertItem) {
-    const participants = this.props.mentions.participants.current;
-    const copy = {...item};
-    const name = item.displayName;
-    const first = getFirstName(name);
+    const {mentions, onError} = this.props;
 
-    // show just the first name unless someone else has the same first name
-    // check how many other participants have the same first name
-    const duplicates = participants.reduce((sum, participant) => {
-      const given = getFirstName(participant.displayName);
+    try {
+      const participants = mentions.participants.current;
+      const copy = {...item};
+      const name = item.displayName;
+      const first = getFirstName(name);
 
-      return first === given ? sum + 1 : sum;
-    }, 0);
+      // show just the first name unless someone else has the same first name
+      // check how many other participants have the same first name
+      const duplicates = participants.reduce((sum, participant) => {
+        const given = getFirstName(participant.displayName);
 
-    // if there is more than one of you, then show full name instead
-    copy.value = duplicates > 1 ? name : first;
+        return first === given ? sum + 1 : sum;
+      }, 0);
 
-    insertItem(copy);
+      // if there is more than one of you, then show full name instead
+      copy.value = duplicates > 1 ? name : first;
+
+      insertItem(copy);
+    } catch (e) {
+      if (isFunction(onError)) {
+        onError('QuillComposer', 'handleMentionSelect', e);
+      }
+    }
   }
 
   handleTextChange(delta, oldDelta, source) {
@@ -220,17 +243,25 @@ class Composer extends React.Component {
 
   // Inserts text into the composer at cursor position
   insert(text) {
-    // length of the content in the editor
-    const length = this.quill.getLength();
-    // position of cursor in the editor
-    const selection = this.quill.getSelection();
-    // selection will be null if user hasn't selected the editor yet
-    // in that case, insert to the end of the line
-    const index = selection ? selection.index : length - 1;
+    const {onError} = this.props;
 
-    // insert the text and move cursor to after it
-    this.quill.insertText(index, text, 'user');
-    this.quill.setSelection(index + text.length);
+    try {
+      // length of the content in the editor
+      const length = this.quill.getLength();
+      // position of cursor in the editor
+      const selection = this.quill.getSelection();
+      // selection will be null if user hasn't selected the editor yet
+      // in that case, insert to the end of the line
+      const index = selection ? selection.index : length - 1;
+
+      // insert the text and move cursor to after it
+      this.quill.insertText(index, text, 'user');
+      this.quill.setSelection(index + text.length);
+    } catch (e) {
+      if (isFunction(onError)) {
+        onError('QuillComposer', 'insert', e);
+      }
+    }
   }
 
   openMentionList() {
@@ -254,6 +285,8 @@ class Composer extends React.Component {
   }
 }
 
+Composer.displayName = 'QuillComposer';
+
 Composer.propTypes = {
   draft: PropTypes.shape({
     id: PropTypes.any,
@@ -271,6 +304,7 @@ Composer.propTypes = {
     }),
   }),
   notifyKeyDown: PropTypes.func,
+  onError: PropTypes.func,
   send: PropTypes.func,
 };
 
@@ -278,6 +312,7 @@ Composer.defaultProps = {
   draft: {},
   mentions: undefined,
   notifyKeyDown: undefined,
+  onError: undefined,
   send: undefined,
 };
 
