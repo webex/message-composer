@@ -5,7 +5,17 @@ import Turndown from 'turndown';
 import {isFunction} from 'lodash';
 
 import Quill from './quill';
-import {buildContents, buildMentionAvatar, buildMentionText, getFirstName, getQuillText, getMentions} from './utils';
+import {
+  buildContents,
+  buildContentsWithMentionElement,
+  buildContentsWithMentionPlaceholder,
+  buildMentionAvatar,
+  buildMentionText,
+  getFirstName,
+  getQuillText,
+  replaceMentions,
+  getMentions,
+} from './utils';
 import SanitizePlugin from './sanitize';
 import './styles.scss';
 
@@ -93,7 +103,7 @@ class Composer extends React.Component {
       console.log('text', text);
 
       // there may be mentions, so convert it to deltas before we insert
-      const contents = buildContents(text);
+      const contents = buildContentsWithMentionElement(text);
 
       this.quill.setContents(contents);
     }
@@ -106,14 +116,14 @@ class Composer extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    const {draft, placeholder} = this.props;
+    const {draft, mentions, placeholder} = this.props;
     const prevDraft = prevProps.draft;
 
     // updates the text in the composer as we switch conversations
     if (prevDraft.id !== draft.id) {
       if (draft?.value) {
         // there may be mentions, so convert it to deltas before we insert
-        const contents = buildContents(draft.value);
+        const contents = buildContentsWithMentionPlaceholder(draft.value, mentions?.participants?.current);
 
         this.quill.setContents(contents);
       } else {
@@ -129,27 +139,33 @@ class Composer extends React.Component {
 
   handleEnter() {
     const {onError, send} = this.props;
+    send.crashme();
 
     try {
       // gets the text from the composer with mentions
       const text = getQuillText(this.quill);
 
       // gets the ids that were mentioned
-      const mentions = getMentions(this.quill);
+      const mentioned = getMentions(this.quill);
 
       // converts text from markdown to html
       // element tags will have new lines after them which we don't want so we remove them here too
       // new lines in the text will be represented with a br tag so no need to worry about them
-      const parsed = md.render(text).replace(/>\n/g, '>');
+      const marked = md.render(text).replace(/>\n/g, '>');
+      console.log('send marked', marked);
+
+      // convert our mention placeholders to mention elements
+      // pass in the mentioned people we got earlier so we only convert the ones that were actually mentioned
+      const parsed = replaceMentions(marked, mentioned);
       console.log('send parsed', parsed);
 
-      // after parsing, text will have the p tags around it, remove them so we can check if there are other html tags present
+      // after parsing from markdown, text will have the p tags around it, remove them so we can check if there are other html tags present
       // we can ignore p tags because if there are no other element tags, we can just display the original text instead
       const shortened = parsed.replace(/<\/?p>/g, '');
 
       // checks if we have any other html tags. this would indicate there were markdowns or mentions in the original text
       // this should not match <br /> tags
-      const hasMarkdown = /<.+?>(?:.|\n)+<\/.+?>/.test(shortened);
+      const hasMarkdown = /<.+?>(?:.|\n)+<\/.+?>/.test(parsed);
 
       const object = {displayName: text.trim()};
 
@@ -165,8 +181,8 @@ class Composer extends React.Component {
       }
 
       // if there are mentions then include them in the object
-      if (mentions) {
-        object.mentions = mentions;
+      if (mentioned.group || mentioned.people.length) {
+        object.mentions = mentioned;
       }
 
       console.log('send object', object);

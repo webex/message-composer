@@ -1,6 +1,6 @@
-const mentionPersonRegex = /<spark-mention data-object-type='person' data-object-id='[\w-]{36}'>/;
-const mentionGroupRegex = /<spark-mention data-object-type='groupMention' data-group-type='all'>/;
-const mentionCloseRegex = /<\/spark-mention>/;
+// const mentionPersonRegex = /<spark-mention data-object-type='person' data-object-id='[\w-]{36}'>/;
+// const mentionGroupRegex = /<spark-mention data-object-type='groupMention' data-group-type='all'>/;
+// const mentionCloseRegex = /<\/spark-mention>/;
 
 // not a full sanitization plugin
 // only converts < and > carots to their html entities
@@ -22,16 +22,9 @@ function sanitizerPlugin(md) {
 
           // if there is a html element in here, then we want to change the tags to html entities
           if (childType === 'html_inline') {
-            // only allow <spark-mention> tags to pass
-            if (
-              !mentionPersonRegex.test(childContent) &&
-              !mentionGroupRegex.test(childContent) &&
-              !mentionCloseRegex.test(childContent)
-            ) {
-              const replaced = childContent.replace(/</g, '&lt;').replace(/(?!^)>/gm, '&gt;');
+            const replaced = childContent.replace(/</g, '&lt;').replace(/(?!^)>/gm, '&gt;');
 
-              children[childIndex].content = replaced;
-            }
+            children[childIndex].content = replaced;
           }
         });
       }
