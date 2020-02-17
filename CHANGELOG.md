@@ -1,3 +1,16 @@
+# [1.9.0](https://github.com/webex/message-composer/compare/v1.8.1...v1.9.0) (2020-02-17)
+
+
+### Bug Fixes
+
+* **quill:** move withCrash to client ([450fddd](https://github.com/webex/message-composer/commit/450fdddfa7c7e6c4190a6594b61701a5beddefdb))
+* **quill:** remove random forced crashes ([cf6231e](https://github.com/webex/message-composer/commit/cf6231edb12d19eb6b0298a339ad0c108f343e25))
+
+
+### Features
+
+* **quill:** crash handling ([a38909f](https://github.com/webex/message-composer/commit/a38909fa3e1cf6db6704b93881bdbb1aa03b2bef))
+
 ## [1.8.1](https://github.com/webex/message-composer/compare/v1.8.0...v1.8.1) (2020-02-10)
 
 
