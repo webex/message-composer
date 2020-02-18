@@ -6,7 +6,7 @@ import {isFunction} from 'lodash';
 
 import Quill from './quill';
 import {
-  buildContentsWithMentionPlaceholder,
+  buildContents,
   buildMentionAvatar,
   buildMentionText,
   getFirstName,
@@ -100,7 +100,7 @@ class Composer extends React.Component {
       const text = td.turndown(modified).replace(/\n```/g, '```');
 
       // there may be mentions, so convert it to deltas before we insert
-      const contents = buildContentsWithMentionPlaceholder(text);
+      const contents = buildContents(text);
 
       this.quill.setContents(contents);
     }
@@ -116,7 +116,7 @@ class Composer extends React.Component {
     if (prevDraft.id !== draft.id) {
       if (draft?.value) {
         // there may be mentions, so convert it to deltas before we insert
-        const contents = buildContentsWithMentionPlaceholder(draft.value, mentions?.participants?.current);
+        const contents = buildContents(draft.value, mentions?.participants?.current);
 
         this.quill.setContents(contents);
       } else {

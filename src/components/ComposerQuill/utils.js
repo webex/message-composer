@@ -8,47 +8,8 @@ export function getFirstName(name) {
 }
 
 // converts a string of text into operation deltas
-// used for edit message composer, when the mention object is a html element
-export function buildContentsWithMentionElement(text) {
-  const split = text.split(/(<spark-mention [a-zA-Z0-9-='"\s]+>.+?<\/spark-mention>)/);
-
-  const contents = split.map((line) => {
-    // convert spark-mention into a mention delta
-    if (line.indexOf('<spark-mention ') === 0) {
-      // converts the string to a html element so we can grab the data
-      const object = new DOMParser().parseFromString(line, 'text/xml');
-      // DOMParser returns a document but we just need the first element
-      const mention = object.firstChild;
-      const objectType = mention.getAttribute('data-object-type');
-      let objectId;
-
-      if (objectType === 'person') {
-        objectId = mention.getAttribute('data-object-id');
-      }
-
-      return {
-        insert: {
-          mention: {
-            index: 0,
-            denotationChar: '@',
-            id: objectId,
-            objectType,
-            value: mention.textContent,
-          },
-        },
-      };
-    }
-
-    // otherwise just insert the text
-    return {insert: line};
-  });
-
-  return contents;
-}
-
-// converts a string of text into operation deltas
 // used for drafts, where the mention object is our own placeholder string
-export function buildContentsWithMentionPlaceholder(text, mentions) {
+export function buildContents(text, mentions) {
   const split = text.split(/(@{.+?_(?:groupMention|person)_(?:all|[\w-]{36})})/);
 
   const contents = split.map((line) => {
@@ -62,6 +23,7 @@ export function buildContentsWithMentionPlaceholder(text, mentions) {
 
       if (type === 'groupMention' || type === 'person') {
         if (id === 'all' || uuidRegex.test(id)) {
+          // if the mention list wasn't provided then go ahead and insert
           if (!mentions || mentions.some((mention) => mention.id === id)) {
             return {
               insert: {
