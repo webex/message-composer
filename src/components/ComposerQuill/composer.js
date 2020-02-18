@@ -106,10 +106,6 @@ class Composer extends React.Component {
     }
 
     this.quill.on('text-change', this.handleTextChange);
-
-    window.ql = this.quill;
-    window.md = md;
-    window.td = td;
   }
 
   componentDidUpdate(prevProps) {
@@ -138,7 +134,7 @@ class Composer extends React.Component {
     const {onError, send} = this.props;
 
     try {
-      // gets the text from the composer with mentions
+      // gets the text from the composer with mentions as a placeholder string
       const text = getQuillText(this.quill);
 
       // gets the ids that were mentioned
@@ -175,11 +171,10 @@ class Composer extends React.Component {
       }
 
       // if there are mentions then include them in the object
-      if (mentioned.group || mentioned.people.length) {
-        object.mentions = mentioned;
+      if (mentioned.people.length) {
+        object.mentions = mentioned.people;
       }
 
-      // TODO: are we supposed to send mention ids back??
       send(object);
       // clear the composer and reset the draft
       this.quill.setText('');
