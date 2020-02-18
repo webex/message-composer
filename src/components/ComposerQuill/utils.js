@@ -8,74 +8,6 @@ export function getFirstName(name) {
 }
 
 // converts a string of text into operation deltas
-export function buildContents(text, options = {}) {
-  // splits off <spark-mention> element OR our mention placeholder
-  const regex = /(<spark-mention [a-zA-Z0-9-='"\s]+>.+?<\/spark-mention>|@{.+?_(?:groupMention|person)_(?:all|[\w-]{36})})/;
-  const split = text.split(regex);
-
-  const contents = split.map((line) => {
-    const matches = mentionRegex.exec(line);
-
-    // convert our placeholder mention into a mention delta
-    if (options.replaceMentionPlaceholder && matches && matches.length === 4) {
-      const name = matches[1];
-      const type = matches[2];
-      const id = matches[3];
-
-      if (type === 'groupMention' || type === 'person') {
-        if (id === 'all' || uuidRegex.test(id)) {
-          return {
-            insert: {
-              mention: {
-                index: 0,
-                denotationChar: '@',
-                id,
-                objectType: type,
-                value: name,
-              },
-            },
-          };
-        }
-      }
-    }
-    // convert spark-mention into a mention delta
-    else if (options.replaceMentionElement && line.indexOf('<spark-mention ') === 0) {
-      // converts the string to a html element so we can grab the data
-      const object = new DOMParser().parseFromString(line, 'text/xml');
-      // DOMParser returns a document but we just need the first element
-      const mention = object.firstChild;
-      const objectType = mention.getAttribute('data-object-type');
-      let id;
-
-      if (objectType === 'groupMention') {
-        id = mention.getAttribute('data-group-type');
-      } else if (objectType === 'person') {
-        id = mention.getAttribute('data-object-id');
-      }
-
-      if (id) {
-        return {
-          insert: {
-            mention: {
-              index: 0,
-              denotationChar: '@',
-              id,
-              objectType,
-              value: mention.textContent,
-            },
-          },
-        };
-      }
-    }
-
-    // otherwise just insert the text
-    return {insert: line};
-  });
-
-  return contents;
-}
-
-// converts a string of text into operation deltas
 // used for edit message composer, when the mention object is a html element
 export function buildContentsWithMentionElement(text) {
   const split = text.split(/(<spark-mention [a-zA-Z0-9-='"\s]+>.+?<\/spark-mention>)/);
@@ -116,7 +48,7 @@ export function buildContentsWithMentionElement(text) {
 
 // converts a string of text into operation deltas
 // used for drafts, where the mention object is our own placeholder string
-export function buildContentsWithMentionPlaceholder(text, mentions = []) {
+export function buildContentsWithMentionPlaceholder(text, mentions) {
   const split = text.split(/(@{.+?_(?:groupMention|person)_(?:all|[\w-]{36})})/);
 
   const contents = split.map((line) => {
@@ -128,9 +60,9 @@ export function buildContentsWithMentionPlaceholder(text, mentions = []) {
       const type = matches[2];
       const id = matches[3];
 
-      if (type === 'groupMentions' || type === 'person') {
+      if (type === 'groupMention' || type === 'person') {
         if (id === 'all' || uuidRegex.test(id)) {
-          if (mentions.some((mention) => mention.id === id)) {
+          if (!mentions || mentions.some((mention) => mention.id === id)) {
             return {
               insert: {
                 mention: {
@@ -281,4 +213,25 @@ export function buildMentionText(item) {
   text += '</div>';
 
   return text;
+}
+
+// converts <spark-mention> elements to our placeholder mention string
+export function keepReplacement(content, node) {
+  // should always be spark-mention but just in case
+  if (node.tagName === 'SPARK-MENTION') {
+    const type = node.getAttribute('data-object-type');
+    let id;
+
+    if (type === 'groupMention') {
+      id = node.getAttribute('data-group-type');
+    } else if (type === 'person') {
+      id = node.getAttribute('data-object-id');
+    }
+
+    if (id) {
+      return `@{${content}_${type}_${id}}`;
+    }
+  }
+
+  return content;
 }

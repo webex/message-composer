@@ -6,15 +6,14 @@ import {isFunction} from 'lodash';
 
 import Quill from './quill';
 import {
-  buildContents,
-  buildContentsWithMentionElement,
   buildContentsWithMentionPlaceholder,
   buildMentionAvatar,
   buildMentionText,
   getFirstName,
-  getQuillText,
-  replaceMentions,
   getMentions,
+  getQuillText,
+  keepReplacement,
+  replaceMentions,
 } from './utils';
 import SanitizePlugin from './sanitize';
 import './styles.scss';
@@ -25,7 +24,8 @@ const md = new MarkdownIt('commonmark', {breaks: true});
 
 // converts html to markdown
 // options: codeBlockStyle: 'fenced' will wrap code blocks around ``` rather than the default of indents
-const td = new Turndown({codeBlockStyle: 'fenced'});
+// keepReplacement: function that converts spark-mention tags to our placeholder mentions for conversion
+const td = new Turndown({codeBlockStyle: 'fenced', keepReplacement});
 
 // not a full sanitization plugin
 // only converts < and > carots to their html entities
@@ -90,20 +90,17 @@ class Composer extends React.Component {
     // inserts the initial text to the composer
     // may contain formats as html tags, so convert those to markdowns
     if (draft?.value) {
-      console.log('draft', draft.value);
       // replace new lines with <br> tag and new line so it will display properly
       // turndown will trim \n in text, so add a <br> tag since we want the line break
       // but turndown doesn't trim them in code blocks, but will ignore <br> tags
       const modified = draft.value.replace(/\n/g, '<br />\n');
-      console.log('modified', modified);
 
       // converts text from html to a string with markdown
       // remove the extra new line before the close code fence
       const text = td.turndown(modified).replace(/\n```/g, '```');
-      console.log('text', text);
 
       // there may be mentions, so convert it to deltas before we insert
-      const contents = buildContentsWithMentionElement(text);
+      const contents = buildContentsWithMentionPlaceholder(text);
 
       this.quill.setContents(contents);
     }
@@ -139,7 +136,6 @@ class Composer extends React.Component {
 
   handleEnter() {
     const {onError, send} = this.props;
-    send.crashme();
 
     try {
       // gets the text from the composer with mentions
@@ -152,12 +148,10 @@ class Composer extends React.Component {
       // element tags will have new lines after them which we don't want so we remove them here too
       // new lines in the text will be represented with a br tag so no need to worry about them
       const marked = md.render(text).replace(/>\n/g, '>');
-      console.log('send marked', marked);
 
       // convert our mention placeholders to mention elements
       // pass in the mentioned people we got earlier so we only convert the ones that were actually mentioned
       const parsed = replaceMentions(marked, mentioned);
-      console.log('send parsed', parsed);
 
       // after parsing from markdown, text will have the p tags around it, remove them so we can check if there are other html tags present
       // we can ignore p tags because if there are no other element tags, we can just display the original text instead
@@ -184,8 +178,6 @@ class Composer extends React.Component {
       if (mentioned.group || mentioned.people.length) {
         object.mentions = mentioned;
       }
-
-      console.log('send object', object);
 
       // TODO: are we supposed to send mention ids back??
       send(object);
@@ -295,7 +287,6 @@ class Composer extends React.Component {
 
   // Inserts text into the composer at cursor position
   insert(text) {
-    this.setState({crash: true});
     const {onError} = this.props;
 
     try {
@@ -330,10 +321,6 @@ class Composer extends React.Component {
   }
 
   render() {
-    if (this.state?.crash) {
-      this.props.crash.crash();
-    }
-
     return <div id="quill-composer" />;
   }
 }
