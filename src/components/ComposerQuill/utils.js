@@ -1,5 +1,16 @@
 const uuidRegex = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/;
-const mentionRegex = /@{(.+?)_(groupMention|person)_(all|[\w-]{36})}/g;
+
+// regexes that matches the mention placeholder
+// this one matches the whole placeholder
+const mentionRegexMatchWhole = /(@{.+?_(?:groupMention|person)_(?:all|[\w-]{36})})/;
+// this one matches the individual values
+const mentionRegexMatchValues = /@{(.+?)_(groupMention|person)_(all|[\w-]{36})}/g;
+
+// returns the mention placeholder string
+// WARNING: this string should match the regex right above this
+function getMentionPlaceholder(name, type, id) {
+  return `@{${name}_${type}_${id}}`;
+}
 
 export function getFirstName(name) {
   const index = name.indexOf(' ');
@@ -10,17 +21,20 @@ export function getFirstName(name) {
 // converts a string of text into operation deltas
 // used for drafts, where the mention object is our own placeholder string
 export function buildContents(text, mentions) {
-  const split = text.split(/(@{.+?_(?:groupMention|person)_(?:all|[\w-]{36})})/);
+  // seperate out our mention placeholder so we can parse them
+  const split = text.split(mentionRegexMatchWhole);
 
+  // goes through the lines looking for ones that match the mention placeholder
   const contents = split.map((line) => {
-    const matches = mentionRegex.exec(line);
+    const matches = mentionRegexMatchValues.exec(line);
 
-    // convert our placeholder mention into a mention delta
+    // if found, convert our placeholder mention into a mention delta
     if (matches && matches.length === 4) {
       const name = matches[1];
       const type = matches[2];
       const id = matches[3];
 
+      // make sure all the fields are valid before inserting the mention delta
       if (type === 'groupMention' || type === 'person') {
         if (id === 'all' || uuidRegex.test(id)) {
           // if the mention list wasn't provided then go ahead and insert
@@ -62,7 +76,7 @@ export function getQuillText(quill) {
         // if it's a mention object, then we insert a placeholder for later
         const {mention} = op.insert;
 
-        text += `@{${mention.value}_${mention.objectType}_${mention.id}}`;
+        text += getMentionPlaceholder(mention.value, mention.objectType, mention.id);
       }
     }
   });
@@ -72,7 +86,7 @@ export function getQuillText(quill) {
 
 // convert placeholder mentions to <spark-mention> elements
 export function replaceMentions(text, mentions) {
-  return text.replace(mentionRegex, (match, name, type, id) => {
+  return text.replace(mentionRegexMatchValues, (match, name, type, id) => {
     let sb;
 
     if (type === 'groupMention') {
@@ -191,7 +205,7 @@ export function keepReplacement(content, node) {
     }
 
     if (id) {
-      return `@{${content}_${type}_${id}}`;
+      return getMentionPlaceholder(content, type, id);
     }
   }
 
