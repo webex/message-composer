@@ -31,7 +31,6 @@ const MessageComposer = ({
   }, [emitter, setEmitter]);
 
   const containerClasses = classnames('message-composer-container', {disabled});
-  const focus = () => emitter.current.emit('FOCUS');
 
   const toolbarDom = <Toolbar emitter={emitter.current} active={active} disabled={disabled} />;
 
@@ -58,7 +57,7 @@ const MessageComposer = ({
         {toolbarDom}
       </div>
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
-      <div className={composerClasses} onClick={focus}>
+      <div className={composerClasses}>
         <Composer
           send={send}
           markdown={markdown}

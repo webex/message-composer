@@ -1,3 +1,17 @@
+const uuidRegex = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/;
+
+// regexes that matches the mention placeholder
+// this one matches the whole placeholder
+const mentionRegexMatchWhole = /(@{.+?_(?:groupMention|person)_(?:all|[\w-]{36})})/;
+// this one matches the individual values
+const mentionRegexMatchValues = /@{(.+?)_(groupMention|person)_(all|[\w-]{36})}/g;
+
+// returns the mention placeholder string
+// WARNING: this string should match the regex right above this
+function getMentionPlaceholder(name, type, id) {
+  return `@{${name}_${type}_${id}}`;
+}
+
 export function getFirstName(name) {
   const index = name.indexOf(' ');
 
@@ -5,34 +19,40 @@ export function getFirstName(name) {
 }
 
 // converts a string of text into operation deltas
-export function buildContents(text) {
-  const split = text.split(/(<spark-mention [a-zA-Z0-9-='"\s]+>.+?<\/spark-mention>)/);
+// used for drafts, where the mention object is our own placeholder string
+export function buildContents(text, mentions) {
+  // seperate out our mention placeholder so we can parse them
+  const split = text.split(mentionRegexMatchWhole);
 
+  // goes through the lines looking for ones that match the mention placeholder
   const contents = split.map((line) => {
-    // convert spark-mention into a mention delta
-    if (line.indexOf('<spark-mention ') === 0) {
-      // converts the string to a html element so we can grab the data
-      const object = new DOMParser().parseFromString(line, 'text/xml');
-      // DOMParser returns a document but we just need the first element
-      const mention = object.firstChild;
-      const objectType = mention.getAttribute('data-object-type');
-      let objectId;
+    const matches = mentionRegexMatchValues.exec(line);
 
-      if (objectType === 'person') {
-        objectId = mention.getAttribute('data-object-id');
+    // if found, convert our placeholder mention into a mention delta
+    if (matches && matches.length === 4) {
+      const name = matches[1];
+      const type = matches[2];
+      const id = matches[3];
+
+      // make sure all the fields are valid before inserting the mention delta
+      if (type === 'groupMention' || type === 'person') {
+        if (id === 'all' || uuidRegex.test(id)) {
+          // if the mention list wasn't provided then go ahead and insert
+          if (!mentions || mentions.some((mention) => mention.id === id)) {
+            return {
+              insert: {
+                mention: {
+                  index: 0,
+                  denotationChar: '@',
+                  id,
+                  objectType: type,
+                  value: name,
+                },
+              },
+            };
+          }
+        }
       }
-
-      return {
-        insert: {
-          mention: {
-            index: 0,
-            denotationChar: '@',
-            id: objectId,
-            objectType,
-            value: mention.textContent,
-          },
-        },
-      };
     }
 
     // otherwise just insert the text
@@ -43,44 +63,73 @@ export function buildContents(text) {
 }
 
 // gets the text inside the composer
-// returns the original string and sanitized version
 export function getQuillText(quill) {
   const contents = quill.getContents();
-  let original = '';
-  let sanitized = '';
+  let text = '';
 
   contents.forEach((op) => {
     if (typeof op.insert === 'string') {
       // if its just a string then we can insert right away
-      original += op.insert;
-
-      // convert '<' and '>' characters to their html entities instead
-      // we don't want to mix html tags the user sent with our conversion of markdown to html
-      // replace '<' to '&lt;', and replace '>' NOT at the beginning of a line to '&gt;'
-      sanitized += op.insert.replace(/</g, '&lt;').replace(/(?!^)>/gm, '&gt;');
+      text += op.insert;
     } else if (typeof op.insert === 'object') {
       if (op.insert.mention) {
-        // if it's a mention object, convert it to a string with spark-mention tag
+        // if it's a mention object, then we insert a placeholder for later
         const {mention} = op.insert;
-        let sb = '';
 
-        if (mention.objectType === 'groupMention') {
-          sb += "<spark-mention data-object-type='groupMention' data-group-type='all'>";
-          sb += mention.value;
-          sb += '</spark-mention>';
-        } else {
-          sb += `<spark-mention data-object-type='person' data-object-id='${mention.id}'>`;
-          sb += mention.value;
-          sb += '</spark-mention>';
-        }
-
-        original += sb;
-        sanitized += sb;
+        text += getMentionPlaceholder(mention.value, mention.objectType, mention.id);
       }
     }
   });
 
-  return {original, sanitized};
+  return text;
+}
+
+// convert placeholder mentions to <spark-mention> elements
+export function replaceMentions(text, mentions) {
+  return text.replace(mentionRegexMatchValues, (match, name, type, id) => {
+    let sb;
+
+    if (type === 'groupMention') {
+      // check if an all mention was inserted to the composer
+      if (mentions.group && id === 'all') {
+        sb = `<spark-mention data-object-type='${type}' data-group-type='${id}'>${name}</spark-mention>`;
+      }
+    } else if (type === 'person') {
+      if (uuidRegex.test(id)) {
+        // only convert the ids that are in the list of mentions
+        if (mentions.people.some((mention) => mention.id === id)) {
+          sb = `<spark-mention data-object-type='${type}' data-object-id='${id}'>${name}</spark-mention>`;
+        }
+      }
+    }
+
+    return sb || match;
+  });
+}
+
+// get the mention objects currently in the editor
+export function getMentions(quill) {
+  const contents = quill.getContents();
+  const mentions = {
+    group: false,
+    people: [],
+  };
+
+  contents.forEach((op) => {
+    if (typeof op.insert === 'object' && op.insert.mention) {
+      const {mention} = op.insert;
+
+      if (mention.objectType === 'person') {
+        mentions.people.push({
+          id: mention.id,
+        });
+      } else if (mention.objectType === 'groupMention' && mention.id === 'all') {
+        mentions.group = true;
+      }
+    }
+  });
+
+  return mentions;
 }
 
 // builds up the avatar for a mention item
@@ -140,4 +189,25 @@ export function buildMentionText(item) {
   text += '</div>';
 
   return text;
+}
+
+// converts <spark-mention> elements to our placeholder mention string
+export function keepReplacement(content, node) {
+  // should always be spark-mention but just in case
+  if (node.tagName === 'SPARK-MENTION') {
+    const type = node.getAttribute('data-object-type');
+    let id;
+
+    if (type === 'groupMention') {
+      id = node.getAttribute('data-group-type');
+    } else if (type === 'person') {
+      id = node.getAttribute('data-object-id');
+    }
+
+    if (id) {
+      return getMentionPlaceholder(content, type, id);
+    }
+  }
+
+  return content;
 }

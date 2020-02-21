@@ -5,11 +5,31 @@ import Turndown from 'turndown';
 import {isFunction} from 'lodash';
 
 import Quill from './quill';
-import {buildContents, buildMentionAvatar, buildMentionText, getFirstName, getQuillText} from './utils';
+import {
+  buildContents,
+  buildMentionAvatar,
+  buildMentionText,
+  getFirstName,
+  getMentions,
+  getQuillText,
+  keepReplacement,
+  replaceMentions,
+} from './utils';
+import SanitizePlugin from './sanitize';
 import './styles.scss';
 
-const md = new MarkdownIt('commonmark', {breaks: true}); // converts markdown to html
-const td = new Turndown(); // converts html to markdown
+// converts markdown to html
+// options: break converts new line (\n) into <br> tags
+const md = new MarkdownIt('commonmark', {breaks: true});
+
+// converts html to markdown
+// options: codeBlockStyle: 'fenced' will wrap code blocks around ``` rather than the default of indents
+// keepReplacement: function that converts spark-mention tags to our placeholder mentions for conversion
+const td = new Turndown({codeBlockStyle: 'fenced', keepReplacement});
+
+// not a full sanitization plugin
+// only converts < and > carots to their html entities
+md.use(SanitizePlugin);
 
 // Turndown escapes markdown characters to prevent them from being compiled back to html
 // We don't need this, so we're just going to return the text without any escaped characters
@@ -28,14 +48,16 @@ class Composer extends React.Component {
     this.handleMentionSelect = this.handleMentionSelect.bind(this);
     this.saveToDraft = this.saveToDraft.bind(this);
     this.openMentionList = this.openMentionList.bind(this);
+    this.handleFocus = this.handleFocus.bind(this);
   }
 
   componentDidMount() {
-    const {draft, emitter} = this.props;
+    const {draft, emitter, placeholder} = this.props;
 
     emitter.on('INSERT_TEXT', this.insert);
     emitter.on('SEND', this.handleEnter);
     emitter.on('OPEN_MENTION', this.openMentionList);
+    emitter.on('FOCUS', this.handleFocus);
 
     const bindings = {
       enter: {
@@ -64,16 +86,21 @@ class Composer extends React.Component {
         },
       },
       formats: ['mention'],
-      placeholder: 'Compose something awesome...',
+      placeholder,
     });
 
     // inserts the initial text to the composer
     // may contain formats as html tags, so convert those to markdowns
     if (draft?.value) {
-      // replace new lines with <br> tag so turndown can convert it properly
-      const modified = draft.value.replace(/\n/g, '<br />');
+      // replace new lines with <br> tag and new line so it will display properly
+      // turndown will trim \n in text, so add a <br> tag since we want the line break
+      // but turndown doesn't trim them in code blocks, but will ignore <br> tags
+      const modified = draft.value.replace(/\n/g, '<br />\n');
+
       // converts text from html to a string with markdown
-      const text = td.turndown(modified);
+      // remove the extra new line before the close code fence
+      const text = td.turndown(modified).replace(/\n```/g, '```');
+
       // there may be mentions, so convert it to deltas before we insert
       const contents = buildContents(text);
 
@@ -84,19 +111,24 @@ class Composer extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    const {draft} = this.props;
+    const {draft, mentions, placeholder} = this.props;
     const prevDraft = prevProps.draft;
 
     // updates the text in the composer as we switch conversations
     if (prevDraft.id !== draft.id) {
       if (draft?.value) {
         // there may be mentions, so convert it to deltas before we insert
-        const contents = buildContents(draft.value);
+        const contents = buildContents(draft.value, mentions?.participants?.current);
 
         this.quill.setContents(contents);
       } else {
         this.quill.setText('');
       }
+    }
+
+    // update the placeholder if it changed
+    if (prevProps.placeholder !== placeholder) {
+      this.quill.root.dataset.placeholder = placeholder;
     }
   }
 
@@ -104,29 +136,33 @@ class Composer extends React.Component {
     const {onError, send} = this.props;
 
     try {
-      // get the text from the composer as-is and a sanitized version
-      // check the sanitized version if there are markdown or mentions in it
-      // if there are, then we will parse and use the sanitized version
-      // otherwise we will send the original without the content property
-      const {original, sanitized} = getQuillText(this.quill);
+      // gets the text from the composer with mentions as a placeholder string
+      const text = getQuillText(this.quill);
+
+      // gets the ids that were mentioned
+      const mentioned = getMentions(this.quill);
 
       // converts text from markdown to html
       // element tags will have new lines after them which we don't want so we remove them here too
       // new lines in the text will be represented with a br tag so no need to worry about them
-      const parsed = md.render(sanitized).replace(/\n/g, '');
+      const marked = md.render(text).replace(/>\n/g, '>');
 
-      // after parsing, text will have the p tags around it, remove them so we can check if there are other html tags present
+      // convert our mention placeholders to mention elements
+      // pass in the mentioned people we got earlier so we only convert the ones that were actually mentioned
+      const parsed = replaceMentions(marked, mentioned);
+
+      // after parsing from markdown, text will have the p tags around it, remove them so we can check if there are other html tags present
       // we can ignore p tags because if there are no other element tags, we can just display the original text instead
       const shortened = parsed.replace(/<\/?p>/g, '');
 
-      // checks if we have any other html tags. this would indicate there were markdowns in the original text
+      // checks if we have any other html tags. this would indicate there were markdowns or mentions in the original text
       // this should not match <br /> tags
-      const hasMarkdown = /<.+?>.+<\/.+?>/.test(shortened);
+      const hasMarkdown = /<.+?>(?:.|\n)+<\/.+?>/.test(parsed);
 
-      const object = {displayName: original.trim()};
+      const object = {displayName: text.trim()};
 
-      // if there are no markdowns, then we only need to send the displayName for the activity object
-      // if there are markdowns, then strip the markdowns from the text for displayName
+      // if there are no markdowns, then we only need to send the displayName for the activity object with the original text
+      // if there are markdowns, then strip the markdowns from the parsed text for displayName
       // and send content with the html tags
       if (hasMarkdown) {
         // removes all html tags
@@ -134,6 +170,11 @@ class Composer extends React.Component {
 
         object.displayName = stripped;
         object.content = parsed;
+      }
+
+      // if there are mentions then include them in the object
+      if (mentioned.people.length) {
+        object.mentions = mentioned.people;
       }
 
       send(object);
@@ -234,10 +275,10 @@ class Composer extends React.Component {
 
   saveToDraft() {
     const {draft} = this.props;
-    const {original} = getQuillText(this.quill);
+    const text = getQuillText(this.quill);
 
     if (draft?.save) {
-      draft.save(original, draft.id);
+      draft.save(text, draft.id);
     }
   }
 
@@ -276,12 +317,13 @@ class Composer extends React.Component {
     this.quill.setSelection(index + 1);
   }
 
+  handleFocus() {
+    // setting the cursor to the end of the text will also give focus
+    this.quill.setSelection(this.quill.getLength());
+  }
+
   render() {
-    return (
-      <div id="quill-container">
-        <div id="quill-composer" />
-      </div>
-    );
+    return <div id="quill-composer" />;
   }
 }
 
@@ -305,6 +347,7 @@ Composer.propTypes = {
   }),
   notifyKeyDown: PropTypes.func,
   onError: PropTypes.func,
+  placeholder: PropTypes.string,
   send: PropTypes.func,
 };
 
@@ -313,6 +356,7 @@ Composer.defaultProps = {
   mentions: undefined,
   notifyKeyDown: undefined,
   onError: undefined,
+  placeholder: 'Compose something awesome...',
   send: undefined,
 };
 

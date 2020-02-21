@@ -3,6 +3,11 @@
     &:focus {
       box-shadow: none;
     }
+
+    &.ql-blank::before {
+      font-style: initial;
+      font-size: 0.875rem;
+    }
   }
 
   .ql-mention-list-container {
