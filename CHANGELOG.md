@@ -1,3 +1,15 @@
+## [1.9.1](https://github.com/webex/message-composer/compare/v1.9.0...v1.9.1) (2020-02-21)
+
+
+### Bug Fixes
+
+* **quill:** add focus handler ([ea88865](https://github.com/webex/message-composer/commit/ea88865f9e2f086c29b466d2714865d68c914180))
+* **quill:** bug fixes ([e42dd16](https://github.com/webex/message-composer/commit/e42dd16bfd14e87a33100417f8293089cb8d7e73))
+* **quill:** fix inline code carots ([3ba7252](https://github.com/webex/message-composer/commit/3ba72529814316a95af32120ae1a43135b915611))
+* **quill:** inline code carrots ([06088c4](https://github.com/webex/message-composer/commit/06088c4cd84c43af708aabf183481a95f5dababc))
+* **quill:** more bug fixes ([dfa89f8](https://github.com/webex/message-composer/commit/dfa89f8267d12b686a40d1dbe082e6e52017c6fe))
+* **quill:** updated mentions to work properly ([bfa5ce0](https://github.com/webex/message-composer/commit/bfa5ce08b207875c9a8fd323b041404c6a163ed4))
+
 # [1.9.0](https://github.com/webex/message-composer/compare/v1.8.1...v1.9.0) (2020-02-17)
 
 
