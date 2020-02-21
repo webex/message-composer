@@ -48,6 +48,7 @@ class Composer extends React.Component {
     this.handleMentionSelect = this.handleMentionSelect.bind(this);
     this.saveToDraft = this.saveToDraft.bind(this);
     this.openMentionList = this.openMentionList.bind(this);
+    this.handleFocus = this.handleFocus.bind(this);
   }
 
   componentDidMount() {
@@ -56,6 +57,7 @@ class Composer extends React.Component {
     emitter.on('INSERT_TEXT', this.insert);
     emitter.on('SEND', this.handleEnter);
     emitter.on('OPEN_MENTION', this.openMentionList);
+    emitter.on('FOCUS', this.handleFocus);
 
     const bindings = {
       enter: {
@@ -313,6 +315,11 @@ class Composer extends React.Component {
     this.quill.setSelection();
     this.quill.insertText(index, '@');
     this.quill.setSelection(index + 1);
+  }
+
+  handleFocus() {
+    // setting the cursor to the end of the text will also give focus
+    this.quill.setSelection(this.quill.getLength());
   }
 
   render() {
