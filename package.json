@@ -28,6 +28,7 @@
     "is-hotkey": "^0.1.4",
     "lodash.isequal": "^4.5.0",
     "markdown-it": "^10.0.0",
+    "markdown-it-linkscheme": "^1.0.2",
     "popper.js": "^1.14.7",
     "prismjs": "^1.15.0",
     "prop-types": "^15.7.2",
