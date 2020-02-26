@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import MarkdownIt from 'markdown-it';
+import LinkSchemePlugin from 'markdown-it-linkscheme';
 import Turndown from 'turndown';
 import {isFunction} from 'lodash';
 
@@ -30,6 +31,8 @@ const td = new Turndown({codeBlockStyle: 'fenced', keepReplacement});
 // not a full sanitization plugin
 // only converts < and > carots to their html entities
 md.use(SanitizePlugin);
+// add a scheme (ie: http://) to a link if it doesn't have one
+md.use(LinkSchemePlugin);
 
 // Turndown escapes markdown characters to prevent them from being compiled back to html
 // We don't need this, so we're just going to return the text without any escaped characters
@@ -177,10 +180,12 @@ class Composer extends React.Component {
         object.mentions = mentioned.people;
       }
 
-      send(object);
-      // clear the composer and reset the draft
-      this.quill.setText('');
-      this.saveToDraft();
+      // sends the message, if it succeeded then clear the composer
+      if (send(object)) {
+        // clear the composer and reset the draft
+        this.quill.setText('');
+        this.saveToDraft();
+      }
     } catch (e) {
       if (isFunction(onError)) {
         onError('QuillComposer', 'handleEnter', e);
