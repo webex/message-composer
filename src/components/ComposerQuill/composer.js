@@ -357,7 +357,7 @@ Composer.propTypes = {
 };
 
 Composer.defaultProps = {
-  draft: {},
+  draft: undefined,
   mentions: undefined,
   notifyKeyDown: undefined,
   onError: undefined,
