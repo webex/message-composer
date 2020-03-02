@@ -42,7 +42,7 @@ Or check out the [stories](src/index.stories.js) file.
 
 ## API
 
-Check out the API docs [here](docs/api.md)
+Check out the API docs [here](docs/api.md).
 
 ## Development
 
