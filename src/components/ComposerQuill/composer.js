@@ -136,19 +136,21 @@ class Composer extends React.Component {
   }
 
   handleEnter() {
-    const {onError, send} = this.props;
+    const {markdown, onError, send} = this.props;
 
     try {
+      const enableMarkdown = !markdown?.disabled;
+
       // gets the text from the composer with mentions as a placeholder string
       const text = getQuillText(this.quill);
 
       // gets the ids that were mentioned
       const mentioned = getMentions(this.quill);
 
-      // converts text from markdown to html
+      // if markdown is enabled, converts text from markdown to html
       // element tags will have new lines after them which we don't want so we remove them here too
       // new lines in the text will be represented with a br tag so no need to worry about them
-      const marked = md.render(text).replace(/>\n/g, '>');
+      const marked = enableMarkdown ? md.render(text).replace(/>\n/g, '>') : text;
 
       // convert our mention placeholders to mention elements
       // pass in the mentioned people we got earlier so we only convert the ones that were actually mentioned
@@ -345,6 +347,9 @@ Composer.propTypes = {
     off: PropTypes.func,
     emit: PropTypes.func,
   }).isRequired,
+  markdown: PropTypes.shape({
+    disabled: PropTypes.bool,
+  }),
   mentions: PropTypes.shape({
     participants: PropTypes.shape({
       current: PropTypes.array,
@@ -358,6 +363,7 @@ Composer.propTypes = {
 
 Composer.defaultProps = {
   draft: {},
+  markdown: undefined,
   mentions: undefined,
   notifyKeyDown: undefined,
   onError: undefined,
