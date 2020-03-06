@@ -22,6 +22,7 @@ const MessageComposer = ({
   placeholder,
   composerType,
   onError,
+  keyBindings,
 }) => {
   const emitter = useRef(new TinyEmitter());
   const [active, setActive] = useState({});
@@ -69,6 +70,7 @@ const MessageComposer = ({
           notifyKeyDown={notifyKeyDown}
           placeholder={placeholder}
           onError={onError}
+          keyBindings={keyBindings}
         />
       </div>
       <div className="children">{children}</div>
@@ -87,6 +89,7 @@ MessageComposer.propTypes = {
     value: PropTypes.object,
     save: PropTypes.func,
   }),
+  keyBindings: PropTypes.object,
   markdown: PropTypes.shape({
     disabled: PropTypes.bool,
   }),
@@ -107,6 +110,7 @@ MessageComposer.defaultProps = {
   composerType: 'slate',
   disabled: false,
   draft: undefined,
+  keyBindings: undefined,
   markdown: undefined,
   mentions: undefined,
   notifyKeyDown: null,

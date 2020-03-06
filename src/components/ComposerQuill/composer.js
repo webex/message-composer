@@ -55,7 +55,7 @@ class Composer extends React.Component {
   }
 
   componentDidMount() {
-    const {draft, emitter, placeholder} = this.props;
+    const {draft, emitter, keyBindings, placeholder} = this.props;
 
     emitter.on('INSERT_TEXT', this.insert);
     emitter.on('SEND', this.handleEnter);
@@ -68,6 +68,13 @@ class Composer extends React.Component {
         // need to bind our own this or else quill will bind their own and cause us to not be able to access other class methods
         handler: this.handleEnter.bind(this),
       },
+      tab: {
+        key: 9,
+        // disable tab in message composer
+        handler: () => {},
+      },
+      // key bindings from props will override our defaults above
+      ...keyBindings,
     };
 
     this.quill = new Quill('#quill-composer', {
@@ -94,7 +101,7 @@ class Composer extends React.Component {
 
     // inserts the initial text to the composer
     // may contain formats as html tags, so convert those to markdowns
-    if (draft?.value) {
+    if (typeof draft?.value === 'string') {
       // replace new lines with <br> tag and new line so it will display properly
       // turndown will trim \n in text, so add a <br> tag since we want the line break
       // but turndown doesn't trim them in code blocks, but will ignore <br> tags
@@ -139,6 +146,7 @@ class Composer extends React.Component {
     const {markdown, onError, send} = this.props;
 
     try {
+      // markdown is enabled if undefined
       const enableMarkdown = !markdown?.disabled;
 
       // gets the text from the composer with mentions as a placeholder string
@@ -338,8 +346,8 @@ Composer.displayName = 'QuillComposer';
 
 Composer.propTypes = {
   draft: PropTypes.shape({
-    id: PropTypes.any,
-    value: PropTypes.object,
+    id: PropTypes.string,
+    value: PropTypes.string,
     save: PropTypes.func,
   }),
   emitter: PropTypes.shape({
@@ -347,6 +355,7 @@ Composer.propTypes = {
     off: PropTypes.func,
     emit: PropTypes.func,
   }).isRequired,
+  keyBindings: PropTypes.object,
   markdown: PropTypes.shape({
     disabled: PropTypes.bool,
   }),
@@ -363,6 +372,7 @@ Composer.propTypes = {
 
 Composer.defaultProps = {
   draft: {},
+  keyBindings: undefined,
   markdown: undefined,
   mentions: undefined,
   notifyKeyDown: undefined,
