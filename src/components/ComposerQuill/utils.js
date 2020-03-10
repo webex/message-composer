@@ -21,115 +21,135 @@ export function getFirstName(name) {
 // converts a string of text into operation deltas
 // used for drafts, where the mention object is our own placeholder string
 export function buildContents(text, mentions) {
-  // seperate out our mention placeholder so we can parse them
-  const split = text.split(mentionRegexMatchWhole);
+  try {
+    // seperate out our mention placeholder so we can parse them
+    const split = text.split(mentionRegexMatchWhole);
 
-  // goes through the lines looking for ones that match the mention placeholder
-  const contents = split.map((line) => {
-    const matches = mentionRegexMatchValues.exec(line);
+    // goes through the lines looking for ones that match the mention placeholder
+    const contents = split.map((line) => {
+      const matches = mentionRegexMatchValues.exec(line);
 
-    // if found, convert our placeholder mention into a mention delta
-    if (matches && matches.length === 4) {
-      const name = matches[1];
-      const type = matches[2];
-      const id = matches[3];
+      // if found, convert our placeholder mention into a mention delta
+      if (matches && matches.length === 4) {
+        const name = matches[1];
+        const type = matches[2];
+        const id = matches[3];
 
-      // make sure all the fields are valid before inserting the mention delta
-      if (type === 'groupMention' || type === 'person') {
-        if (id === 'all' || uuidRegex.test(id)) {
-          // if the mention list wasn't provided then go ahead and insert
-          if (!mentions || mentions.some((mention) => mention.id === id)) {
-            return {
-              insert: {
-                mention: {
-                  index: 0,
-                  denotationChar: '@',
-                  id,
-                  objectType: type,
-                  value: name,
+        // make sure all the fields are valid before inserting the mention delta
+        if (type === 'groupMention' || type === 'person') {
+          if (id === 'all' || uuidRegex.test(id)) {
+            // if the mention list wasn't provided then go ahead and insert
+            if (!mentions || mentions.some((mention) => mention.id === id)) {
+              return {
+                insert: {
+                  mention: {
+                    index: 0,
+                    denotationChar: '@',
+                    id,
+                    objectType: type,
+                    value: name,
+                  },
                 },
-              },
-            };
+              };
+            }
           }
         }
       }
-    }
 
-    // otherwise just insert the text
-    return {insert: line};
-  });
+      // otherwise just insert the text
+      return {insert: line};
+    });
 
-  return contents;
+    return contents;
+  } catch (e) {
+    e.func = 'buildContents';
+    throw e;
+  }
 }
 
 // gets the text inside the composer
 export function getQuillText(quill) {
-  const contents = quill.getContents();
-  let text = '';
+  try {
+    const contents = quill.getContents();
+    let text = '';
 
-  contents.forEach((op) => {
-    if (typeof op.insert === 'string') {
-      // if its just a string then we can insert right away
-      text += op.insert;
-    } else if (typeof op.insert === 'object') {
-      if (op.insert.mention) {
-        // if it's a mention object, then we insert a placeholder for later
-        const {mention} = op.insert;
+    contents.forEach((op) => {
+      if (typeof op.insert === 'string') {
+        // if its just a string then we can insert right away
+        text += op.insert;
+      } else if (typeof op.insert === 'object') {
+        if (op.insert.mention) {
+          // if it's a mention object, then we insert a placeholder for later
+          const {mention} = op.insert;
 
-        text += getMentionPlaceholder(mention.value, mention.objectType, mention.id);
+          text += getMentionPlaceholder(mention.value, mention.objectType, mention.id);
+        }
       }
-    }
-  });
+    });
 
-  return text;
+    return text;
+  } catch (e) {
+    e.func = 'getQuillText';
+    throw e;
+  }
 }
 
 // convert placeholder mentions to <spark-mention> elements
 export function replaceMentions(text, mentions) {
-  return text.replace(mentionRegexMatchValues, (match, name, type, id) => {
-    let sb;
+  try {
+    return text.replace(mentionRegexMatchValues, (match, name, type, id) => {
+      let sb;
 
-    if (type === 'groupMention') {
-      // check if an all mention was inserted to the composer
-      if (mentions.group && id === 'all') {
-        sb = `<spark-mention data-object-type='${type}' data-group-type='${id}'>${name}</spark-mention>`;
-      }
-    } else if (type === 'person') {
-      if (uuidRegex.test(id)) {
-        // only convert the ids that are in the list of mentions
-        if (mentions.people.some((mention) => mention.id === id)) {
-          sb = `<spark-mention data-object-type='${type}' data-object-id='${id}'>${name}</spark-mention>`;
+      if (type === 'groupMention') {
+        // check if an all mention was inserted to the composer
+        if (mentions.group && id === 'all') {
+          sb = `<spark-mention data-object-type='${type}' data-group-type='${id}'>${name}</spark-mention>`;
+        }
+      } else if (type === 'person') {
+        if (uuidRegex.test(id)) {
+          // only convert the ids that are in the list of mentions
+          if (mentions.people.some((mention) => mention.id === id)) {
+            sb = `<spark-mention data-object-type='${type}' data-object-id='${id}'>${name}</spark-mention>`;
+          }
         }
       }
-    }
 
-    return sb || match;
-  });
+      return sb || match;
+    });
+  } catch (e) {
+    e.func = 'replaceMentions';
+    throw e;
+  }
 }
 
 // get the mention objects currently in the editor
 export function getMentions(quill) {
-  const contents = quill.getContents();
-  const mentions = {
-    group: false,
-    people: [],
-  };
+  try {
+    const contents = quill.getContents();
+    const mentions = {
+      group: false,
+      people: [],
+    };
 
-  contents.forEach((op) => {
-    if (typeof op.insert === 'object' && op.insert.mention) {
-      const {mention} = op.insert;
+    contents.forEach((op) => {
+      if (typeof op.insert === 'object' && op.insert.mention) {
+        const {mention} = op.insert;
 
-      if (mention.objectType === 'person') {
-        mentions.people.push({
-          id: mention.id,
-        });
-      } else if (mention.objectType === 'groupMention' && mention.id === 'all') {
-        mentions.group = true;
+        if (mention.objectType === 'person') {
+          mentions.people.push({
+            id: mention.id,
+          });
+        } else if (mention.objectType === 'groupMention' && mention.id === 'all') {
+          mentions.group = true;
+        }
       }
-    }
-  });
+    });
 
-  return mentions;
+    return mentions;
+  } catch (e) {
+    e.func = 'getMentions';
+    throw e;
+  }
 }
 
 // builds up the avatar for a mention item

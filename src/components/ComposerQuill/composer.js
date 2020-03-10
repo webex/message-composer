@@ -57,88 +57,111 @@ class Composer extends React.Component {
   componentDidMount() {
     const {draft, emitter, keyBindings, placeholder} = this.props;
 
-    emitter.on('INSERT_TEXT', this.insert);
-    emitter.on('SEND', this.handleEnter);
-    emitter.on('OPEN_MENTION', this.openMentionList);
-    emitter.on('FOCUS', this.handleFocus);
+    try {
+      emitter.on('INSERT_TEXT', this.insert);
+      emitter.on('SEND', this.handleEnter);
+      emitter.on('OPEN_MENTION', this.openMentionList);
+      emitter.on('FOCUS', this.handleFocus);
 
-    const bindings = {
-      enter: {
-        key: 13,
-        // need to bind our own this or else quill will bind their own and cause us to not be able to access other class methods
-        handler: this.handleEnter.bind(this),
-      },
-      tab: {
-        key: 9,
-        // disable tab in message composer
-        handler: () => {},
-      },
-      // key bindings from props will override our defaults above
-      ...keyBindings,
-    };
-
-    this.quill = new Quill('#quill-composer', {
-      modules: {
-        keyboard: {
-          bindings,
+      const bindings = {
+        enter: {
+          key: 13,
+          // need to bind our own this or else quill will bind their own and cause us to not be able to access other class methods
+          handler: this.handleEnter.bind(this),
         },
-        mention: {
-          dataAttributes: ['displayName', 'objectType', 'src'],
-          defaultMenuOrientation: 'top',
-          mentionDenotationChars: ['@'],
-          onSelect: this.handleMentionSelect,
-          renderItem: this.handleMentionItem,
-          source: this.handleMention.bind(this),
-          spaceAfterInsert: false,
+        tab: {
+          key: 9,
+          // disable tab in message composer
+          handler: () => {},
         },
-        toolbar: {
-          container: '#toolbar',
+        // key bindings from props will override our defaults above
+        ...keyBindings,
+      };
+
+      this.quill = new Quill('#quill-composer', {
+        modules: {
+          keyboard: {
+            bindings,
+          },
+          mention: {
+            dataAttributes: ['displayName', 'objectType', 'src'],
+            defaultMenuOrientation: 'top',
+            mentionDenotationChars: ['@'],
+            onSelect: this.handleMentionSelect,
+            renderItem: this.handleMentionItem,
+            source: this.handleMention.bind(this),
+            spaceAfterInsert: false,
+          },
+          toolbar: {
+            container: '#toolbar',
+          },
         },
-      },
-      formats: ['mention'],
-      placeholder,
-    });
+        formats: ['mention'],
+        placeholder,
+      });
 
-    // inserts the initial text to the composer
-    // may contain formats as html tags, so convert those to markdowns
-    if (typeof draft?.value === 'string') {
-      // replace new lines with <br> tag and new line so it will display properly
-      // turndown will trim \n in text, so add a <br> tag since we want the line break
-      // but turndown doesn't trim them in code blocks, but will ignore <br> tags
-      const modified = draft.value.replace(/\n/g, '<br />\n');
+      // inserts the initial text to the composer
+      // may contain formats as html tags, so convert those to markdowns
+      if (typeof draft?.value === 'string') {
+        // replace new lines with <br> tag and new line so it will display properly
+        // turndown will trim \n in text, so add a <br> tag since we want the line break
+        // but turndown doesn't trim them in code blocks, but will ignore <br> tags
+        const modified = draft.value.replace(/\n/g, '<br />\n');
 
-      // converts text from html to a string with markdown
-      // remove the extra new line before the close code fence
-      const text = td.turndown(modified).replace(/\n```/g, '```');
+        // converts text from html to a string with markdown
+        // remove the extra new line before the close code fence
+        const text = td.turndown(modified).replace(/\n```/g, '```');
 
-      // there may be mentions, so convert it to deltas before we insert
-      const contents = buildContents(text);
+        // there may be mentions, so convert it to deltas before we insert
+        const contents = buildContents(text);
 
-      this.quill.setContents(contents);
+        this.quill.setContents(contents);
+      }
+
+      this.quill.on('text-change', this.handleTextChange);
+    } catch (e) {
+      let func = 'componentDidMount';
+
+      if (e.func) {
+        func += `->${e.func}`;
+      }
+
+      e.message = `${func}: ${e.message}`;
+      throw e;
     }
-
-    this.quill.on('text-change', this.handleTextChange);
   }
 
   componentDidUpdate(prevProps) {
     const {draft, mentions, placeholder} = this.props;
-    const prevDraft = prevProps.draft;
 
-    // updates the text in the composer as we switch conversations
-    if (prevDraft.id !== draft.id) {
-      if (draft?.value) {
-        // there may be mentions, so convert it to deltas before we insert
-        const contents = buildContents(draft.value, mentions?.participants?.current);
+    try {
+      const prevDraft = prevProps.draft;
 
-        this.quill.setContents(contents);
-      } else {
-        this.quill.setText('');
+      // updates the text in the composer as we switch conversations
+      if (prevDraft.id !== draft.id) {
+        if (draft?.value) {
+          // there may be mentions, so convert it to deltas before we insert
+          const contents = buildContents(draft.value, mentions?.participants?.current);
+
+          this.quill.setContents(contents);
+        } else {
+          this.quill.setText('');
+        }
       }
-    }
 
-    // update the placeholder if it changed
-    if (prevProps.placeholder !== placeholder) {
-      this.quill.root.dataset.placeholder = placeholder;
+      // update the placeholder if it changed
+      if (prevProps.placeholder !== placeholder) {
+        this.quill.root.dataset.placeholder = placeholder;
+      }
+    } catch (e) {
+      let func = 'componentDidUpdate';
+
+      if (e.func) {
+        func += `->${e.func}`;
+      }
+
+      e.message = `${func}: ${e.message}`;
+      throw e;
     }
   }
 
@@ -198,7 +221,13 @@ class Composer extends React.Component {
       }
     } catch (e) {
       if (isFunction(onError)) {
-        onError('QuillComposer', 'handleEnter', e);
+        let func = 'handleEnter';
+
+        if (e.func) {
+          func += `->${e.func}`;
+        }
+
+        onError('QuillComposer', func, e);
       }
     }
   }
