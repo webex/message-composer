@@ -1,3 +1,12 @@
+## [1.9.3](https://github.com/webex/message-composer/compare/v1.9.2...v1.9.3) (2020-03-11)
+
+
+### Bug Fixes
+
+* **markdown:** disable markdowns ([c215429](https://github.com/webex/message-composer/commit/c2154293e781b0c0533eb4f739cd7d2942b0742a))
+* **quill:** add more function names to error message ([6cc8d9e](https://github.com/webex/message-composer/commit/6cc8d9e8d444369139671285f0df2494216dd996))
+* **quill:** allow keybidings to be passed ([cb9883b](https://github.com/webex/message-composer/commit/cb9883b012d76fc63eef6f94e9c6d769ec216700))
+
 ## [1.9.2](https://github.com/webex/message-composer/compare/v1.9.1...v1.9.2) (2020-02-26)
 
 
