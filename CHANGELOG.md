@@ -1,3 +1,63 @@
+## [1.9.3](https://github.com/webex/message-composer/compare/v1.9.2...v1.9.3) (2020-03-11)
+
+
+### Bug Fixes
+
+* **markdown:** disable markdowns ([c215429](https://github.com/webex/message-composer/commit/c2154293e781b0c0533eb4f739cd7d2942b0742a))
+* **quill:** add more function names to error message ([6cc8d9e](https://github.com/webex/message-composer/commit/6cc8d9e8d444369139671285f0df2494216dd996))
+* **quill:** allow keybidings to be passed ([cb9883b](https://github.com/webex/message-composer/commit/cb9883b012d76fc63eef6f94e9c6d769ec216700))
+
+## [1.9.2](https://github.com/webex/message-composer/compare/v1.9.1...v1.9.2) (2020-02-26)
+
+
+### Bug Fixes
+
+* **quill:** couple bug fixes ([86b7756](https://github.com/webex/message-composer/commit/86b77563270b801e8cd72cb0f9d61fef6a5fd91c))
+
+## [1.9.1](https://github.com/webex/message-composer/compare/v1.9.0...v1.9.1) (2020-02-21)
+
+
+### Bug Fixes
+
+* **quill:** add focus handler ([ea88865](https://github.com/webex/message-composer/commit/ea88865f9e2f086c29b466d2714865d68c914180))
+* **quill:** bug fixes ([e42dd16](https://github.com/webex/message-composer/commit/e42dd16bfd14e87a33100417f8293089cb8d7e73))
+* **quill:** fix inline code carots ([3ba7252](https://github.com/webex/message-composer/commit/3ba72529814316a95af32120ae1a43135b915611))
+* **quill:** inline code carrots ([06088c4](https://github.com/webex/message-composer/commit/06088c4cd84c43af708aabf183481a95f5dababc))
+* **quill:** more bug fixes ([dfa89f8](https://github.com/webex/message-composer/commit/dfa89f8267d12b686a40d1dbe082e6e52017c6fe))
+* **quill:** updated mentions to work properly ([bfa5ce0](https://github.com/webex/message-composer/commit/bfa5ce08b207875c9a8fd323b041404c6a163ed4))
+
+# [1.9.0](https://github.com/webex/message-composer/compare/v1.8.1...v1.9.0) (2020-02-17)
+
+
+### Bug Fixes
+
+* **quill:** move withCrash to client ([450fddd](https://github.com/webex/message-composer/commit/450fdddfa7c7e6c4190a6594b61701a5beddefdb))
+* **quill:** remove random forced crashes ([cf6231e](https://github.com/webex/message-composer/commit/cf6231edb12d19eb6b0298a339ad0c108f343e25))
+
+
+### Features
+
+* **quill:** crash handling ([a38909f](https://github.com/webex/message-composer/commit/a38909fa3e1cf6db6704b93881bdbb1aa03b2bef))
+
+## [1.8.1](https://github.com/webex/message-composer/compare/v1.8.0...v1.8.1) (2020-02-10)
+
+
+### Bug Fixes
+
+* **quill:** safari doesn't support lookbehind, use lookahead instead ([19479ff](https://github.com/webex/message-composer/commit/19479ff386c9afd7a3f4f6851c1f5676e5804f12))
+
+# [1.8.0](https://github.com/webex/message-composer/compare/v1.7.0...v1.8.0) (2020-02-07)
+
+
+### Bug Fixes
+
+* **quill:** add avatar alt text; use andrew's idea of carot conversion ([7d7a86b](https://github.com/webex/message-composer/commit/7d7a86b0a7dff0177982500fa1d32543bdc9b485))
+
+
+### Features
+
+* **quill:** fixed formatting and all other bugs ([78880c1](https://github.com/webex/message-composer/commit/78880c1fd8ec7ed6591cd9d00de404ea69c67bcf))
+
 # [1.7.0](https://github.com/webex/message-composer/compare/v1.6.0...v1.7.0) (2020-02-05)
 
 
