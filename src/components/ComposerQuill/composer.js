@@ -400,7 +400,7 @@ Composer.propTypes = {
 };
 
 Composer.defaultProps = {
-  draft: {},
+  draft: undefined,
   keyBindings: undefined,
   markdown: undefined,
   mentions: undefined,
