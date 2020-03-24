@@ -52,6 +52,7 @@ class Composer extends React.Component {
     this.saveToDraft = this.saveToDraft.bind(this);
     this.openMentionList = this.openMentionList.bind(this);
     this.handleFocus = this.handleFocus.bind(this);
+    this.handleClear = this.handleClear.bind(this);
   }
 
   componentDidMount() {
@@ -62,6 +63,7 @@ class Composer extends React.Component {
       emitter.on('SEND', this.handleEnter);
       emitter.on('OPEN_MENTION', this.openMentionList);
       emitter.on('FOCUS', this.handleFocus);
+      emitter.on('CLEAR', this.handleClear);
 
       const bindings = {
         enter: {
@@ -213,11 +215,14 @@ class Composer extends React.Component {
         object.mentions = mentioned.people;
       }
 
+      if (mentioned.group) {
+        object.hasGroupMention = true;
+      }
+
       // sends the message, if it succeeded then clear the composer
       if (send(object)) {
         // clear the composer and reset the draft
-        this.quill.setText('');
-        this.saveToDraft();
+        this.handleClear();
       }
     } catch (e) {
       if (isFunction(onError)) {
@@ -364,6 +369,11 @@ class Composer extends React.Component {
   handleFocus() {
     // setting the cursor to the end of the text will also give focus
     this.quill.setSelection(this.quill.getLength());
+  }
+
+  handleClear() {
+    this.quill.setText('');
+    this.saveToDraft();
   }
 
   render() {
