@@ -1,3 +1,10 @@
+## [1.9.4](https://github.com/webex/message-composer/compare/v1.9.3...v1.9.4) (2020-03-24)
+
+
+### Bug Fixes
+
+* **quill:** add handleClear and groupMention ([1f172ac](https://github.com/webex/message-composer/commit/1f172ac5c32faa4cb7769e421062e6268bb2bc72))
+
 ## [1.9.3](https://github.com/webex/message-composer/compare/v1.9.2...v1.9.3) (2020-03-11)
 
 
