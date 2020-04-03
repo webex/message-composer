@@ -336,9 +336,18 @@ class Composer extends React.Component {
     const {onError} = this.props;
 
     try {
+      let index = 0;
+
       // position of cursor in the editor
       const selection = this.quill.getSelection(true);
-      const {index} = selection;
+
+      // this _should_ always be true, use the position of the cursor
+      if (selection) {
+        ({index} = selection);
+      } else {
+        // but just in case it's not found, insert to the end as a backup
+        index = this.quill.getLength() - 1;
+      }
 
       // insert the text and move cursor to after it
       this.quill.insertText(index, text, 'user');
