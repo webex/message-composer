@@ -336,13 +336,9 @@ class Composer extends React.Component {
     const {onError} = this.props;
 
     try {
-      // length of the content in the editor
-      const length = this.quill.getLength();
       // position of cursor in the editor
-      const selection = this.quill.getSelection();
-      // selection will be null if user hasn't selected the editor yet
-      // in that case, insert to the end of the line
-      const index = selection ? selection.index : length - 1;
+      const selection = this.quill.getSelection(true);
+      const {index} = selection;
 
       // insert the text and move cursor to after it
       this.quill.insertText(index, text, 'user');
@@ -367,8 +363,7 @@ class Composer extends React.Component {
   }
 
   handleFocus() {
-    // setting the cursor to the end of the text will also give focus
-    this.quill.setSelection(this.quill.getLength());
+    this.quill.focus();
   }
 
   handleClear() {
