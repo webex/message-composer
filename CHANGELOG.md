@@ -1,3 +1,10 @@
+## [1.9.5](https://github.com/webex/message-composer/compare/v1.9.4...v1.9.5) (2020-04-03)
+
+
+### Bug Fixes
+
+* **quill:** fix cursor position when inserting text ([4af4ad3](https://github.com/webex/message-composer/commit/4af4ad33893c69e41d65f4750976fede23ad7f8b))
+
 ## [1.9.4](https://github.com/webex/message-composer/compare/v1.9.3...v1.9.4) (2020-03-24)
 
 
