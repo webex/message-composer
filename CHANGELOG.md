@@ -1,3 +1,10 @@
+## [1.9.6](https://github.com/webex/message-composer/compare/v1.9.5...v1.9.6) (2020-04-03)
+
+
+### Bug Fixes
+
+* **quill:** add fallback if selection returns null ([0182c40](https://github.com/webex/message-composer/commit/0182c40f944dcd9b17a13e4315ef53d706ac60ff))
+
 ## [1.9.5](https://github.com/webex/message-composer/compare/v1.9.4...v1.9.5) (2020-04-03)
 
 
