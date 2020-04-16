@@ -4,7 +4,7 @@ const uuidRegex = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[
 // this one matches the whole placeholder
 const mentionRegexMatchWhole = /(@{.+?_(?:groupMention|person)_(?:all|[\w-]{36})})/;
 // this one matches the individual values
-const mentionRegexMatchValues = /@{(.+?)_(groupMention|person)_(all|[\w-]{36})}/g;
+const mentionRegexMatchValues = /@{(.+?)_(groupMention|person)_(all|moderators|[\w-]{36})}/g;
 
 // returns the mention placeholder string
 // WARNING: this string should match the regex right above this
@@ -98,11 +98,18 @@ export function getQuillText(quill) {
 export function replaceMentions(text, mentions) {
   try {
     return text.replace(mentionRegexMatchValues, (match, name, type, id) => {
-      let sb;
+      let sb = '';
 
       if (type === 'groupMention') {
         // check if an all mention was inserted to the composer
-        if (id === 'all' && mentions.group.some((mention) => mention.groupType === id)) {
+
+        if (id === 'moderators') {
+          mentions.people.forEach((mention) => {
+            const string = 'person';
+
+            sb += `<spark-mention data-object-type='${string}' data-object-id='${mention.id}'>${mention.name}</spark-mention>`;
+          });
+        } else if (id === 'all' && mentions.group.some((mention) => mention.groupType === id)) {
           sb = `<spark-mention data-object-type='${type}' data-group-type='${id}'>${name}</spark-mention>`;
         }
       } else if (type === 'person') {
