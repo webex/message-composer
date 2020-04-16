@@ -12,6 +12,11 @@ const users = [
     objectType: 'groupMention',
   },
   {
+    id: 'here',
+    displayName: 'Here',
+    objectType: 'groupMention',
+  },
+  {
     id: 'moderators',
     displayName: 'Moderators',
     objectType: 'groupMention',
@@ -97,10 +102,13 @@ let mentions = {
   },
   getDisplay: (user) => (user.objectType === 'person' ? user.displayName.split(' ')[0] : user.displayName),
 };
-// insert moderators
-const items = [users[2], users[3], users[4]];
+// insert presence items
+let items = [users[3], users[4], users[5]];
 
 users[1].items = JSON.stringify(items);
+// insert moderators
+items = [users[5], users[6], users[7]];
+users[2].items = JSON.stringify(items);
 
 const spaces = [];
 const setValue = (v, num) => {
