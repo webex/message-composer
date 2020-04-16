@@ -103,8 +103,11 @@ export function replaceMentions(text, mentions) {
       if (type === 'groupMention') {
         // check if an all mention was inserted to the composer
         if (id === 'moderators' || id === 'here') {
-          mentions.people.forEach((mention) => {
+          mentions.people.forEach((mention, i) => {
             sb += `<spark-mention data-object-type='${mention.type}' data-object-id='${mention.id}'>${mention.name}</spark-mention>`;
+            if (i < mentions.people.length - 1) {
+              sb += ', ';
+            }
           });
         } else if (id === 'all' && mentions.group.some((mention) => mention.groupType === id)) {
           sb = `<spark-mention data-object-type='${type}' data-group-type='${id}'>${name}</spark-mention>`;
