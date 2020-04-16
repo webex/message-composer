@@ -145,6 +145,19 @@ export function getMentions(quill) {
             groupType: mention.id,
             objectType: mention.objectType,
           });
+        } else if (
+          mention.objectType === 'groupMention' &&
+          mention.items &&
+          (mention.id === 'moderators' || mention.id === 'here')
+        ) {
+          const list = JSON.parse(mention.items);
+
+          list.forEach((person) => {
+            mentions.people.push({
+              id: person.id,
+              objectType: person.objectType,
+            });
+          });
         }
       }
     });

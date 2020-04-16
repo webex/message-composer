@@ -86,7 +86,7 @@ class Composer extends React.Component {
             bindings,
           },
           mention: {
-            dataAttributes: ['displayName', 'objectType', 'src'],
+            dataAttributes: ['displayName', 'objectType', 'src', 'items'],
             defaultMenuOrientation: 'top',
             mentionDenotationChars: ['@'],
             onSelect: this.handleMentionSelect,
