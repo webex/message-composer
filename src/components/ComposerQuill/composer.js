@@ -219,6 +219,7 @@ class Composer extends React.Component {
         object.groupMentions = mentioned.group;
       }
 
+      object.mentionType = mentioned.mentionType;
       // sends the message, if it succeeded then clear the composer
       if (send(object)) {
         // clear the composer and reset the draft

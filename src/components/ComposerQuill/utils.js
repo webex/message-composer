@@ -104,7 +104,7 @@ export function replaceMentions(text, mentions) {
         // check if an all mention was inserted to the composer
         if (id === 'moderators' || id === 'here') {
           mentions.people.forEach((mention, i) => {
-            sb += `<spark-mention data-object-type='${mention.type}' data-object-id='${mention.id}'>${mention.name}</spark-mention>`;
+            sb += `<spark-mention data-object-type='${mention.objectType}' data-object-id='${mention.id}'>${mention.name}</spark-mention>`;
             if (i < mentions.people.length - 1) {
               sb += ', ';
             }
@@ -147,23 +147,25 @@ export function getMentions(quill) {
             id: mention.id,
             objectType: mention.objectType,
           });
+          mentions.mentionType = 'person';
         } else if (mention.objectType === 'groupMention' && mention.id === 'all') {
           mentions.group.push({
             groupType: mention.id,
             objectType: mention.objectType,
           });
+          mentions.mentionType = mention.id;
         } else if (
           mention.objectType === 'groupMention' &&
           mention.items &&
           (mention.id === 'moderators' || mention.id === 'here')
         ) {
+          mentions.mentionType = mention.id;
           const list = JSON.parse(mention.items);
 
           list.forEach((person) => {
             mentions.people.push({
               id: person.id,
               objectType: person.objectType,
-              type: person.objectType,
               name: person.value,
             });
           });
