@@ -102,7 +102,7 @@ export function replaceMentions(text, mentions) {
 
       if (type === 'groupMention') {
         // check if an all mention was inserted to the composer
-        if (mentions.group && id === 'all') {
+        if (id === 'all' && mentions.group.some((mention) => mention.groupType === id)) {
           sb = `<spark-mention data-object-type='${type}' data-group-type='${id}'>${name}</spark-mention>`;
         }
       } else if (type === 'person') {
@@ -127,7 +127,7 @@ export function getMentions(quill) {
   try {
     const contents = quill.getContents();
     const mentions = {
-      group: false,
+      group: [],
       people: [],
     };
 
@@ -138,9 +138,13 @@ export function getMentions(quill) {
         if (mention.objectType === 'person') {
           mentions.people.push({
             id: mention.id,
+            objectType: mention.objectType,
           });
         } else if (mention.objectType === 'groupMention' && mention.id === 'all') {
-          mentions.group = true;
+          mentions.group.push({
+            groupType: mention.id,
+            objectType: mention.objectType,
+          });
         }
       }
     });

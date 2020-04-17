@@ -56,7 +56,7 @@ for (const user of users) {
   }
 }
 
-const mentions = {
+let mentions = {
   filter: (query) =>
     Promise.resolve(
       query === '' ? users : users.filter((user) => user.displayName.toLowerCase().startsWith(query.toLowerCase()))
@@ -97,6 +97,7 @@ const Example = (composerType) => {
   const [message, setMessage] = useState('');
   const [number, setNumber] = useState(1);
   const [failSend, setFailSend] = useState(false);
+  const participantsRef = useRef();
   const toggleFailSend = () => {
     setFailSend(!failSend);
   };
@@ -171,6 +172,12 @@ const Example = (composerType) => {
     }),
     [isMarkdownDisabled]
   );
+
+  if (composerType === 'quill') {
+    participantsRef.current = users;
+
+    mentions = {participants: participantsRef};
+  }
 
   return (
     <div className="container">
