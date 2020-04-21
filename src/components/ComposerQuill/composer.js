@@ -215,8 +215,8 @@ class Composer extends React.Component {
         object.mentions = mentioned.people;
       }
 
-      if (mentioned.group) {
-        object.hasGroupMention = true;
+      if (mentioned.group.length) {
+        object.groupMentions = mentioned.group;
       }
 
       // sends the message, if it succeeded then clear the composer
