@@ -1,3 +1,10 @@
+## [1.9.7](https://github.com/webex/message-composer/compare/v1.9.6...v1.9.7) (2020-04-21)
+
+
+### Bug Fixes
+
+* **mentions:** fix [@all](https://github.com/all) group mentions ([944b96f](https://github.com/webex/message-composer/commit/944b96fd255df9a41720ef2aaf1a2c310c905b70))
+
 ## [1.9.6](https://github.com/webex/message-composer/compare/v1.9.5...v1.9.6) (2020-04-03)
 
 
