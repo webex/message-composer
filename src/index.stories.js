@@ -1,14 +1,24 @@
 import React, {useMemo, useState, useRef} from 'react';
+import uuid from 'uuid';
 
 import MessageComposer from './index.js';
 
 import './styles.scss';
 
-let ids = 1;
 const users = [
   {
     id: 'all',
     displayName: 'All',
+    objectType: 'groupMention',
+  },
+  {
+    id: 'here',
+    displayName: 'Here',
+    objectType: 'groupMention',
+  },
+  {
+    id: 'moderators',
+    displayName: 'Moderators',
     objectType: 'groupMention',
   },
   {
@@ -46,13 +56,23 @@ const users = [
   },
 ];
 
-for (const user of users) {
+const sanitizeUser = (user) => {
   if (!user.id) {
-    // eslint-disable-next-line no-plusplus
-    user.id = ids++;
+    // eslint-disable-next-line no-param-reassign
+    user.id = uuid.v4();
   }
   if (!user.objectType) {
+    // eslint-disable-next-line no-param-reassign
     user.objectType = 'person';
+  }
+};
+
+for (const user of users) {
+  sanitizeUser(user);
+  if (user.items) {
+    for (const person of user.items) {
+      sanitizeUser(person);
+    }
   }
 }
 
@@ -82,6 +102,13 @@ let mentions = {
   },
   getDisplay: (user) => (user.objectType === 'person' ? user.displayName.split(' ')[0] : user.displayName),
 };
+// insert presence items
+let items = [users[3], users[4], users[5]];
+
+users[1].items = JSON.stringify(items);
+// insert moderators
+items = [users[5], users[6], users[7]];
+users[2].items = JSON.stringify(items);
 
 const spaces = [];
 const setValue = (v, num) => {

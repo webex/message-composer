@@ -86,7 +86,7 @@ class Composer extends React.Component {
             bindings,
           },
           mention: {
-            dataAttributes: ['displayName', 'objectType', 'src'],
+            dataAttributes: ['displayName', 'objectType', 'src', 'items', 'secondary'],
             defaultMenuOrientation: 'top',
             mentionDenotationChars: ['@'],
             onSelect: this.handleMentionSelect,
@@ -219,6 +219,7 @@ class Composer extends React.Component {
         object.groupMentions = mentioned.group;
       }
 
+      object.mentionType = mentioned.mentionType;
       // sends the message, if it succeeded then clear the composer
       if (send(object)) {
         // clear the composer and reset the draft
@@ -286,22 +287,36 @@ class Composer extends React.Component {
 
     try {
       const participants = mentions.participants.current;
-      const copy = {...item};
-      const name = item.displayName;
-      const first = getFirstName(name);
+      let sanitizedItem;
+      const sanitizeMention = (mentionItem) => {
+        const copy = {...mentionItem};
+        const name = mentionItem.displayName;
+        const first = getFirstName(name);
 
-      // show just the first name unless someone else has the same first name
-      // check how many other participants have the same first name
-      const duplicates = participants.reduce((sum, participant) => {
-        const given = getFirstName(participant.displayName);
+        // show just the first name unless someone else has the same first name
+        // check how many other participants have the same first name
+        const duplicates = participants.reduce((sum, participant) => {
+          const given = getFirstName(participant.displayName);
 
-        return first === given ? sum + 1 : sum;
-      }, 0);
+          return first === given ? sum + 1 : sum;
+        }, 0);
 
-      // if there is more than one of you, then show full name instead
-      copy.value = duplicates > 1 ? name : first;
+        // if there is more than one of you, then show full name instead
+        copy.value = duplicates > 1 ? name : first;
 
-      insertItem(copy);
+        return copy;
+      };
+
+      if (item.items) {
+        let modItems = JSON.parse(item.items);
+
+        modItems = modItems.map(sanitizeMention);
+        sanitizedItem = {...item, items: JSON.stringify(modItems), value: item.displayName};
+      } else {
+        sanitizedItem = sanitizeMention(item);
+      }
+
+      insertItem(sanitizedItem);
     } catch (e) {
       if (isFunction(onError)) {
         onError('QuillComposer', 'handleMentionSelect', e);

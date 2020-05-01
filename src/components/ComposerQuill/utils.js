@@ -2,9 +2,9 @@ const uuidRegex = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[
 
 // regexes that matches the mention placeholder
 // this one matches the whole placeholder
-const mentionRegexMatchWhole = /(@{.+?_(?:groupMention|person)_(?:all|[\w-]{36})})/;
+const mentionRegexMatchWhole = /(@{.+?_(?:groupMention|person)_(?:all|moderators|here|[\w-]{36})})/;
 // this one matches the individual values
-const mentionRegexMatchValues = /@{(.+?)_(groupMention|person)_(all|[\w-]{36})}/g;
+const mentionRegexMatchValues = /@{(.+?)_(groupMention|person)_(all|moderators|here|[\w-]{36})}/g;
 
 // returns the mention placeholder string
 // WARNING: this string should match the regex right above this
@@ -98,11 +98,18 @@ export function getQuillText(quill) {
 export function replaceMentions(text, mentions) {
   try {
     return text.replace(mentionRegexMatchValues, (match, name, type, id) => {
-      let sb;
+      let sb = '';
 
       if (type === 'groupMention') {
         // check if an all mention was inserted to the composer
-        if (id === 'all' && mentions.group.some((mention) => mention.groupType === id)) {
+        if (id === 'moderators' || id === 'here') {
+          mentions.people.forEach((mention, i) => {
+            sb += `<spark-mention data-object-type='${mention.objectType}' data-object-id='${mention.id}'>${mention.name}</spark-mention>`;
+            if (i < mentions.people.length - 1) {
+              sb += ', ';
+            }
+          });
+        } else if (id === 'all' && mentions.group.some((mention) => mention.groupType === id)) {
           sb = `<spark-mention data-object-type='${type}' data-group-type='${id}'>${name}</spark-mention>`;
         }
       } else if (type === 'person') {
@@ -140,10 +147,27 @@ export function getMentions(quill) {
             id: mention.id,
             objectType: mention.objectType,
           });
+          mentions.mentionType = 'person';
         } else if (mention.objectType === 'groupMention' && mention.id === 'all') {
           mentions.group.push({
             groupType: mention.id,
             objectType: mention.objectType,
+          });
+          mentions.mentionType = mention.id;
+        } else if (
+          mention.objectType === 'groupMention' &&
+          mention.items &&
+          (mention.id === 'moderators' || mention.id === 'here')
+        ) {
+          mentions.mentionType = mention.id;
+          const list = JSON.parse(mention.items);
+
+          list.forEach((person) => {
+            mentions.people.push({
+              id: person.id,
+              objectType: person.objectType,
+              name: person.value,
+            });
           });
         }
       }
@@ -169,9 +193,9 @@ export function buildMentionAvatar(item) {
     // otherwise we build it ourself
     let initials;
 
-    if (id === 'all') {
+    if (id === 'all' || id === 'moderators' || id === 'here') {
       // avatar is a circle @ for all
-      classes += ' all';
+      classes += ' group-mention';
       initials = '@';
     } else {
       // use the initials of the name as the avatar
@@ -193,13 +217,8 @@ export function buildMentionAvatar(item) {
 
 // build the text element for mention item
 export function buildMentionText(item) {
-  const {id, displayName} = item;
-  let secondary;
+  const {displayName, secondary} = item;
   let text = '';
-
-  if (id === 'all') {
-    secondary = 'Mention everyone in this space';
-  }
 
   text += "<div class='ql-mention-item-text'>";
   text += "<div class='ql-mention-item-text-primary'>";
