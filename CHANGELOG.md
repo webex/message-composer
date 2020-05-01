@@ -1,3 +1,13 @@
+# [1.10.0](https://github.com/webex/message-composer/compare/v1.9.7...v1.10.0) (2020-05-01)
+
+
+### Features
+
+* **mention:** add [@moderator](https://github.com/moderator) and [@here](https://github.com/here) ([d720160](https://github.com/webex/message-composer/commit/d720160432424b9f027c8eed977ca794b52f58d0))
+* **mentions:** add mention type ([b276404](https://github.com/webex/message-composer/commit/b276404b62428532f231e3641a25ea667a5d0304))
+* **mentions:** add space after group mentioned items ([6d75778](https://github.com/webex/message-composer/commit/6d75778fddcd336513c5057a1049c179c04ed660))
+* **mentions:** sanitize items input ([cb69351](https://github.com/webex/message-composer/commit/cb69351daeb100bd2202e9f9bafe90b6d7ca9bdf))
+
 ## [1.9.7](https://github.com/webex/message-composer/compare/v1.9.6...v1.9.7) (2020-04-21)
 
 
