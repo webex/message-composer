@@ -231,3 +231,71 @@ export function keepReplacement(content, node) {
 
   return content;
 }
+
+export function isQuillEmpty(quill) {
+  if (JSON.stringify(quill.getContents()) === '{"ops":[{"insert":"\\n"}]}') {
+    return true;
+  }
+
+  return false;
+}
+
+export function addEmptyCheckToHandlerParams(keyBindings) {
+  const keyBindingKeys = Object.keys(keyBindings);
+
+  return keyBindingKeys.reduce((decoratedKeyBindings, keyBindingKey) => {
+    const keyBinding = keyBindings[keyBindingKey];
+    const keyBindingHandler = keyBinding.handler;
+
+    keyBinding.handler = function handler(range, context) {
+      const that = this;
+
+      function boundIsQuillEmpty() {
+        return isQuillEmpty(that.quill);
+      }
+
+      return keyBindingHandler(range, context, boundIsQuillEmpty);
+    };
+
+    // eslint-disable-next-line no-param-reassign
+    decoratedKeyBindings[keyBindingKey] = keyBinding;
+
+    return decoratedKeyBindings;
+  }, {});
+}
+
+export function getKeyBindingDelta(prevKeyBindings, newKeyBindings) {
+  const newKeyBindingsKeys = Object.keys(newKeyBindings);
+
+  const keysToUpdate = {};
+
+  newKeyBindingsKeys.forEach((currentKey) => {
+    const oldId = prevKeyBindings[currentKey]?.uniqueId;
+    const newId = newKeyBindings[currentKey]?.uniqueId;
+
+    if (typeof newId !== 'undefined' && oldId !== newId) {
+      keysToUpdate[currentKey] = oldId;
+    }
+  });
+
+  return keysToUpdate;
+}
+
+export function updateKeyBindings(quill, bindingsToReplace, newKeyBindings) {
+  const quillBindings = quill.keyboard.bindings;
+
+  for (const [bindingName, idToReplace] of Object.entries(bindingsToReplace)) {
+    const currentNewBinding = newKeyBindings[bindingName];
+    const currentKeyCode = currentNewBinding.key;
+    const currentQuillBindings = quillBindings[currentKeyCode];
+    const quillBindingToReplace = currentQuillBindings.findIndex((currentBinding) => {
+      return typeof currentBinding.uniqueId !== 'undefined' && currentBinding.uniqueId === idToReplace;
+    });
+
+    if (quillBindingToReplace > -1) {
+      currentQuillBindings.splice(quillBindingToReplace, 1);
+    }
+
+    quill.keyboard.addBinding(newKeyBindings[bindingName]);
+  }
+}

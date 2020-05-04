@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import MarkdownIt from 'markdown-it';
 import LinkSchemePlugin from 'markdown-it-linkscheme';
 import Turndown from 'turndown';
-import {isFunction} from 'lodash';
+import {isFunction, isEmpty} from 'lodash';
 
 import Quill from './quill';
 import {
@@ -15,6 +15,9 @@ import {
   getQuillText,
   keepReplacement,
   replaceMentions,
+  addEmptyCheckToHandlerParams,
+  getKeyBindingDelta,
+  updateKeyBindings,
 } from './utils';
 import SanitizePlugin from './sanitize';
 import './styles.scss';
@@ -65,6 +68,8 @@ class Composer extends React.Component {
       emitter.on('FOCUS', this.handleFocus);
       emitter.on('CLEAR', this.handleClear);
 
+      const boundKeyBindings = addEmptyCheckToHandlerParams(keyBindings);
+
       const bindings = {
         enter: {
           key: 13,
@@ -77,7 +82,7 @@ class Composer extends React.Component {
           handler: () => {},
         },
         // key bindings from props will override our defaults above
-        ...keyBindings,
+        ...boundKeyBindings,
       };
 
       this.quill = new Quill('#quill-composer', {
@@ -134,7 +139,14 @@ class Composer extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    const {draft, mentions, placeholder} = this.props;
+    const {draft, mentions, placeholder, keyBindings} = this.props;
+
+    const keyBindingDelta = getKeyBindingDelta(prevProps.keyBindings, keyBindings);
+
+    if (!isEmpty(keyBindingDelta)) {
+      addEmptyCheckToHandlerParams(keyBindings);
+      updateKeyBindings(this.quill, keyBindingDelta, keyBindings);
+    }
 
     try {
       const prevDraft = prevProps.draft;
