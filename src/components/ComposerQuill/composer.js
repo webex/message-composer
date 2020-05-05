@@ -68,6 +68,7 @@ class Composer extends React.Component {
       emitter.on('FOCUS', this.handleFocus);
       emitter.on('CLEAR', this.handleClear);
 
+      // binds additional util fnc to keybinding handler callback
       const boundKeyBindings = addEmptyCheckToHandlerParams(keyBindings);
 
       const bindings = {
@@ -142,6 +143,7 @@ class Composer extends React.Component {
     const {draft, mentions, placeholder, keyBindings} = this.props;
 
     try {
+      // checks if keybindings need to be updated
       const keyBindingDelta = getKeyBindingDelta(prevProps.keyBindings, keyBindings);
 
       if (!isEmpty(keyBindingDelta)) {
@@ -386,8 +388,10 @@ class Composer extends React.Component {
   handleFocus() {
     this.quill.focus();
 
+    // empty quill editor getLength returns 1, so it is safe to use length-1 to point to cursor index 0
     const length = this.quill.getLength();
 
+    // position cursor at end of content, if any
     this.quill.setSelection(length - 1);
   }
 
