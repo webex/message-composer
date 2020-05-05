@@ -141,14 +141,14 @@ class Composer extends React.Component {
   componentDidUpdate(prevProps) {
     const {draft, mentions, placeholder, keyBindings} = this.props;
 
-    const keyBindingDelta = getKeyBindingDelta(prevProps.keyBindings, keyBindings);
-
-    if (!isEmpty(keyBindingDelta)) {
-      addEmptyCheckToHandlerParams(keyBindings);
-      updateKeyBindings(this.quill, keyBindingDelta, keyBindings);
-    }
-
     try {
+      const keyBindingDelta = getKeyBindingDelta(prevProps.keyBindings, keyBindings);
+
+      if (!isEmpty(keyBindingDelta)) {
+        addEmptyCheckToHandlerParams(keyBindings);
+        updateKeyBindings(this.quill, keyBindingDelta, keyBindings);
+      }
+
       const prevDraft = prevProps.draft;
 
       // updates the text in the composer as we switch conversations
@@ -385,6 +385,10 @@ class Composer extends React.Component {
 
   handleFocus() {
     this.quill.focus();
+
+    const length = this.quill.getLength();
+
+    this.quill.setSelection(length - 1);
   }
 
   handleClear() {
@@ -427,7 +431,7 @@ Composer.propTypes = {
 
 Composer.defaultProps = {
   draft: undefined,
-  keyBindings: undefined,
+  keyBindings: {},
   markdown: undefined,
   mentions: undefined,
   notifyKeyDown: undefined,
