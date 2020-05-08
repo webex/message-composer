@@ -254,3 +254,85 @@ export function keepReplacement(content, node) {
 
   return content;
 }
+
+// quill's empty state is not really empty, needs custom matcher
+const emptyQuillContentsMatcher = '{"ops":[{"insert":"\\n"}]}';
+
+export function isQuillEmpty(quill) {
+  if (JSON.stringify(quill.getContents()) === emptyQuillContentsMatcher) {
+    return true;
+  }
+
+  return false;
+}
+
+// takes keyBindings passed as props, returns decorated keybindings
+export function addEmptyCheckToHandlerParams(keyBindings) {
+  const keyBindingKeys = Object.keys(keyBindings);
+
+  return keyBindingKeys.reduce((decoratedKeyBindings, keyBindingKey) => {
+    const keyBinding = keyBindings[keyBindingKey];
+    // store original handler fnc
+    const keyBindingHandler = keyBinding.handler;
+
+    // monkey patch for handler function that passes reference to quill editor without losing this binding
+    keyBinding.handler = function handler(range, context) {
+      // stores this binding for closing over in util function
+      const that = this;
+
+      function boundIsQuillEmpty() {
+        return isQuillEmpty(that.quill);
+      }
+
+      // calls handler with util passed through
+      return keyBindingHandler(range, context, boundIsQuillEmpty);
+    };
+
+    // eslint-disable-next-line no-param-reassign
+    decoratedKeyBindings[keyBindingKey] = keyBinding;
+
+    return decoratedKeyBindings;
+  }, {});
+}
+
+// compares key binding uniqueIds to find bindings that need replacing
+export function getKeyBindingDelta(prevKeyBindings, newKeyBindings) {
+  const newKeyBindingsKeys = Object.keys(newKeyBindings);
+
+  const keysToUpdate = {};
+
+  newKeyBindingsKeys.forEach((currentKey) => {
+    const oldId = prevKeyBindings[currentKey]?.uniqueId;
+    const newId = newKeyBindings[currentKey]?.uniqueId;
+
+    // new ID exists and doesnt match old ID, flag for update
+    if (typeof newId !== 'undefined' && oldId !== newId) {
+      keysToUpdate[currentKey] = oldId;
+    }
+  });
+
+  return keysToUpdate;
+}
+
+// replaces quill instance's outdated key bindings with fresh data and callbacks
+export function updateKeyBindings(quill, bindingsToReplace, newKeyBindings) {
+  const quillBindings = quill.keyboard.bindings;
+
+  // loop over keys and values of outdated bindings
+  for (const [bindingName, idToReplace] of Object.entries(bindingsToReplace)) {
+    const currentNewBinding = newKeyBindings[bindingName];
+    const currentKeyCode = currentNewBinding.key;
+    // all bindings registered to quill instance
+    const currentQuillBindings = quillBindings[currentKeyCode];
+    // compares binding's id to id that needs to be replaced with fresh data
+    const quillBindingToReplace = currentQuillBindings.findIndex(
+      (currentBinding) => typeof currentBinding.uniqueId !== 'undefined' && currentBinding.uniqueId === idToReplace
+    );
+
+    // remove the old binding, if it exists
+    if (quillBindingToReplace > -1) {
+      currentQuillBindings.splice(quillBindingToReplace, 1);
+    }
+    quill.keyboard.addBinding(currentNewBinding);
+  }
+}

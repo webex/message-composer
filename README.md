@@ -11,7 +11,7 @@ You will need Node v11+ and Yarn installed.
 `yarn build` to build the composer.
 
 To link with the client, run `yarn link` in your message composer terminal, then run `yarn link @webex/message-composer` in the client terminal.
-You will need to build the composer after making changes for them to take effect.
+You will need to build the composer after making changes for them to take effect. To unlink, run `yarn unlink @webex/message-composer` in the client terminal, then `yarn` to rebuild the original package from deployed package.
 
 To test without linking to a client, run `yarn storybook`.
 

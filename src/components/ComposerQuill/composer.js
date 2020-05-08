@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import MarkdownIt from 'markdown-it';
 import LinkSchemePlugin from 'markdown-it-linkscheme';
 import Turndown from 'turndown';
-import {isFunction} from 'lodash';
+import {isFunction, isEmpty} from 'lodash';
 
 import Quill from './quill';
 import {
@@ -15,6 +15,9 @@ import {
   getQuillText,
   keepReplacement,
   replaceMentions,
+  addEmptyCheckToHandlerParams,
+  getKeyBindingDelta,
+  updateKeyBindings,
 } from './utils';
 import SanitizePlugin from './sanitize';
 import './styles.scss';
@@ -65,6 +68,9 @@ class Composer extends React.Component {
       emitter.on('FOCUS', this.handleFocus);
       emitter.on('CLEAR', this.handleClear);
 
+      // binds additional util fnc to keybinding handler callback
+      const boundKeyBindings = addEmptyCheckToHandlerParams(keyBindings);
+
       const bindings = {
         enter: {
           key: 13,
@@ -77,7 +83,7 @@ class Composer extends React.Component {
           handler: () => {},
         },
         // key bindings from props will override our defaults above
-        ...keyBindings,
+        ...boundKeyBindings,
       };
 
       this.quill = new Quill('#quill-composer', {
@@ -134,9 +140,17 @@ class Composer extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    const {draft, mentions, placeholder} = this.props;
+    const {draft, mentions, placeholder, keyBindings} = this.props;
 
     try {
+      // checks if keybindings need to be updated
+      const keyBindingDelta = getKeyBindingDelta(prevProps.keyBindings, keyBindings);
+
+      if (!isEmpty(keyBindingDelta)) {
+        addEmptyCheckToHandlerParams(keyBindings);
+        updateKeyBindings(this.quill, keyBindingDelta, keyBindings);
+      }
+
       const prevDraft = prevProps.draft;
 
       // updates the text in the composer as we switch conversations
@@ -388,6 +402,12 @@ class Composer extends React.Component {
 
   handleFocus() {
     this.quill.focus();
+
+    // empty quill editor getLength returns 1, so it is safe to use length-1 to point to cursor index 0
+    const length = this.quill.getLength();
+
+    // position cursor at end of content, if any
+    this.quill.setSelection(length - 1);
   }
 
   handleClear() {
@@ -430,7 +450,7 @@ Composer.propTypes = {
 
 Composer.defaultProps = {
   draft: undefined,
-  keyBindings: undefined,
+  keyBindings: {},
   markdown: undefined,
   mentions: undefined,
   notifyKeyDown: undefined,
