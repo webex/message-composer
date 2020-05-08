@@ -1,3 +1,15 @@
+# [1.11.0](https://github.com/webex/message-composer/compare/v1.10.0...v1.11.0) (2020-05-08)
+
+
+### Bug Fixes
+
+* **cursor:** move cursor to end of edited text ([19548ce](https://github.com/webex/message-composer/commit/19548cec74acaffe80494216ef6906e5676c0275))
+
+
+### Features
+
+* **key-bindings:** bind key bindings to component ([beeb737](https://github.com/webex/message-composer/commit/beeb737057f3a6237ef80922e3738e145bde125b))
+
 # [1.10.0](https://github.com/webex/message-composer/compare/v1.9.7...v1.10.0) (2020-05-01)
 
 
