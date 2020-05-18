@@ -3,7 +3,6 @@ import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import {TinyEmitter} from 'tiny-emitter';
 
-import SlateComposer from '../ComposerSlate';
 import QuillComposer from '../ComposerQuill';
 
 import CreateToolbar from './create-toolbar';
@@ -20,7 +19,6 @@ const MessageComposer = ({
   setEmitter,
   notifyKeyDown,
   placeholder,
-  composerType,
   onError,
   keyBindings,
 }) => {
@@ -35,31 +33,14 @@ const MessageComposer = ({
 
   const toolbarDom = <Toolbar emitter={emitter.current} active={active} disabled={disabled} />;
 
-  let composerClasses = 'composer';
-
-  let Composer;
-
-  switch (composerType) {
-    default:
-    case 'slate': {
-      Composer = SlateComposer;
-      composerClasses += ' slate';
-      break;
-    }
-    case 'quill': {
-      Composer = QuillComposer;
-      break;
-    }
-  }
-
   return (
     <div className={containerClasses}>
       <div className="toolbar" id="toolbar">
         {toolbarDom}
       </div>
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
-      <div className={composerClasses}>
-        <Composer
+      <div className="composer">
+        <QuillComposer
           send={send}
           markdown={markdown}
           mentions={mentions}
@@ -82,11 +63,10 @@ MessageComposer.displayName = 'MessageComposer';
 
 MessageComposer.propTypes = {
   children: PropTypes.node,
-  composerType: PropTypes.oneOf(['slate', 'quill']),
   disabled: PropTypes.bool,
   draft: PropTypes.shape({
-    id: PropTypes.any,
-    value: PropTypes.object,
+    id: PropTypes.string,
+    value: PropTypes.string,
     save: PropTypes.func,
   }),
   keyBindings: PropTypes.object,
@@ -94,8 +74,7 @@ MessageComposer.propTypes = {
     disabled: PropTypes.bool,
   }),
   mentions: PropTypes.shape({
-    filter: PropTypes.func,
-    renderSuggestion: PropTypes.func,
+    participants: PropTypes.object,
   }),
   notifyKeyDown: PropTypes.func,
   onError: PropTypes.func,
@@ -107,7 +86,6 @@ MessageComposer.propTypes = {
 
 MessageComposer.defaultProps = {
   children: undefined,
-  composerType: 'slate',
   disabled: false,
   draft: undefined,
   keyBindings: undefined,

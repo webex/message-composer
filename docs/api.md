@@ -1,12 +1,11 @@
 # API
 
-Definitition of the props for the message composer. Props related to the Quill composer are listed. A few props related to Slate may not be listed.
+Definitition of the props for the message composer. Props related to the Quill composer are listed.
 
 ## Props
 
 ### Table of Contents
 
-- [composerType](#composerType)
 - [draft](#draft)
 - [mentions](#mentions)
 - [notifyKeyDown](#notifyKeyDown)
@@ -15,14 +14,6 @@ Definitition of the props for the message composer. Props related to the Quill c
 - [send](#send)
 - [setEmitter](#setEmitter)
 - [Toolbar](#Toolbar)
-
-### composerType
-
-`composerType: PropTypes.oneOf(['slate', 'quill'])`
-<br>
-`default: 'slate'`
-
-Choose the text editor to use. Options are [slate](https://github.com/ianstormtaylor/slate) or [quill](https://github.com/quilljs/quill).
 
 ### draft
 

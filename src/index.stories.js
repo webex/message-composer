@@ -75,33 +75,6 @@ for (const user of users) {
     }
   }
 }
-
-let mentions = {
-  filter: (query) =>
-    Promise.resolve(
-      query === '' ? users : users.filter((user) => user.displayName.toLowerCase().startsWith(query.toLowerCase()))
-    ),
-  renderSuggestion: (user, {active}) => {
-    const activeStyle = active ? {backgroundColor: 'lightblue'} : null;
-    const style = {
-      ...activeStyle,
-      height: '30px',
-      width: '200px',
-    };
-
-    return {
-      key: user.id,
-      render: <div style={style}>{user.displayName}</div>,
-    };
-  },
-  renderInsert: (user) => {
-    const style = {background: 'lightblue'};
-    const text = user.objectType === 'person' ? user.displayName.split(' ')[0] : user.displayName;
-
-    return <b style={style}>{text}</b>;
-  },
-  getDisplay: (user) => (user.objectType === 'person' ? user.displayName.split(' ')[0] : user.displayName),
-};
 // insert presence items
 let items = [users[3], users[4], users[5]];
 
@@ -120,9 +93,9 @@ export default {
   title: 'MessageComposer',
 };
 
-const Example = (composerType) => {
+const Example = () => {
   const [message, setMessage] = useState('');
-  const [number, setNumber] = useState(1);
+  const [number, setNumber] = useState('1');
   const [failSend, setFailSend] = useState(false);
   const participantsRef = useRef();
   const toggleFailSend = () => {
@@ -134,7 +107,7 @@ const Example = (composerType) => {
     setNumber(num);
   };
 
-  const other = number === 1 ? 2 : 1;
+  const other = number === '1' ? '2' : '1';
 
   const draft = {
     id: number,
@@ -200,11 +173,8 @@ const Example = (composerType) => {
     [isMarkdownDisabled]
   );
 
-  if (composerType === 'quill') {
-    participantsRef.current = users;
-
-    mentions = {participants: participantsRef};
-  }
+  participantsRef.current = users;
+  const mentions = {participants: participantsRef};
 
   return (
     <div className="container">
@@ -220,7 +190,6 @@ const Example = (composerType) => {
           notifyKeyDown={notifyKeyDown}
           placeholder={placeholder}
           setEmitter={setEmitter}
-          composerType={composerType}
         />
         <br />
         <div>Sending: {JSON.stringify(message)}</div>
@@ -238,5 +207,4 @@ const Example = (composerType) => {
   );
 };
 
-export const Slate = () => Example('slate');
-export const Quill = () => Example('quill');
+export const Quill = () => Example();
