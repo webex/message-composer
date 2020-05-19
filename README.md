@@ -23,7 +23,6 @@ import Composer from '@webex/message-composer';
 // Prepare the functions and variables and whatnot
 
 <Composer
-  composerType={'quill'}
   draft={draft}
   mentions={mentions}
   notifyKeyDown={onKeyDown}
