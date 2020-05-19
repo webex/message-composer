@@ -1,3 +1,15 @@
+# [2.0.0](https://github.com/webex/message-composer/compare/v1.11.0...v2.0.0) (2020-05-19)
+
+
+### Features
+
+* **quill:** only support quill composer ([d30ec9e](https://github.com/webex/message-composer/commit/d30ec9e961e826ecd383945f0c48de63c354af8b))
+
+
+### BREAKING CHANGES
+
+* **quill:** remove support fore `composerType` and only support Quill Composer
+
 # [1.11.0](https://github.com/webex/message-composer/compare/v1.10.0...v1.11.0) (2020-05-08)
 
 
