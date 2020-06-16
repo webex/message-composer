@@ -18,6 +18,8 @@ const MessageComposer = ({
   draft,
   setEmitter,
   notifyKeyDown,
+  onMentionOpen,
+  onMentionClose,
   placeholder,
   onError,
   keyBindings,
@@ -49,6 +51,8 @@ const MessageComposer = ({
           emitter={emitter.current}
           active={setActive}
           notifyKeyDown={notifyKeyDown}
+          onMentionOpen={onMentionOpen}
+          onMentionClose={onMentionClose}
           placeholder={placeholder}
           onError={onError}
           keyBindings={keyBindings}
@@ -77,6 +81,8 @@ MessageComposer.propTypes = {
     participants: PropTypes.object,
   }),
   notifyKeyDown: PropTypes.func,
+  onMentionClose: PropTypes.func,
+  onMentionOpen: PropTypes.func,
   onError: PropTypes.func,
   placeholder: PropTypes.string,
   send: PropTypes.func,
@@ -92,6 +98,8 @@ MessageComposer.defaultProps = {
   markdown: undefined,
   mentions: undefined,
   notifyKeyDown: null,
+  onMentionClose: undefined,
+  onMentionOpen: undefined,
   onError: undefined,
   placeholder: '',
   send: undefined,

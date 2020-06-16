@@ -52,6 +52,8 @@ class Composer extends React.Component {
     this.handleEnter = this.handleEnter.bind(this);
     this.handleTextChange = this.handleTextChange.bind(this);
     this.handleMentionSelect = this.handleMentionSelect.bind(this);
+    this.handleMentionOpen = this.handleMentionOpen.bind(this);
+    this.handleMentionClose = this.handleMentionClose.bind(this);
     this.saveToDraft = this.saveToDraft.bind(this);
     this.openMentionList = this.openMentionList.bind(this);
     this.handleFocus = this.handleFocus.bind(this);
@@ -96,6 +98,8 @@ class Composer extends React.Component {
             defaultMenuOrientation: 'top',
             mentionDenotationChars: ['@'],
             onSelect: this.handleMentionSelect,
+            onOpen: this.handleMentionOpen,
+            onClose: this.handleMentionClose,
             renderItem: this.handleMentionItem,
             source: this.handleMention.bind(this),
             spaceAfterInsert: false,
@@ -338,6 +342,22 @@ class Composer extends React.Component {
     }
   }
 
+  handleMentionOpen() {
+    const {onMentionOpen} = this.props;
+
+    if (onMentionOpen) {
+      onMentionOpen();
+    }
+  }
+
+  handleMentionClose() {
+    const {onMentionClose} = this.props;
+
+    if (onMentionClose) {
+      onMentionClose();
+    }
+  }
+
   handleTextChange(delta, oldDelta, source) {
     const {notifyKeyDown} = this.props;
 
@@ -443,6 +463,8 @@ Composer.propTypes = {
     }),
   }),
   notifyKeyDown: PropTypes.func,
+  onMentionClose: PropTypes.func,
+  onMentionOpen: PropTypes.func,
   onError: PropTypes.func,
   placeholder: PropTypes.string,
   send: PropTypes.func,
@@ -454,6 +476,8 @@ Composer.defaultProps = {
   markdown: undefined,
   mentions: undefined,
   notifyKeyDown: undefined,
+  onMentionClose: undefined,
+  onMentionOpen: undefined,
   onError: undefined,
   placeholder: 'Compose something awesome...',
   send: undefined,
