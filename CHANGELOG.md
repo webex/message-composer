@@ -1,3 +1,10 @@
+# [2.1.0](https://github.com/webex/message-composer/compare/v2.0.0...v2.1.0) (2020-06-18)
+
+
+### Features
+
+* **mention:** add mention open/close handlers ([fe0c1c3](https://github.com/webex/message-composer/commit/fe0c1c3a6c6ffff8200ac8b6830663837eddbd2f))
+
 # [2.0.0](https://github.com/webex/message-composer/compare/v1.11.0...v2.0.0) (2020-05-19)
 
 
