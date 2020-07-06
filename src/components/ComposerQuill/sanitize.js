@@ -24,6 +24,10 @@ function sanitizerPlugin(md) {
           }
         });
       }
+      if (type === 'html_block') {
+        // eslint-disable-next-line no-param-reassign
+        token.content = token.content.replace(/</g, '&lt;').replace(/(?!^)>/gm, '&gt;');
+      }
     });
   }
 
