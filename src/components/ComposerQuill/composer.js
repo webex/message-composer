@@ -108,7 +108,20 @@ class Composer extends React.Component {
             container: '#toolbar',
           },
         },
-        formats: ['mention'],
+        formats: [
+          // add format to enable during copy and paste
+          'mention',
+          'bold',
+          'list',
+          'italic',
+          'size',
+          'strike',
+          'underline',
+          'blockquote',
+          'indent',
+          'header',
+          'direction',
+        ],
         placeholder,
       });
 
