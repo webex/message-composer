@@ -1,3 +1,10 @@
+## [2.1.1](https://github.com/webex/message-composer/compare/v2.1.0...v2.1.1) (2020-07-15)
+
+
+### Bug Fixes
+
+* **composer:** message copy paste format bug ([7e28440](https://github.com/webex/message-composer/commit/7e2844075bbdff6c581dcfcf5e5bf8c4ead40584))
+
 # [2.1.0](https://github.com/webex/message-composer/compare/v2.0.0...v2.1.0) (2020-06-18)
 
 
