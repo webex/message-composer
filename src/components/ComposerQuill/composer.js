@@ -21,6 +21,7 @@ import {
 } from './utils';
 import SanitizePlugin from './sanitize';
 import './styles.scss';
+import { replace } from 'core-js/fn/symbol';
 
 // converts markdown to html
 // options: break converts new line (\n) into <br> tags
@@ -206,7 +207,14 @@ class Composer extends React.Component {
       const enableMarkdown = !markdown?.disabled;
 
       // gets the text from the composer with mentions as a placeholder string
-      const text = getQuillText(this.quill);
+      let text = getQuillText(this.quill);
+
+      const results = String.raw`${text}`.match(/\\/g);
+
+      if (results) {
+        // replace backslash and underscore with htmlcode
+        text = String.raw`${text}`.replace(/\\/g, '&bsol;').replace(/_/g, '&#95;');
+      }
 
       // gets the ids that were mentioned
       const mentioned = getMentions(this.quill);

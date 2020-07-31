@@ -13,7 +13,7 @@ function sanitizerPlugin(md) {
 
         // these are the child html elements inside the inline element
         children.forEach((child, childIndex) => {
-          const childContent = child.content;
+          const childContent = child.content.length > 0 ? child.content : child.markup;
           const childType = child.type;
 
           // if there is a html element in here, then we want to change the tags to html entities
