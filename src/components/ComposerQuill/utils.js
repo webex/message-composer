@@ -1,3 +1,5 @@
+import {reverse} from 'lodash';
+
 const uuidRegex = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/;
 
 // regexes that matches the mention placeholder
@@ -5,9 +7,9 @@ const uuidRegex = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[
 const mentionRegexMatchWhole = /(@{.+?_(?:groupMention|person)_(?:all|moderators|here|[\w-]{36})})/;
 // this one matches the individual values
 const mentionRegexMatchValues = /@{(.+?)_(groupMention|person)_(all|moderators|here|[\w-]{36})}/g;
-
 // returns the mention placeholder string
 // WARNING: this string should match the regex right above this
+
 function getMentionPlaceholder(name, type, id) {
   return `@{${name}_${type}_${id}}`;
 }
@@ -66,23 +68,111 @@ export function buildContents(text, mentions) {
     throw e;
   }
 }
+// replace last occurence with markdown and match
+function replaceLastOccurence(str, match, markdown){
+  const stringArray = str.split('\n');
+ 
+  for (let i = stringArray.length; i > 0; i -= 1){
+    const modifyMatch = match.replace('*', '\\*')
+    
+    if (stringArray[i - 1] && stringArray[i - 1].indexOf(modifyMatch) !== -1){
+      stringArray[i - 1] = markdown + stringArray[i - 1];
+      break;
+    }
+  }
+ 
+  return stringArray.join('\n');
+}
+// update text for one side markdown like bullet or order list
+function updateTextWithUniqueMarkdown(text, prevText, umdType, olIndex){
+  if (umdType === 'bullet'){
+    return replaceLastOccurence(text, prevText, '* ');
+  }
+  if (umdType === 'ordered') {
 
+ 
+    return replaceLastOccurence(text, prevText, `${olIndex}. `);
+  
+}
+return '';
+
+}
+// get markdown from quill attributes
+function getMarkdownForAttributes(attributes){
+  if (!attributes){
+    return {markdown:'' , umdType:''};
+  }
+  let markdown = '';
+  let umdType = '';
+
+  for (const [key, value] of Object.entries(attributes)){
+    if (Object.prototype.hasOwnProperty.call(attributes, key)) {
+      switch (key){
+        case 'bold':
+          markdown += '**';
+          break;
+        case 'italic':
+          markdown += '_';
+          break;
+        case 'list':
+          if (value === 'bullet'){
+            umdType = 'bullet';
+          } else if (value === 'ordered'){
+            umdType = 'ordered';
+          }   
+      }
+    }
+  }
+ 
+  return {markdown, umdType};
+}
 // gets the text inside the composer
 export function getQuillText(quill) {
   try {
     const contents = quill.getContents();
     let text = '';
+    let prevText = '';
+    let lastOrderIndex = 0;
+    let olIndex;
 
-    contents.forEach((op) => {
+    contents.forEach((op, itr) => {
+      const {markdown, umdType} = getMarkdownForAttributes(op.attributes);
+      
       if (typeof op.insert === 'string') {
-        // if its just a string then we can insert right away
-        text += op.insert;
-      } else if (typeof op.insert === 'object') {
+
+        if (umdType.length > 0) {
+          if (lastOrderIndex === 0 || (lastOrderIndex + 2 !== itr && lastOrderIndex + 3 !== itr)){
+            olIndex = 1;
+          } else {
+            olIndex += 1;
+          }
+          text = updateTextWithUniqueMarkdown(text, prevText, umdType, olIndex);
+          lastOrderIndex = itr;
+        } 
+        prevText = op.insert.split('\n').pop() || op.insert;
+        // if its just a string then we can insert right away 
+         text += markdown.length > 0 ? markdown + op.insert + reverse(markdown.split('')).join('') : op.insert;
+  
+    } else if (typeof op.insert === 'object') {
         if (op.insert.mention) {
           // if it's a mention object, then we insert a placeholder for later
           const {mention} = op.insert;
 
-          text += getMentionPlaceholder(mention.value, mention.objectType, mention.id);
+          if (umdType.length > 0){
+            if (lastOrderIndex === 0 || lastOrderIndex + 2 !== itr){
+              olIndex = 1;
+            } else {
+              olIndex += 1;
+            }
+            text = updateTextWithUniqueMarkdown(text, prevText, umdType, olIndex);
+            lastOrderIndex = itr;
+          } 
+          prevText = getMentionPlaceholder(mention.value, mention.objectType, mention.id)
+          text += markdown.length > 0
+              ? markdown +
+                getMentionPlaceholder(mention.value, mention.objectType, mention.id) + reverse(markdown.split('')).join('')
+              : getMentionPlaceholder(mention.value, mention.objectType, mention.id);
+
         }
       }
     });
