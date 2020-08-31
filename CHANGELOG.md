@@ -1,3 +1,10 @@
+# [2.2.0](https://github.com/webex/message-composer/compare/v2.1.1...v2.2.0) (2020-08-31)
+
+
+### Features
+
+* **sanitize:** user can self xss ([6afbb42](https://github.com/webex/message-composer/commit/6afbb4203a6f4670f230302953bc15858db94bc6))
+
 ## [2.1.1](https://github.com/webex/message-composer/compare/v2.1.0...v2.1.1) (2020-07-15)
 
 
