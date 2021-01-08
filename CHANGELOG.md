@@ -1,3 +1,10 @@
+## [2.2.1](https://github.com/webex/message-composer/compare/v2.2.0...v2.2.1) (2021-01-08)
+
+
+### Bug Fixes
+
+* **mentions:** use first name if available ([e4266ba](https://github.com/webex/message-composer/commit/e4266ba1713223941b3766f4c70845d0834baea8))
+
 # [2.2.0](https://github.com/webex/message-composer/compare/v2.1.1...v2.2.0) (2020-08-31)
 
 
