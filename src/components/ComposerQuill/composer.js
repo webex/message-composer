@@ -94,7 +94,7 @@ class Composer extends React.Component {
             bindings,
           },
           mention: {
-            dataAttributes: ['displayName', 'objectType', 'src', 'items', 'secondary'],
+            dataAttributes: ['displayName', 'firstName', 'objectType', 'src', 'items', 'secondary'],
             defaultMenuOrientation: 'top',
             mentionDenotationChars: ['@'],
             onSelect: this.handleMentionSelect,
@@ -322,12 +322,12 @@ class Composer extends React.Component {
       const sanitizeMention = (mentionItem) => {
         const copy = {...mentionItem};
         const name = mentionItem.displayName;
-        const first = getFirstName(name);
+        const first = mentionItem.firstName || getFirstName(name);
 
         // show just the first name unless someone else has the same first name
         // check how many other participants have the same first name
         const duplicates = participants.reduce((sum, participant) => {
-          const given = getFirstName(participant.displayName);
+          const given = participant.firstName || getFirstName(participant.displayName);
 
           return first === given ? sum + 1 : sum;
         }, 0);
