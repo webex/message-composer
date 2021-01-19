@@ -1,3 +1,10 @@
+# [2.3.0](https://github.com/webex/message-composer/compare/v2.2.1...v2.3.0) (2021-01-19)
+
+
+### Features
+
+* **composer:** disable copy paste rich text in composer ([f97f5ba](https://github.com/webex/message-composer/commit/f97f5ba561f0264186f60dda8c0ff41a2f393298))
+
 ## [2.2.1](https://github.com/webex/message-composer/compare/v2.2.0...v2.2.1) (2021-01-08)
 
 
