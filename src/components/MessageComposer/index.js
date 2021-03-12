@@ -23,6 +23,7 @@ const MessageComposer = ({
   placeholder,
   onError,
   keyBindings,
+  sendButton
 }) => {
   const emitter = useRef(new TinyEmitter());
   const [active, setActive] = useState({});
@@ -57,6 +58,7 @@ const MessageComposer = ({
           onError={onError}
           keyBindings={keyBindings}
         />
+        {sendButton}
       </div>
       <div className="children">{children}</div>
     </div>
@@ -86,6 +88,7 @@ MessageComposer.propTypes = {
   onError: PropTypes.func,
   placeholder: PropTypes.string,
   send: PropTypes.func,
+  sendButton: PropTypes.object,
   setEmitter: PropTypes.func,
   Toolbar: PropTypes.func,
 };
@@ -103,6 +106,7 @@ MessageComposer.defaultProps = {
   onError: undefined,
   placeholder: '',
   send: undefined,
+  sendButton: undefined,
   setEmitter: () => {},
   Toolbar: CreateToolbar,
 };
