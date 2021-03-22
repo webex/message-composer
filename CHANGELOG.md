@@ -1,3 +1,10 @@
+# [2.4.0](https://github.com/webex/message-composer/compare/v2.3.0...v2.4.0) (2021-03-22)
+
+
+### Features
+
+* **composer:** add optional sendButton prop ([5942e70](https://github.com/webex/message-composer/commit/5942e70c1c0fdf9af06a52656282483e4584f358))
+
 # [2.3.0](https://github.com/webex/message-composer/compare/v2.2.1...v2.3.0) (2021-01-19)
 
 
