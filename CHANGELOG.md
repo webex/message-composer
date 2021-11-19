@@ -1,3 +1,10 @@
+# [2.5.0](https://github.com/webex/message-composer/compare/v2.4.0...v2.5.0) (2021-11-19)
+
+
+### Features
+
+* **composer:** improvements to how dislpayName and contents are set ([#81](https://github.com/webex/message-composer/issues/81)) ([df3a7d0](https://github.com/webex/message-composer/commit/df3a7d0e7ccf4231772b48fc70d4c370b99ed58b))
+
 # [2.4.0](https://github.com/webex/message-composer/compare/v2.3.0...v2.4.0) (2021-03-22)
 
 
