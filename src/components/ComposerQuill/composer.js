@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import MarkdownIt from 'markdown-it';
 import LinkSchemePlugin from 'markdown-it-linkscheme';
 import Turndown from 'turndown';
-import {isFunction, isEmpty} from 'lodash';
+import {escape, isFunction, isEmpty, unescape} from 'lodash';
 
 import Quill from './quill';
 import {
@@ -206,39 +206,44 @@ class Composer extends React.Component {
       const enableMarkdown = !markdown?.disabled;
 
       // gets the text from the composer with mentions as a placeholder string
-      const text = getQuillText(this.quill);
+      const text = getQuillText(this.quill).trim();
 
       // gets the ids that were mentioned
       const mentioned = getMentions(this.quill);
+      const hasMentions = mentioned.people.length || mentioned.group.length;
 
       // if markdown is enabled, converts text from markdown to html
-      // element tags will have new lines after them which we don't want so we remove them here too
-      // new lines in the text will be represented with a br tag so no need to worry about them
-      const marked = enableMarkdown ? md.render(text).replace(/>\n/g, '>') : text;
+      // if markdown is not enabled and there are mentions, escape all html to avoid injection
+      // otherwise just use the original text as the display name
+      let object = {displayName: text};
 
-      // convert our mention placeholders to mention elements
-      // pass in the mentioned people we got earlier so we only convert the ones that were actually mentioned
-      const parsed = replaceMentions(marked, mentioned);
+      if (enableMarkdown) {
+        // render text to markdown and convert mention placeholders to elements
+        // pass in mentioned people so actual mentions are the only things converted
+        // new lines in the text will be represented with a br tag so no need to worry about them
+        // element tags will have new lines after them which we don't want so we remove them here too
+        const marked = replaceMentions(md.render(text).replace(/>\n/g, '>'), mentioned);
 
-      // after parsing from markdown, text will have the p tags around it, remove them so we can check if there are other html tags present
-      // we can ignore p tags because if there are no other element tags, we can just display the original text instead
-      const shortened = parsed.replace(/<\/?p>/g, '');
+        // after rendering text will have p tags around it
+        // remove these and check if there is any html remaining (including mentions)
+        // set content as rendered markdown with appropriate display name if there is
+        if (/<.+?>(?:.|\n)+<\/.+?>/.test(marked.replace(/<\/?p>/g, ''))) {
+          object = {
+            content: marked,
+            displayName: marked.replace(/<.+?>/g, ''),
+          };
+        }
+      } else if (hasMentions) {
+        // mentions will always be html so escape html in text before converting mentions
+        // pass in mentioned people so actual mentions are the only things converted
+        const escaped = replaceMentions(escape(text), mentioned);
 
-      // checks if we have any other html tags. this would indicate there were markdowns or mentions in the original text
-      // this should not match <br /> tags
-      const hasMarkdown = /<.+?>(?:.|\n)+<\/.+?>/.test(parsed);
-
-      const object = {displayName: text.trim()};
-
-      // if there are no markdowns, then we only need to send the displayName for the activity object with the original text
-      // if there are markdowns, then strip the markdowns from the parsed text for displayName
-      // and send content with the html tags
-      if (hasMarkdown) {
-        // removes all html tags
-        const stripped = shortened.replace(/<.+?>/g, '');
-
-        object.displayName = stripped;
-        object.content = parsed;
+        // set content as the html escaped version of the rest of the text
+        // set display name as the unescaped version of the escaped content after removing mention tags
+        object = {
+          content: escaped,
+          displayName: unescape(escaped.replace(/<.+?>/g, '')),
+        };
       }
 
       // if there are mentions then include them in the object
