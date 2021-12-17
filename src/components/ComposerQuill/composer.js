@@ -49,6 +49,7 @@ class Composer extends React.Component {
 
     this.quill = undefined;
     this.insert = this.insert.bind(this);
+    this.modifyDraftMessage = this.modifyDraftMessage.bind(this);
     this.handleEnter = this.handleEnter.bind(this);
     this.handleTextChange = this.handleTextChange.bind(this);
     this.handleMentionSelect = this.handleMentionSelect.bind(this);
@@ -65,6 +66,7 @@ class Composer extends React.Component {
 
     try {
       emitter.on('INSERT_TEXT', this.insert);
+      emitter.on('MODIFY_DRAFT', this.modifyDraftMessage);
       emitter.on('SEND', this.handleEnter);
       emitter.on('OPEN_MENTION', this.openMentionList);
       emitter.on('FOCUS', this.handleFocus);
@@ -141,6 +143,7 @@ class Composer extends React.Component {
         const contents = buildContents(text);
 
         this.quill.setContents(contents);
+
       }
 
       this.quill.on('text-change', this.handleTextChange);
@@ -177,6 +180,7 @@ class Composer extends React.Component {
           const contents = buildContents(draft.value, mentions?.participants?.current);
 
           this.quill.setContents(contents);
+     
         } else {
           this.quill.setText('');
         }
@@ -426,6 +430,32 @@ class Composer extends React.Component {
     }
   }
 
+  modifyDraftMessage() {
+    let text = this.quill.getText();
+
+    // modifying list in case of space switch
+      while (text.match(/\* /)) {
+        let indexMatch = text.match(/\* /).index;
+
+        // adding new line in case of mention present
+        if (text.charAt(indexMatch - 1).match(/\n/)){
+          this.quill.insertText(indexMatch, '\n');
+          indexMatch += 1;
+        }
+        this.quill.deleteText(indexMatch, 2);
+        // deleting extra new line
+        if (
+          this.quill
+            .getText()
+            .substr(0, indexMatch + 1)
+            .match(/\n\n/)) {
+          this.quill.deleteText(indexMatch - 1, 1);
+        }
+        this.quill.formatLine(indexMatch, 'list', 'bullet');
+        text = this.quill.getText();
+      }
+  }
+  
   openMentionList() {
     const length = this.quill.getLength();
     const selection = this.quill.getSelection();
