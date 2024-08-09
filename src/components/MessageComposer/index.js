@@ -20,10 +20,11 @@ const MessageComposer = ({
   notifyKeyDown,
   onMentionOpen,
   onMentionClose,
+  onMentionFocus,
   placeholder,
   onError,
   keyBindings,
-  sendButton
+  sendButton,
 }) => {
   const emitter = useRef(new TinyEmitter());
   const [active, setActive] = useState({});
@@ -54,6 +55,7 @@ const MessageComposer = ({
           notifyKeyDown={notifyKeyDown}
           onMentionOpen={onMentionOpen}
           onMentionClose={onMentionClose}
+          onMentionFocus={onMentionFocus}
           placeholder={placeholder}
           onError={onError}
           keyBindings={keyBindings}
@@ -84,6 +86,7 @@ MessageComposer.propTypes = {
   }),
   notifyKeyDown: PropTypes.func,
   onMentionClose: PropTypes.func,
+  onMentionFocus: PropTypes.func,
   onMentionOpen: PropTypes.func,
   onError: PropTypes.func,
   placeholder: PropTypes.string,
@@ -102,6 +105,7 @@ MessageComposer.defaultProps = {
   mentions: undefined,
   notifyKeyDown: null,
   onMentionClose: undefined,
+  onMentionFocus: undefined,
   onMentionOpen: undefined,
   onError: undefined,
   placeholder: '',

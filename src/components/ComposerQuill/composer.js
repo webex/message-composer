@@ -125,6 +125,16 @@ class Composer extends React.Component {
         placeholder,
       });
 
+      this.quillMention = this.quill.getModule('mention');
+      const originalHighlightItem = this.quillMention.highlightItem;
+
+      const {onMentionFocus} = this.props;
+
+      this.quillMention.highlightItem = function(...args) {
+        onMentionFocus(this.itemIndex);
+        originalHighlightItem.apply(this, args);
+      };
+
       // inserts the initial text to the composer
       // may contain formats as html tags, so convert those to markdowns
       if (typeof draft?.value === 'string') {
@@ -482,6 +492,7 @@ Composer.propTypes = {
   }),
   notifyKeyDown: PropTypes.func,
   onMentionClose: PropTypes.func,
+  onMentionFocus: PropTypes.func,
   onMentionOpen: PropTypes.func,
   onError: PropTypes.func,
   placeholder: PropTypes.string,
@@ -495,6 +506,7 @@ Composer.defaultProps = {
   mentions: undefined,
   notifyKeyDown: undefined,
   onMentionClose: undefined,
+  onMentionFocus: undefined,
   onMentionOpen: undefined,
   onError: undefined,
   placeholder: 'Compose something awesome...',
